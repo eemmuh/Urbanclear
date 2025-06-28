@@ -1,0 +1,192 @@
+# Urbanclear - Smart City Traffic Optimization System Configuration
+
+# Application Settings
+app:
+  name: "Urbanclear"
+  version: "1.0.0"
+  debug: false
+  log_level: "INFO"
+  host: "0.0.0.0"
+  port: 8000
+
+# Database Configuration
+database:
+  # PostgreSQL (Primary Database)
+  postgres:
+    host: "localhost"
+    port: 5432
+    database: "traffic_db"
+    username: "traffic_user"
+    password: "your_password_here"
+    pool_size: 10
+    max_overflow: 20
+  
+  # MongoDB (Document Storage)
+  mongodb:
+    host: "localhost"
+    port: 27017
+    database: "traffic_logs"
+    username: "mongo_user"
+    password: "your_password_here"
+  
+  # Redis (Caching)
+  redis:
+    host: "localhost"
+    port: 6379
+    database: 0
+    password: "your_redis_password"
+
+# Kafka Configuration
+kafka:
+  bootstrap_servers: ["localhost:9092"]
+  topics:
+    traffic_data: "traffic-data"
+    incidents: "traffic-incidents"
+    predictions: "traffic-predictions"
+    alerts: "traffic-alerts"
+  consumer:
+    group_id: "traffic-system"
+    auto_offset_reset: "latest"
+  producer:
+    acks: "all"
+    retries: 3
+
+# Spark Configuration
+spark:
+  master: "local[*]"
+  app_name: "TrafficOptimization"
+  config:
+    spark.sql.adaptive.enabled: true
+    spark.sql.adaptive.coalescePartitions.enabled: true
+    spark.serializer: "org.apache.spark.serializer.KryoSerializer"
+
+# Machine Learning Models
+models:
+  traffic_prediction:
+    type: "lstm"
+    sequence_length: 24
+    prediction_horizon: 6
+    update_frequency: "hourly"
+    model_path: "models/traffic_lstm.pkl"
+  
+  route_optimization:
+    algorithm: "genetic"
+    population_size: 100
+    generations: 50
+    mutation_rate: 0.1
+  
+  incident_detection:
+    type: "isolation_forest"
+    contamination: 0.1
+    n_estimators: 100
+    model_path: "models/incident_detector.pkl"
+
+# Data Sources
+data_sources:
+  traffic_sensors:
+    enabled: true
+    update_interval: 30  # seconds
+    api_endpoint: "http://city-sensors.api/v1/traffic"
+    api_key: "your_sensor_api_key"
+  
+  weather:
+    enabled: true
+    provider: "openweathermap"
+    api_key: "your_weather_api_key"
+    update_interval: 300  # seconds
+  
+  cameras:
+    enabled: true
+    processing_interval: 60  # seconds
+    model_path: "models/yolo_traffic.weights"
+  
+  gps_data:
+    enabled: false  # Requires privacy compliance
+    anonymization: true
+    retention_days: 7
+
+# Monitoring & Alerting
+monitoring:
+  prometheus:
+    enabled: true
+    port: 9090
+    scrape_interval: 30
+  
+  grafana:
+    enabled: true
+    port: 3000
+    admin_password: "your_grafana_password"
+  
+  alerts:
+    email:
+      enabled: false
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+      username: "alerts@yourcompany.com"
+      password: "your_email_password"
+    
+    slack:
+      enabled: false
+      webhook_url: "https://hooks.slack.com/your/webhook/url"
+
+# API Settings
+api:
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 100
+  
+  authentication:
+    enabled: false
+    jwt_secret: "your_jwt_secret_key"
+    token_expiry: 3600  # seconds
+  
+  cors:
+    enabled: true
+    allowed_origins: ["*"]
+
+# Geographic Boundaries
+geography:
+  city_bounds:
+    north: 40.7831
+    south: 40.7489
+    east: -73.9441
+    west: -73.9927
+  
+  coordinate_system: "EPSG:4326"  # WGS84
+  default_zoom: 12
+
+# Feature Engineering
+features:
+  time_windows: [5, 15, 30, 60]  # minutes
+  spatial_aggregation: 500  # meters
+  weather_features: ["temperature", "precipitation", "wind_speed"]
+  temporal_features: ["hour", "day_of_week", "month", "is_holiday"]
+
+# System Optimization
+optimization:
+  signal_timing:
+    min_green_time: 10  # seconds
+    max_green_time: 120  # seconds
+    yellow_time: 3  # seconds
+    all_red_time: 2  # seconds
+  
+  route_calculation:
+    max_alternatives: 3
+    max_distance_factor: 1.5
+    avoid_construction: true
+    consider_real_time: true
+
+# Security
+security:
+  encryption:
+    enabled: true
+    algorithm: "AES-256"
+  
+  audit_logging:
+    enabled: true
+    retention_days: 90
+  
+  api_security:
+    https_only: true
+    certificate_path: "/path/to/ssl/cert.pem"
+    private_key_path: "/path/to/ssl/private.key" 
