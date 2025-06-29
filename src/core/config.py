@@ -6,7 +6,7 @@ from typing import List, Dict, Any, Optional
 from functools import lru_cache
 
 import yaml
-from pydantic import Field, validator
+from pydantic import Field, validator, ConfigDict
 from pydantic_settings import BaseSettings
 from loguru import logger
 
@@ -20,6 +20,8 @@ class DatabaseConfig(BaseSettings):
     password: str = "password"
     pool_size: int = 10
     max_overflow: int = 20
+    
+    model_config = ConfigDict(env_prefix="DATABASE__POSTGRES__")
 
 
 class MongoConfig(BaseSettings):
@@ -29,6 +31,8 @@ class MongoConfig(BaseSettings):
     database: str = "traffic_logs"
     username: str = "mongo_user"
     password: str = "password"
+    
+    model_config = ConfigDict(env_prefix="DATABASE__MONGODB__")
 
 
 class RedisConfig(BaseSettings):
@@ -37,6 +41,8 @@ class RedisConfig(BaseSettings):
     port: int = 6379
     database: int = 0
     password: str = "password"
+    
+    model_config = ConfigDict(env_prefix="DATABASE__REDIS__")
 
 
 class DatabaseSettings(BaseSettings):
@@ -247,9 +253,11 @@ class Settings(BaseSettings):
     optimization: OptimizationConfig = OptimizationConfig()
     security: SecurityConfig = SecurityConfig()
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        extra="ignore"
+    )
 
     @classmethod
     def load_from_yaml(cls, config_path: str = "config/config.yaml"):
@@ -258,23 +266,46 @@ class Settings(BaseSettings):
             with open(config_path, 'r') as file:
                 config_data = yaml.safe_load(file)
             
-            # Convert nested dict to flat dict for Pydantic
-            flat_config = {}
+            # Create nested configuration objects with parsed data
+            app_config = AppSettings(**config_data.get('app', {}))
             
-            def flatten_dict(d, prefix=''):
-                for key, value in d.items():
-                    if isinstance(value, dict):
-                        flatten_dict(value, f"{prefix}{key}__" if prefix else f"{key}__")
-                    else:
-                        flat_config[f"{prefix}{key}"] = value
+            # Database configurations
+            db_data = config_data.get('database', {})
+            postgres_config = DatabaseConfig(**db_data.get('postgres', {}))
+            mongodb_config = MongoConfig(**db_data.get('mongodb', {}))
+            redis_config = RedisConfig(**db_data.get('redis', {}))
+            database_config = DatabaseSettings(
+                postgres=postgres_config,
+                mongodb=mongodb_config,
+                redis=redis_config
+            )
             
-            flatten_dict(config_data)
+            # Other configurations with default fallbacks
+            kafka_config = KafkaConfig(**config_data.get('kafka', {}))
+            spark_config = SparkConfig(**config_data.get('spark', {}))
+            models_config = ModelConfig(**config_data.get('models', {}))
+            data_sources_config = DataSourceConfig(**config_data.get('data_sources', {}))
+            monitoring_config = MonitoringConfig(**config_data.get('monitoring', {}))
+            api_config = APIConfig(**config_data.get('api', {}))
+            geography_config = GeographyConfig(**config_data.get('geography', {}))
+            features_config = FeatureConfig(**config_data.get('features', {}))
+            optimization_config = OptimizationConfig(**config_data.get('optimization', {}))
+            security_config = SecurityConfig(**config_data.get('security', {}))
             
-            # Set environment variables for Pydantic to pick up
-            for key, value in flat_config.items():
-                os.environ[key.upper()] = str(value)
-            
-            return cls()
+            return cls(
+                app=app_config,
+                database=database_config,
+                kafka=kafka_config,
+                spark=spark_config,
+                models=models_config,
+                data_sources=data_sources_config,
+                monitoring=monitoring_config,
+                api=api_config,
+                geography=geography_config,
+                features=features_config,
+                optimization=optimization_config,
+                security=security_config
+            )
             
         except FileNotFoundError:
             logger.warning(f"Config file {config_path} not found. Using default settings.")
