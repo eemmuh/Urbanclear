@@ -41,14 +41,15 @@ class Location(BaseModel):
     longitude: float = Field(..., ge=-180, le=180, description="Longitude coordinate")
     address: Optional[str] = Field(None, description="Human-readable address")
     
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "latitude": 40.7831,
                 "longitude": -73.9712,
                 "address": "Central Park, New York, NY"
             }
         }
+    }
 
 
 class TrafficCondition(BaseModel):
@@ -63,8 +64,8 @@ class TrafficCondition(BaseModel):
     congestion_level: float = Field(..., ge=0, le=1, description="Congestion level (0-1)")
     travel_time_index: float = Field(..., ge=1, description="Travel time compared to free flow")
     
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "id": "sensor_001",
                 "location": {
@@ -81,6 +82,7 @@ class TrafficCondition(BaseModel):
                 "travel_time_index": 1.8
             }
         }
+    }
 
 
 class TrafficPrediction(BaseModel):
@@ -93,8 +95,8 @@ class TrafficPrediction(BaseModel):
     confidence: float = Field(..., ge=0, le=1, description="Prediction confidence")
     factors: List[str] = Field(default=[], description="Factors affecting prediction")
     
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "location": {
                     "latitude": 40.7831,
@@ -109,6 +111,7 @@ class TrafficPrediction(BaseModel):
                 "factors": ["rush_hour", "weather_rain", "event_nearby"]
             }
         }
+    }
 
 
 class RoutePoint(BaseModel):
@@ -139,8 +142,8 @@ class RouteRequest(BaseModel):
     avoid_incidents: bool = Field(True, description="Avoid active incidents")
     vehicle_type: Optional[str] = Field(None, description="Type of vehicle")
     
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "origin": {
                     "latitude": 40.7831,
@@ -158,6 +161,7 @@ class RouteRequest(BaseModel):
                 "vehicle_type": "car"
             }
         }
+    }
 
 
 class RouteResponse(BaseModel):
@@ -182,8 +186,8 @@ class IncidentReport(BaseModel):
     resolved_time: Optional[datetime] = Field(None, description="When incident was resolved")
     impact_radius: Optional[float] = Field(None, ge=0, description="Impact radius in miles")
     
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "type": "accident",
                 "location": {
@@ -198,6 +202,7 @@ class IncidentReport(BaseModel):
                 "impact_radius": 0.5
             }
         }
+    }
 
 
 class SignalOptimizationRequest(BaseModel):
@@ -231,8 +236,8 @@ class AnalyticsSummary(BaseModel):
     system_efficiency: float = Field(..., ge=0, le=1, description="Overall system efficiency")
     peak_congestion_hours: List[int] = Field(default=[], description="Hours with peak congestion")
     
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "period": "24h",
                 "total_vehicles": 125000,
@@ -246,6 +251,7 @@ class AnalyticsSummary(BaseModel):
                 "peak_congestion_hours": [8, 9, 17, 18, 19]
             }
         }
+    }
 
 
 class PerformanceMetric(BaseModel):

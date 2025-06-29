@@ -8,6 +8,7 @@ from loguru import logger
 
 from src.api.models import IncidentReport, TrafficSeverity, IncidentType
 from src.core.config import get_settings
+from src.data.mock_data_generator import mock_generator
 
 
 class IncidentDetector:
@@ -82,47 +83,13 @@ class IncidentDetector:
         """Get currently active incidents"""
         logger.info(f"Getting active incidents for location: {location}, severity: {severity}")
         
-        # TODO: Implement actual database query for active incidents
-        # Mock active incidents
-        mock_incidents = [
-            IncidentReport(
-                id="incident_001",
-                type=IncidentType.ACCIDENT,
-                location={
-                    "latitude": 40.7831,
-                    "longitude": -73.9712,
-                    "address": "FDR Drive northbound"
-                },
-                severity=TrafficSeverity.HIGH,
-                description="Multi-vehicle accident blocking 2 lanes",
-                reported_time=datetime.now() - timedelta(minutes=15),
-                estimated_duration=60,
-                lanes_affected=2,
-                impact_radius=0.8,
-                is_resolved=False
-            ),
-            IncidentReport(
-                id="incident_002",
-                type=IncidentType.CONSTRUCTION,
-                location={
-                    "latitude": 40.7505,
-                    "longitude": -73.9934,
-                    "address": "Broadway & 47th Street"
-                },
-                severity=TrafficSeverity.MODERATE,
-                description="Lane closure for utility work",
-                reported_time=datetime.now() - timedelta(hours=2),
-                estimated_duration=240,
-                lanes_affected=1,
-                impact_radius=0.3,
-                is_resolved=False
-            )
-        ]
+        # Use enhanced mock data generator
+        incidents = mock_generator.generate_incidents()
         
         # Filter by location and severity if specified
-        filtered_incidents = mock_incidents
+        filtered_incidents = incidents
         if severity:
-            filtered_incidents = [i for i in filtered_incidents if i.severity == severity]
+            filtered_incidents = [i for i in filtered_incidents if i.severity.value == severity]
         
         return filtered_incidents
     

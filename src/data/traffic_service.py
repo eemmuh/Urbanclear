@@ -6,8 +6,9 @@ from datetime import datetime, timedelta
 import asyncio
 from loguru import logger
 
-from src.api.models import TrafficCondition, AnalyticsSummary
+from src.api.models import TrafficCondition, AnalyticsSummary, IncidentReport
 from src.core.config import get_settings
+from src.data.mock_data_generator import mock_generator
 
 
 class TrafficService:
@@ -23,44 +24,12 @@ class TrafficService:
         radius: Optional[float] = None
     ) -> List[TrafficCondition]:
         """Get current traffic conditions"""
-        # TODO: Implement actual data retrieval from sensors/database
         logger.info(f"Getting current traffic conditions for location: {location}")
         
-        # Mock data for now
-        mock_conditions = [
-            TrafficCondition(
-                id="sensor_001",
-                location={
-                    "latitude": 40.7831,
-                    "longitude": -73.9712,
-                    "address": "Central Park South & 5th Ave"
-                },
-                timestamp=datetime.now(),
-                speed_mph=28.5,
-                volume=1200,
-                density=45.2,
-                severity="moderate",
-                congestion_level=0.65,
-                travel_time_index=1.4
-            ),
-            TrafficCondition(
-                id="sensor_002",
-                location={
-                    "latitude": 40.7505,
-                    "longitude": -73.9934,
-                    "address": "Times Square & Broadway"
-                },
-                timestamp=datetime.now(),
-                speed_mph=22.1,
-                volume=1450,
-                density=52.8,
-                severity="high",
-                congestion_level=0.78,
-                travel_time_index=1.8
-            )
-        ]
+        # Use enhanced mock data generator
+        conditions = mock_generator.generate_current_conditions(location_filter=location)
         
-        return mock_conditions
+        return conditions
     
     async def get_historical_data(
         self,
@@ -125,19 +94,10 @@ class TrafficService:
         """Get traffic analytics summary"""
         logger.info(f"Getting analytics summary for period: {period}")
         
-        # TODO: Implement actual analytics calculation
-        return AnalyticsSummary(
-            period=period,
-            total_vehicles=125000,
-            average_speed=28.5,
-            congestion_incidents=45,
-            resolved_incidents=42,
-            fuel_savings=2500.0,
-            time_savings=15000,
-            emission_reduction=850.5,
-            system_efficiency=0.78,
-            peak_congestion_hours=[8, 9, 17, 18, 19]
-        )
+        # Use enhanced mock data generator
+        summary_data = mock_generator.generate_analytics_summary(period)
+        
+        return AnalyticsSummary(**summary_data)
     
     async def get_performance_metrics(
         self, 

@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 import uvicorn
+from loguru import logger
 
 from src.api.models import (
     TrafficCondition, TrafficPrediction, RouteRequest, RouteResponse,
@@ -73,8 +74,7 @@ async def health_check():
 @app.get("/api/v1/traffic/current", response_model=List[TrafficCondition])
 async def get_current_traffic(
     location: Optional[str] = Query(None, description="Filter by location"),
-    radius: Optional[float] = Query(None, description="Search radius in km"),
-    db=Depends(get_db)
+    radius: Optional[float] = Query(None, description="Search radius in km")
 ):
     """Get current traffic conditions"""
     try:
@@ -84,6 +84,7 @@ async def get_current_traffic(
         )
         return conditions
     except Exception as e:
+        logger.error(f"Error getting current traffic: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/traffic/predict", response_model=List[TrafficPrediction])
@@ -220,14 +221,14 @@ async def get_signal_status(
 # Analytics Endpoints
 @app.get("/api/v1/analytics/summary", response_model=AnalyticsSummary)
 async def get_analytics_summary(
-    period: str = Query("24h", description="Time period (1h, 24h, 7d, 30d)"),
-    db=Depends(get_db)
+    period: str = Query("24h", description="Time period (1h, 24h, 7d, 30d)")
 ):
     """Get traffic analytics summary"""
     try:
         summary = await traffic_service.get_analytics_summary(period)
         return summary
     except Exception as e:
+        logger.error(f"Error getting analytics summary: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/analytics/performance")
@@ -280,6 +281,108 @@ async def websocket_endpoint(websocket):
     """WebSocket endpoint for real-time traffic updates"""
     # Implementation for real-time traffic data streaming
     pass
+
+# Demo endpoints for showcasing functionality
+@app.get("/api/v1/demo/rush-hour-simulation")
+async def simulate_rush_hour():
+    """Simulate rush hour traffic conditions"""
+    try:
+        from src.data.mock_data_generator import MockDataGenerator
+        import datetime
+        
+        # Create a new generator for simulation
+        demo_generator = MockDataGenerator()
+        
+        # Override time to simulate morning rush hour (8 AM)
+        original_time = datetime.datetime.now
+        datetime.datetime.now = lambda: original_time().replace(hour=8, minute=30)
+        
+        conditions = demo_generator.generate_current_conditions()
+        incidents = demo_generator.generate_incidents()
+        
+        # Reset time
+        datetime.datetime.now = original_time
+        
+        return {
+            "scenario": "Morning Rush Hour (8:30 AM)",
+            "traffic_conditions": conditions,
+            "active_incidents": incidents,
+            "summary": {
+                "total_sensors": len(conditions),
+                "avg_speed": sum(c.speed_mph for c in conditions) / len(conditions),
+                "high_congestion_areas": [c.location.address for c in conditions if c.congestion_level > 0.7],
+                "total_incidents": len(incidents)
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error simulating rush hour: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/demo/location-filter")
+async def demo_location_filter():
+    """Demo filtering traffic data by location"""
+    try:
+        # Show different location filters
+        all_traffic = await traffic_service.get_current_conditions()
+        central_park = await traffic_service.get_current_conditions(location="Central Park")
+        broadway = await traffic_service.get_current_conditions(location="Broadway")
+        
+        return {
+            "demo": "Location Filtering",
+            "results": {
+                "all_locations": {
+                    "count": len(all_traffic),
+                    "locations": [t.location.address for t in all_traffic]
+                },
+                "central_park_area": {
+                    "count": len(central_park),
+                    "locations": [t.location.address for t in central_park]
+                },
+                "broadway_area": {
+                    "count": len(broadway),
+                    "locations": [t.location.address for t in broadway]
+                }
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error in location filter demo: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/demo/analytics-comparison")
+async def demo_analytics_comparison():
+    """Demo analytics for different time periods"""
+    try:
+        analytics_1h = await traffic_service.get_analytics_summary("1h")
+        analytics_24h = await traffic_service.get_analytics_summary("24h")
+        analytics_7d = await traffic_service.get_analytics_summary("7d")
+        
+        return {
+            "demo": "Analytics Period Comparison",
+            "comparison": {
+                "1_hour": {
+                    "vehicles": analytics_1h.total_vehicles,
+                    "avg_speed": analytics_1h.average_speed,
+                    "efficiency": analytics_1h.system_efficiency
+                },
+                "24_hours": {
+                    "vehicles": analytics_24h.total_vehicles,
+                    "avg_speed": analytics_24h.average_speed,
+                    "efficiency": analytics_24h.system_efficiency
+                },
+                "7_days": {
+                    "vehicles": analytics_7d.total_vehicles,
+                    "avg_speed": analytics_7d.average_speed,
+                    "efficiency": analytics_7d.system_efficiency
+                }
+            },
+            "insights": {
+                "daily_vehicle_growth": analytics_24h.total_vehicles / analytics_1h.total_vehicles,
+                "weekly_efficiency_trend": f"{((analytics_7d.system_efficiency - analytics_1h.system_efficiency) * 100):+.1f}%"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error in analytics comparison demo: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run(

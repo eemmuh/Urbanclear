@@ -15,7 +15,7 @@ from sqlalchemy.orm import sessionmaker, Session
 import yaml
 from loguru import logger
 
-from src.core.config import get_settings
+from src.core.config import get_settings as _get_settings
 
 # Initialize security
 security = HTTPBearer(auto_error=False)
@@ -27,16 +27,16 @@ _session_local = None
 
 
 @lru_cache()
-def get_settings():
+def get_app_settings():
     """Get application settings"""
-    return get_settings()
+    return _get_settings()
 
 
 def get_database_engine():
     """Get or create database engine"""
     global _db_engine
     if _db_engine is None:
-        settings = get_settings()
+        settings = _get_settings()
         database_url = (
             f"postgresql://{settings.database.postgres.username}:"
             f"{settings.database.postgres.password}@"
@@ -83,7 +83,7 @@ def get_redis_client():
     """Get or create Redis client"""
     global _redis_client
     if _redis_client is None:
-        settings = get_settings()
+        settings = _get_settings()
         _redis_client = redis.Redis(
             host=settings.database.redis.host,
             port=settings.database.redis.port,
@@ -142,7 +142,7 @@ async def get_current_user(
     Dependency to get current authenticated user
     Currently returns None (authentication disabled by default)
     """
-    settings = get_settings()
+    settings = _get_settings()
     
     # If authentication is disabled, return anonymous user
     if not settings.api.authentication.enabled:
