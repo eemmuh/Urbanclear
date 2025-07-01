@@ -1,0 +1,407 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Urbanclear - Geographic Traffic Map",
+    "tags": ["urbanclear", "traffic", "map", "geographic", "geomap"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "1m",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Traffic Conditions Map",
+        "type": "geomap",
+        "targets": [
+          {
+            "expr": "traffic_flow_rate",
+            "legendFormat": "{{location}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 40
+                },
+                {
+                  "color": "orange",
+                  "value": 70
+                },
+                {
+                  "color": "red",
+                  "value": 90
+                }
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {
+          "h": 12,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "options": {
+          "view": {
+            "id": "coords",
+            "lat": 40.7128,
+            "lon": -74.0060,
+            "zoom": 10
+          },
+          "controls": {
+            "mouseWheelZoom": true,
+            "showZoom": true,
+            "showAttribution": true
+          },
+          "basemap": {
+            "type": "default"
+          },
+          "layers": [
+            {
+              "type": "markers",
+              "config": {
+                "style": {
+                  "size": {
+                    "fixed": 8,
+                    "min": 5,
+                    "max": 20
+                  },
+                  "color": {
+                    "field": "Value",
+                    "fixed": "green"
+                  },
+                  "fillOpacity": 0.8,
+                  "strokeWidth": 1,
+                  "strokeColor": "white"
+                },
+                "showLegend": true
+              },
+              "location": {
+                "mode": "auto"
+              },
+              "tooltip": {
+                "mode": "single"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Incidents Map",
+        "type": "geomap",
+        "targets": [
+          {
+            "expr": "active_incidents_total",
+            "legendFormat": "{{severity}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "mappings": [
+              {
+                "options": {
+                  "critical": {
+                    "color": "red",
+                    "index": 0
+                  },
+                  "high": {
+                    "color": "orange",
+                    "index": 1
+                  },
+                  "medium": {
+                    "color": "yellow",
+                    "index": 2
+                  },
+                  "low": {
+                    "color": "green",
+                    "index": 3
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 12,
+          "x": 0,
+          "y": 12
+        },
+        "options": {
+          "view": {
+            "id": "coords",
+            "lat": 40.7128,
+            "lon": -74.0060,
+            "zoom": 10
+          },
+          "controls": {
+            "mouseWheelZoom": true,
+            "showZoom": true,
+            "showAttribution": true
+          },
+          "basemap": {
+            "type": "default"
+          },
+          "layers": [
+            {
+              "type": "markers",
+              "config": {
+                "style": {
+                  "size": {
+                    "fixed": 10,
+                    "min": 8,
+                    "max": 25
+                  },
+                  "color": {
+                    "field": "severity",
+                    "fixed": "red"
+                  },
+                  "fillOpacity": 0.9,
+                  "strokeWidth": 2,
+                  "strokeColor": "white",
+                  "symbol": "triangle-up"
+                },
+                "showLegend": true
+              },
+              "location": {
+                "mode": "auto"
+              },
+              "tooltip": {
+                "mode": "single"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "title": "Traffic Sensor Locations",
+        "type": "geomap",
+        "targets": [
+          {
+            "expr": "count(traffic_flow_rate) by (location)",
+            "legendFormat": "{{location}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 12,
+          "x": 12,
+          "y": 12
+        },
+        "options": {
+          "view": {
+            "id": "coords",
+            "lat": 40.7128,
+            "lon": -74.0060,
+            "zoom": 10
+          },
+          "controls": {
+            "mouseWheelZoom": true,
+            "showZoom": true,
+            "showAttribution": true
+          },
+          "basemap": {
+            "type": "default"
+          },
+          "layers": [
+            {
+              "type": "markers",
+              "config": {
+                "style": {
+                  "size": {
+                    "fixed": 6,
+                    "min": 4,
+                    "max": 12
+                  },
+                  "color": {
+                    "field": "Value",
+                    "fixed": "blue"
+                  },
+                  "fillOpacity": 0.7,
+                  "strokeWidth": 1,
+                  "strokeColor": "white",
+                  "symbol": "circle"
+                },
+                "showLegend": true
+              },
+              "location": {
+                "mode": "auto"
+              },
+              "tooltip": {
+                "mode": "single"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 4,
+        "title": "Traffic Density Heatmap",
+        "type": "geomap",
+        "targets": [
+          {
+            "expr": "avg(traffic_flow_rate) by (location)",
+            "legendFormat": "{{location}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-GrYlRd"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 22
+        },
+        "options": {
+          "view": {
+            "id": "coords",
+            "lat": 40.7128,
+            "lon": -74.0060,
+            "zoom": 9
+          },
+          "controls": {
+            "mouseWheelZoom": true,
+            "showZoom": true,
+            "showAttribution": true
+          },
+          "basemap": {
+            "type": "default"
+          },
+          "layers": [
+            {
+              "type": "heatmap",
+              "config": {
+                "weight": {
+                  "field": "Value",
+                  "fixed": 1,
+                  "min": 0,
+                  "max": 1
+                },
+                "radius": 40,
+                "blur": 15,
+                "opacity": 0.6
+              },
+              "location": {
+                "mode": "auto"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [],
+    "liveNow": false,
+    "schemaVersion": 27,
+    "version": 0,
+    "weekStart": ""
+  }
+} 

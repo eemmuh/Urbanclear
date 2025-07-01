@@ -7,7 +7,9 @@ from typing import List, Optional, Dict, Any
 
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
+from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import Counter, Histogram, Gauge, generate_latest
 from pydantic import BaseModel, Field
 import uvicorn
 from loguru import logger
@@ -39,6 +41,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Prometheus metrics setup
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
+
+# Custom metrics
+TRAFFIC_REQUESTS_TOTAL = Counter('traffic_requests_total', 'Total traffic API requests', ['endpoint', 'method'])
+TRAFFIC_PROCESSING_TIME = Histogram('traffic_processing_seconds', 'Time spent processing traffic requests', ['endpoint'])
+ACTIVE_INCIDENTS = Gauge('active_incidents_total', 'Number of active traffic incidents', ['severity'])
+TRAFFIC_FLOW_RATE = Gauge('traffic_flow_rate', 'Current traffic flow rate', ['location', 'direction'])
+ROUTE_OPTIMIZATION_TIME = Histogram('route_optimization_seconds', 'Time spent optimizing routes')
+SIGNAL_OPTIMIZATION_COUNT = Counter('signal_optimization_total', 'Total signal optimizations performed')
+PREDICTION_ACCURACY = Gauge('prediction_accuracy', 'Current prediction model accuracy', ['model_type'])
+
+@app.get("/metrics")
+async def metrics():
+    """Prometheus metrics endpoint"""
+    return Response(generate_latest(), media_type="text/plain")
 
 # Initialize services
 traffic_service = TrafficService()

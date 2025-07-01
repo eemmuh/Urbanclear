@@ -49,6 +49,7 @@ ortools==9.8.3296
 
 # Monitoring and Logging
 prometheus-client==0.19.0
+prometheus-fastapi-instrumentator==6.1.0
 grafana-api==1.0.3
 loguru==0.7.2
 

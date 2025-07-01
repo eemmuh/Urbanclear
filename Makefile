@@ -55,3 +55,32 @@ setup-env: ## Set up development environment
 health: ## Check system health
 	curl -s http://localhost:8000/health | python -m json.tool
 
+dashboards: ## Open Grafana dashboards in browser
+	@echo "Opening Grafana dashboards..."
+	@echo "URL: http://localhost:3000"
+	@echo "Username: admin"
+	@echo "Password: grafana_password"
+	@if command -v open >/dev/null 2>&1; then open http://localhost:3000; fi
+	@if command -v xdg-open >/dev/null 2>&1; then xdg-open http://localhost:3000; fi
+
+metrics: ## Show Prometheus metrics endpoint
+	@echo "Prometheus metrics available at:"
+	@echo "- API metrics: http://localhost:8000/metrics"
+	@echo "- Prometheus UI: http://localhost:9090"
+	@if curl -s http://localhost:8000/metrics >/dev/null 2>&1; then \
+		echo "✓ API metrics endpoint is accessible"; \
+	else \
+		echo "✗ API metrics endpoint is not accessible"; \
+	fi
+
+monitor: ## Start only monitoring services (Prometheus + Grafana)
+	docker-compose up -d prometheus grafana postgres-exporter redis-exporter
+
+monitoring-status: ## Check status of monitoring services
+	@echo "Monitoring Services Status:"
+	@echo "=========================="
+	@docker-compose ps prometheus grafana postgres-exporter redis-exporter
+
+setup-dashboards: ## Setup and verify dashboard system
+	python scripts/setup_dashboards.py
+

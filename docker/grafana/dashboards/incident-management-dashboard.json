@@ -1,0 +1,413 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Urbanclear - Incident Management Dashboard",
+    "tags": ["urbanclear", "incidents", "management"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Active Incidents by Severity",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(active_incidents_total) by (severity)",
+            "legendFormat": "{{severity}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "displayMode": "basic",
+              "orientation": "horizontal"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "critical": {
+                    "color": "red",
+                    "index": 0
+                  },
+                  "high": {
+                    "color": "orange", 
+                    "index": 1
+                  },
+                  "medium": {
+                    "color": "yellow",
+                    "index": 2
+                  },
+                  "low": {
+                    "color": "green",
+                    "index": 3
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 3
+                },
+                {
+                  "color": "orange",
+                  "value": 7
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 8,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Incident Response Time",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "avg(histogram_quantile(0.95, sum(rate(incident_response_time_bucket[5m])) by (le)))",
+            "legendFormat": "95th percentile",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 300
+                },
+                {
+                  "color": "red",
+                  "value": 600
+                }
+              ]
+            },
+            "unit": "s",
+            "min": 0,
+            "max": 1800
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 8,
+          "x": 8,
+          "y": 0
+        },
+        "options": {
+          "orientation": "auto",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true,
+          "text": {}
+        }
+      },
+      {
+        "id": 3,
+        "title": "Incidents Resolved Today",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(incidents_resolved_total[24h]))",
+            "legendFormat": "Resolved",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic" 
+            },
+            "custom": {
+              "displayMode": "basic",
+              "orientation": "horizontal"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 8,
+          "x": 16,
+          "y": 0
+        }
+      },
+      {
+        "id": 4,
+        "title": "Incident Trends (24h)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(incidents_reported_total[5m])) by (severity)",
+            "legendFormat": "{{severity}} incidents/min",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "Incidents per minute",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "spanNulls": true,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 5
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 6
+        }
+      },
+      {
+        "id": 5,
+        "title": "Incident Severity Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(active_incidents_total) by (severity)",
+            "legendFormat": "{{severity}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "mappings": [
+              {
+                "options": {
+                  "critical": {
+                    "color": "red",
+                    "index": 0
+                  },
+                  "high": {
+                    "color": "orange",
+                    "index": 1
+                  },
+                  "medium": {
+                    "color": "yellow",
+                    "index": 2
+                  },
+                  "low": {
+                    "color": "green",
+                    "index": 3
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 12,
+          "x": 0,
+          "y": 14
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "pieType": "pie",
+          "tooltip": {
+            "mode": "single"
+          },
+          "legend": {
+            "displayMode": "visible",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Average Resolution Time by Severity",
+        "type": "barchart",
+        "targets": [
+          {
+            "expr": "avg(incident_resolution_time_seconds) by (severity)",
+            "legendFormat": "{{severity}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "Resolution Time (minutes)",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "displayMode": "basic",
+              "fillOpacity": 80,
+              "gradientMode": "none",
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              },
+              "orientation": "horizontal"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1800
+                }
+              ]
+            },
+            "unit": "s"
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 12,
+          "x": 12,
+          "y": 14
+        }
+      },
+      {
+        "id": 7,
+        "title": "Recent Incident Alerts",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job=\"traffic-api\"} |= \"incident\"",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 20
+        },
+        "options": {
+          "showCommonLabels": false,
+          "showLabels": false,
+          "showTime": true,
+          "sortOrder": "Descending",
+          "wrapLogMessage": true,
+          "enableLogDetails": true,
+          "prettifyLogMessage": false,
+          "dedupStrategy": "none"
+        }
+      }
+    ],
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [],
+    "liveNow": false,
+    "schemaVersion": 27,
+    "version": 0,
+    "weekStart": ""
+  }
+} 

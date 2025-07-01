@@ -168,17 +168,6 @@ pytest --cov=src tests/
 3. Make changes with tests
 4. Submit a pull request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🤝 Support
-
-For questions and support:
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation in the `docs/` folder
-
 ---
 
 **Urbanclear - Built with ❤️ for smarter cities** 

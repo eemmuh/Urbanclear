@@ -121,6 +121,29 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
 
+  # Postgres Exporter for monitoring
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: urbanclear_postgres_exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://traffic_user:traffic_password@postgres:5432/traffic_db?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      - postgres
+
+  # Redis Exporter for monitoring
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: urbanclear_redis_exporter
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+      REDIS_PASSWORD: "redis_password"
+    ports:
+      - "9121:9121"
+    depends_on:
+      - redis
+
   # Grafana for dashboards
   grafana:
     image: grafana/grafana:latest
@@ -129,12 +152,15 @@ services:
       - "3000:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: grafana_password
+      GF_INSTALL_PLUGINS: grafana-worldmap-panel,grafana-piechart-panel,grafana-clock-panel
     volumes:
       - grafana_data:/var/lib/grafana
       - ./docker/grafana/provisioning:/etc/grafana/provisioning
       - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
     depends_on:
       - prometheus
+      - postgres-exporter
+      - redis-exporter
 
   # Spark Master
   spark-master:

@@ -1,0 +1,532 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Urbanclear - System Overview",
+    "tags": ["urbanclear", "overview", "main", "dashboard"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"traffic-api\"}",
+            "legendFormat": "API",
+            "refId": "A"
+          },
+          {
+            "expr": "up{job=\"postgres-exporter\"}",
+            "legendFormat": "Database",
+            "refId": "B"
+          },
+          {
+            "expr": "up{job=\"redis-exporter\"}",
+            "legendFormat": "Cache",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "color": "red",
+                    "index": 0,
+                    "text": "DOWN"
+                  },
+                  "1": {
+                    "color": "green",
+                    "index": 1,
+                    "text": "ONLINE"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Real-time Traffic Overview",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "avg(traffic_flow_rate)",
+            "legendFormat": "Average Traffic Flow",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(active_incidents_total)",
+            "legendFormat": "Active Incidents",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "spanNulls": true,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 4
+        }
+      },
+      {
+        "id": 3,
+        "title": "API Performance",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[5m]))",
+            "legendFormat": "Requests/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "95th percentile latency",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "spanNulls": true,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 4
+        }
+      },
+      {
+        "id": 4,
+        "title": "Key Metrics",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(active_incidents_total)",
+            "legendFormat": "Active Incidents",
+            "refId": "A"
+          },
+          {
+            "expr": "count(up{job=\"traffic-api\"} == 1)",
+            "legendFormat": "Services Online",
+            "refId": "B"
+          },
+          {
+            "expr": "avg(prediction_accuracy)",
+            "legendFormat": "Model Accuracy %",
+            "refId": "C"
+          },
+          {
+            "expr": "sum(rate(signal_optimization_total[1h]))",
+            "legendFormat": "Signal Optimizations/hr",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 12
+        },
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "text": {},
+          "textMode": "auto"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Traffic Flow by Location",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "traffic_flow_rate",
+            "legendFormat": "{{location}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 50
+                },
+                {
+                  "color": "orange",
+                  "value": 70
+                },
+                {
+                  "color": "red",
+                  "value": 90
+                }
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 18
+        },
+        "options": {
+          "displayMode": "gradient",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "showUnfilled": true
+        }
+      },
+      {
+        "id": 6,
+        "title": "Incident Severity Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(active_incidents_total) by (severity)",
+            "legendFormat": "{{severity}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "mappings": [
+              {
+                "options": {
+                  "critical": {
+                    "color": "red",
+                    "index": 0
+                  },
+                  "high": {
+                    "color": "orange",
+                    "index": 1
+                  },
+                  "medium": {
+                    "color": "yellow",
+                    "index": 2
+                  },
+                  "low": {
+                    "color": "green",
+                    "index": 3
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 18
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "pieType": "pie",
+          "tooltip": {
+            "mode": "single"
+          },
+          "legend": {
+            "displayMode": "visible",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "System Resource Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends{datname=\"traffic_db\"}",
+            "legendFormat": "DB Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_memory_used_bytes / redis_memory_max_bytes * 100",
+            "legendFormat": "Redis Memory %",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "spanNulls": true,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 26
+        }
+      },
+      {
+        "id": 8,
+        "title": "Quick Links",
+        "type": "text",
+        "gridPos": {
+          "h": 4,
+          "w": 24,
+          "x": 0,
+          "y": 32
+        },
+        "options": {
+          "content": "## Quick Navigation\n\n- **[Traffic Flow Dashboard](/d/traffic-flow)** - Real-time traffic conditions and flow analysis\n- **[Incident Management](/d/incident-management)** - Active incidents and response tracking\n- **[System Performance](/d/system-performance)** - Infrastructure monitoring and performance metrics\n- **[Geographic Map](/d/geographic-map)** - Interactive traffic map with sensor locations\n- **[Predictive Analytics](/d/predictive-analytics)** - ML model performance and predictions\n\n## System Information\n- **Version**: Urbanclear v1.0.0\n- **Environment**: Production\n- **Last Updated**: Real-time\n- **Data Sources**: PostgreSQL, Redis, Prometheus",
+          "mode": "markdown"
+        }
+      }
+    ],
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [
+      {
+        "asDropdown": false,
+        "icon": "external link",
+        "includeVars": false,
+        "keepTime": false,
+        "tags": ["urbanclear"],
+        "targetBlank": false,
+        "title": "Other Dashboards",
+        "type": "dashboards",
+        "url": ""
+      }
+    ],
+    "liveNow": false,
+    "schemaVersion": 27,
+    "version": 0,
+    "weekStart": ""
+  }
+} 
