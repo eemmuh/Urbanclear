@@ -264,7 +264,7 @@ def main():
     # Create placeholder for auto-refresh
     placeholder = st.empty()
     
-    # Main dashboard loop
+    # Main dashboard loop  
     while auto_refresh:
         with placeholder.container():
             # Fetch data
@@ -283,20 +283,20 @@ def main():
             with col1:
                 # Traffic flow chart
                 traffic_fig = dashboard.create_traffic_flow_chart(traffic_data)
-                st.plotly_chart(traffic_fig, use_container_width=True)
+                st.plotly_chart(traffic_fig, use_container_width=True, key="traffic_flow_chart")
                 
                 # Predictions chart
                 prediction_fig = dashboard.create_prediction_chart(prediction_data)
-                st.plotly_chart(prediction_fig, use_container_width=True)
+                st.plotly_chart(prediction_fig, use_container_width=True, key="prediction_chart")
                 
             with col2:
                 # Congestion map
                 map_fig = dashboard.create_congestion_map(traffic_data)
-                st.plotly_chart(map_fig, use_container_width=True)
+                st.plotly_chart(map_fig, use_container_width=True, key="congestion_map_chart")
                 
                 # Incidents chart
                 incidents_fig = dashboard.create_incidents_chart(incidents_data)
-                st.plotly_chart(incidents_fig, use_container_width=True)
+                st.plotly_chart(incidents_fig, use_container_width=True, key="incidents_chart")
                 
             # System status
             st.subheader("🔧 System Status")

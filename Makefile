@@ -40,10 +40,18 @@ help: ## Show this help message
 	@echo "  init-db         Initialize database"
 	@echo "  setup-dashboards Setup Grafana dashboards"
 	@echo ""
-	@echo "🔍 Monitoring:"
+	@echo "🔍 Monitoring & Health:"
 	@echo "  check-services  Check service status"
+	@echo "  health-check    Comprehensive health check"
+	@echo "  system-status   Quick status check"
 	@echo "  logs-api        View API logs"
 	@echo "  logs-docker     View Docker logs"
+	@echo ""
+	@echo "🔧 Fixes & Restarts:"
+	@echo "  quick-fix       Auto-fix common issues"
+	@echo "  restart-api     Restart API server only"
+	@echo "  restart-dashboard Restart dashboard only"
+	@echo "  fix-all         Nuclear option: reset everything"
 	@echo ""
 	@echo "🧹 Cleanup:"
 	@echo "  clean           Clean build artifacts"
@@ -279,4 +287,52 @@ venv-recreate: venv-clean venv-create
 	@echo "🔄 Recreating virtual environment..."
 	@echo "📝 Don't forget to activate: source urbanclear-env/bin/activate"
 	@echo "📦 Then install packages: make venv-install"
+
+# ==========================================
+# System Health & Fixes
+# ==========================================
+
+health-check: ## Run comprehensive system health check
+	@echo "🔍 Running comprehensive system health check..."
+	@python scripts/health_check.py
+
+quick-fix: ## Automatically fix common issues
+	@echo "🔧 Running quick fixes..."
+	@pkill -f "uvicorn\|streamlit" 2>/dev/null || true
+	@sleep 2
+	@echo "Starting API server..."
+	@python run_api.py &
+	@sleep 5
+	@echo "Starting Streamlit dashboard..."
+	@nohup streamlit run src/visualization/web_dashboard.py --server.port 8501 --server.address 0.0.0.0 --browser.gatherUsageStats false > /dev/null 2>&1 &
+	@echo "✅ Services restarted!"
+
+system-status: ## Check status of all services quickly
+	@echo "📊 System Status:"
+	@echo "=================="
+	@curl -s http://localhost:8000/health 2>/dev/null | python -c "import sys,json; print('API: ' + json.load(sys.stdin)['status'])" || echo "API: Not running"
+	@curl -s http://localhost:8501 > /dev/null 2>&1 && echo "Streamlit: Running" || echo "Streamlit: Not running"
+	@docker ps --format "Docker: {{.Names}}" | head -3 2>/dev/null || echo "Docker: Not running"
+
+restart-api: ## Restart API server only
+	@echo "🔄 Restarting API server..."
+	@pkill -f uvicorn 2>/dev/null || true
+	@sleep 2
+	@python run_api.py &
+	@echo "✅ API server restarted"
+
+restart-dashboard: ## Restart Streamlit dashboard only
+	@echo "🔄 Restarting Streamlit dashboard..."
+	@pkill -f streamlit 2>/dev/null || true
+	@sleep 2
+	@nohup streamlit run src/visualization/web_dashboard.py --server.port 8501 --server.address 0.0.0.0 --browser.gatherUsageStats false > /dev/null 2>&1 &
+	@echo "✅ Dashboard restarted"
+
+fix-all: stop clean quick-fix ## Nuclear option: reset and restart everything
+	@echo "💥 Complete system reset and restart..."
+	@sleep 3
+	@make start
+	@sleep 10
+	@make init-db
+	@echo "🎉 System completely refreshed!"
 
