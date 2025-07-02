@@ -1,5 +1,6 @@
+# Urbanclear Traffic System - .gitignore
 
-# Python
+# === Python ===
 __pycache__/
 *.py[cod]
 *$py.class
@@ -17,67 +18,185 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Environment
-.env
-.venv
-env/
+# === Virtual Environments ===
+urbanclear-env/
 venv/
+env/
 ENV/
 env.bak/
 venv.bak/
+.env
+.venv
 
-# IDE
+# === IDE and Editor Files ===
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# Logs
-logs/
-*.log
-
-# Models
-models/*.pkl
-models/*.h5
-models/*.joblib
-
-# Data
-data/raw/*
-data/processed/*
-data/interim/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/interim/.gitkeep
-
-# Database
-*.db
-*.sqlite
-
-# Docker
-.docker/
-
-# OS
 .DS_Store
 Thumbs.db
 
-# Testing
+# === Jupyter Notebooks ===
+.ipynb_checkpoints/
+*.ipynb
+
+# === Logs and Databases ===
+logs/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+
+# === ML Models and Data ===
+models/trained/
+models/*.joblib
+models/*.pkl
+models/*.pickle
+models/*.h5
+models/*.pt
+models/*.pth
+data/processed/
+data/interim/
+data/external/
+*.csv
+*.parquet
+*.feather
+
+# === Configuration Files with Secrets ===
+config/config.yaml
+config/secrets.yaml
+.env.local
+.env.production
+.env.development
+*.key
+*.pem
+*.crt
+
+# === Docker Volumes and Data ===
+docker/data/
+docker/logs/
+volumes/
+.docker/
+
+# === Cache and Temporary Files ===
+.cache/
+.pytest_cache/
 .coverage
 htmlcov/
-.pytest_cache/
 .tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
-# Config (keep examples)
-config/config.yaml
-!config/config.example.yaml
+# === OS Generated Files ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# Temporary files
+# === Backup Files ===
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
+
+# === Runtime Files ===
+*.pid
+*.sock
+pids/
 tmp/
 temp/
+
+# === Prometheus Data ===
+prometheus_data/
+grafana_data/
+
+# === API Keys and Secrets ===
+api_keys.txt
+secrets.txt
+.secrets
+credentials.json
+
+# === Documentation Build ===
+docs/_build/
+docs/build/
+site/
+
+# === Package Managers ===
+node_modules/
+package-lock.json
+yarn.lock
+
+# === Generated Reports ===
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# === Profiling ===
+.prof
+
+# === CDK (Cloud Development Kit) ===
+.cdk.staging/
+cdk.out/
+
+# === Terraform ===
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# === Local Development ===
+local_settings.py
+dev_settings.py
+debug.py
+test_script.py
+playground.py
+
+# === Deployment ===
+deploy/
+deployment/
+k8s/secrets/
+
+# === Streamlit ===
+.streamlit/secrets.toml
+.streamlit/config.toml
+
+# === FastAPI ===
+*.openapi.json
+
+# === Monitoring and Metrics ===
+metrics/
+monitoring/
+
+# === Custom Project Files ===
+# Add any project-specific files here
+experimental/
+sandbox/
+deprecated/
+archive/
+
+# === Keep Important Empty Directories ===
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/interim/.gitkeep
+!data/external/.gitkeep
+!logs/.gitkeep
+!models/trained/.gitkeep
+
+# === Allow Sample Data ===
+!data/sample/
+data/sample/*
+!data/sample/traffic_data.csv
+!data/sample/*.example.*

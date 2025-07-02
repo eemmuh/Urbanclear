@@ -8,7 +8,10 @@ from loguru import logger
 
 from src.api.models import TrafficCondition, AnalyticsSummary, IncidentReport
 from src.core.config import get_settings
-from src.data.mock_data_generator import mock_generator
+from src.data.mock_data_generator import MockDataGenerator
+
+# Create a global instance
+_mock_generator = MockDataGenerator()
 
 
 class TrafficService:
@@ -16,6 +19,7 @@ class TrafficService:
     
     def __init__(self):
         self.settings = get_settings()
+        self.mock_generator = _mock_generator
         logger.info("TrafficService initialized")
     
     async def get_current_conditions(
@@ -26,10 +30,13 @@ class TrafficService:
         """Get current traffic conditions"""
         logger.info(f"Getting current traffic conditions for location: {location}")
         
-        # Use enhanced mock data generator
-        conditions = mock_generator.generate_current_conditions(location_filter=location)
-        
-        return conditions
+        try:
+            # Use enhanced mock data generator
+            conditions = self.mock_generator.generate_current_conditions(location_filter=location)
+            return conditions
+        except Exception as e:
+            logger.error(f"Error generating current conditions: {e}")
+            return []
     
     async def get_historical_data(
         self,
@@ -95,7 +102,7 @@ class TrafficService:
         logger.info(f"Getting analytics summary for period: {period}")
         
         # Use enhanced mock data generator
-        summary_data = mock_generator.generate_analytics_summary(period)
+        summary_data = self.mock_generator.generate_analytics_summary(period)
         
         return AnalyticsSummary(**summary_data)
     

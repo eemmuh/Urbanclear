@@ -4,6 +4,7 @@ Urbanclear - Smart City Traffic Optimization System - Main API
 import os
 from datetime import datetime
 from typing import List, Optional, Dict, Any
+import random
 
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,15 +15,15 @@ from pydantic import BaseModel, Field
 import uvicorn
 from loguru import logger
 
-from src.api.models import (
+from api.models import (
     TrafficCondition, TrafficPrediction, RouteRequest, RouteResponse,
     IncidentReport, AnalyticsSummary, SignalOptimizationRequest
 )
-from src.api.dependencies import get_db, get_cache, get_current_user
-from src.data.traffic_service import TrafficService
-from src.models.prediction import TrafficPredictor
-from src.models.optimization import RouteOptimizer
-from src.models.incident_detection import IncidentDetector
+from api.dependencies import get_db, get_cache, get_current_user
+from data.traffic_service import TrafficService
+from models.prediction import TrafficPredictor
+from models.optimization import RouteOptimizer
+from models.incident_detection import IncidentDetector
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -98,68 +99,80 @@ async def get_current_traffic(
 ):
     """Get current traffic conditions"""
     try:
-        conditions = await traffic_service.get_current_conditions(
-            location=location,
-            radius=radius
-        )
-        return conditions
+        TRAFFIC_REQUESTS_TOTAL.labels(endpoint="current", method="GET").inc()
+        with TRAFFIC_PROCESSING_TIME.labels(endpoint="current").time():
+            conditions = await traffic_service.get_current_conditions(
+                location=location,
+                radius=radius
+            )
+            logger.info(f"Retrieved {len(conditions)} traffic conditions")
+            return conditions
     except Exception as e:
         logger.error(f"Error getting current traffic: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve traffic data: {str(e)}")
 
 @app.get("/api/v1/traffic/predict", response_model=List[TrafficPrediction])
 async def predict_traffic(
     location: str = Query(..., description="Location for prediction"),
-    hours_ahead: int = Query(1, ge=1, le=24, description="Hours to predict ahead"),
-    db=Depends(get_db)
+    hours_ahead: int = Query(1, ge=1, le=24, description="Hours to predict ahead")
 ):
     """Get traffic predictions"""
     try:
-        predictions = await traffic_predictor.predict(
-            location=location,
-            hours_ahead=hours_ahead
-        )
-        return predictions
+        TRAFFIC_REQUESTS_TOTAL.labels(endpoint="predict", method="GET").inc()
+        with TRAFFIC_PROCESSING_TIME.labels(endpoint="predict").time():
+            predictions = await traffic_predictor.predict(
+                location=location,
+                hours_ahead=hours_ahead
+            )
+            logger.info(f"Generated {len(predictions)} predictions for {location}")
+            return predictions
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error predicting traffic: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate predictions: {str(e)}")
 
 @app.get("/api/v1/traffic/historical")
 async def get_historical_traffic(
     location: str = Query(..., description="Location"),
     start_date: datetime = Query(..., description="Start date"),
-    end_date: datetime = Query(..., description="End date"),
-    db=Depends(get_db)
+    end_date: datetime = Query(..., description="End date")
 ):
     """Get historical traffic data"""
     try:
+        if start_date >= end_date:
+            raise HTTPException(status_code=400, detail="Start date must be before end date")
+        
         data = await traffic_service.get_historical_data(
             location=location,
             start_date=start_date,
             end_date=end_date
         )
         return data
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error getting historical data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve historical data: {str(e)}")
 
 # Route Optimization Endpoints
 @app.post("/api/v1/routes/optimize", response_model=RouteResponse)
 async def optimize_route(
-    route_request: RouteRequest,
-    db=Depends(get_db)
+    route_request: RouteRequest
 ):
     """Optimize route based on current traffic conditions"""
     try:
+        ROUTE_OPTIMIZATION_TIME.observe(0.5)  # Mock timing
         optimized_route = await route_optimizer.optimize(route_request)
+        logger.info(f"Optimized route from {route_request.origin.address} to {route_request.destination.address}")
         return optimized_route
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error optimizing route: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to optimize route: {str(e)}")
 
 @app.get("/api/v1/routes/alternatives")
 async def get_route_alternatives(
     origin: str = Query(..., description="Origin location"),
     destination: str = Query(..., description="Destination location"),
-    max_alternatives: int = Query(3, ge=1, le=5, description="Max alternatives"),
-    db=Depends(get_db)
+    max_alternatives: int = Query(3, ge=1, le=5, description="Max alternatives")
 ):
     """Get alternative routes"""
     try:
@@ -170,7 +183,8 @@ async def get_route_alternatives(
         )
         return alternatives
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error getting route alternatives: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get alternatives: {str(e)}")
 
 # Incident Management Endpoints
 @app.get("/api/v1/incidents/active", response_model=List[IncidentReport])
@@ -245,27 +259,48 @@ async def get_analytics_summary(
 ):
     """Get traffic analytics summary"""
     try:
-        summary = await traffic_service.get_analytics_summary(period)
-        return summary
+        valid_periods = ["1h", "24h", "7d", "30d"]
+        if period not in valid_periods:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid period. Must be one of: {', '.join(valid_periods)}"
+            )
+        
+        TRAFFIC_REQUESTS_TOTAL.labels(endpoint="analytics", method="GET").inc()
+        with TRAFFIC_PROCESSING_TIME.labels(endpoint="analytics").time():
+            summary = await traffic_service.get_analytics_summary(period)
+            logger.info(f"Generated analytics summary for period: {period}")
+            return summary
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error getting analytics summary: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to generate analytics: {str(e)}")
 
 @app.get("/api/v1/analytics/performance")
 async def get_performance_metrics(
     metric_type: str = Query("congestion", description="Type of metric"),
-    location: Optional[str] = Query(None, description="Filter by location"),
-    db=Depends(get_db)
+    location: Optional[str] = Query(None, description="Filter by location")
 ):
     """Get system performance metrics"""
     try:
+        valid_metrics = ["congestion", "throughput", "emissions", "efficiency"]
+        if metric_type not in valid_metrics:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid metric type. Must be one of: {', '.join(valid_metrics)}"
+            )
+        
         metrics = await traffic_service.get_performance_metrics(
             metric_type=metric_type,
             location=location
         )
         return metrics
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error getting performance metrics: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve metrics: {str(e)}")
 
 # System Administration Endpoints
 @app.post("/api/v1/admin/models/retrain")
@@ -302,107 +337,132 @@ async def websocket_endpoint(websocket):
     # Implementation for real-time traffic data streaming
     pass
 
-# Demo endpoints for showcasing functionality
+# Demo Endpoints for Testing
 @app.get("/api/v1/demo/rush-hour-simulation")
 async def simulate_rush_hour():
     """Simulate rush hour traffic conditions"""
     try:
-        from src.data.mock_data_generator import MockDataGenerator
-        import datetime
+        logger.info("Generating rush hour simulation data")
         
-        # Create a new generator for simulation
-        demo_generator = MockDataGenerator()
-        
-        # Override time to simulate morning rush hour (8 AM)
-        original_time = datetime.datetime.now
-        datetime.datetime.now = lambda: original_time().replace(hour=8, minute=30)
-        
-        conditions = demo_generator.generate_current_conditions()
-        incidents = demo_generator.generate_incidents()
-        
-        # Reset time
-        datetime.datetime.now = original_time
-        
-        return {
-            "scenario": "Morning Rush Hour (8:30 AM)",
-            "traffic_conditions": conditions,
-            "active_incidents": incidents,
-            "summary": {
-                "total_sensors": len(conditions),
-                "avg_speed": sum(c.speed_mph for c in conditions) / len(conditions),
-                "high_congestion_areas": [c.location.address for c in conditions if c.congestion_level > 0.7],
-                "total_incidents": len(incidents)
-            }
+        # Generate data for multiple locations during rush hour
+        rush_hour_data = {
+            "scenario": "Rush Hour Simulation",
+            "time_period": "8:00 AM - 9:00 AM",
+            "locations": []
         }
+        
+        # Use mock generator for realistic data
+        conditions = await traffic_service.get_current_conditions()
+        
+        for condition in conditions[:5]:  # Limit to 5 locations for demo
+            # Simulate rush hour impact
+            rush_condition = {
+                "location": condition.location.address,
+                "coordinates": {
+                    "lat": condition.location.latitude,
+                    "lng": condition.location.longitude
+                },
+                "normal_speed": condition.speed_mph * 1.5,  # What speed would be normally
+                "rush_hour_speed": condition.speed_mph,
+                "congestion_increase": "40-60%",
+                "estimated_delay": f"{random.randint(5, 15)} minutes",
+                "volume": condition.volume,
+                "severity": condition.severity
+            }
+            rush_hour_data["locations"].append(rush_condition)
+        
+        rush_hour_data["summary"] = {
+            "total_locations_monitored": len(rush_hour_data["locations"]),
+            "average_speed_reduction": "35%",
+            "total_estimated_delays": f"{sum(random.randint(5, 15) for _ in rush_hour_data['locations'])} minutes",
+            "most_congested": max(rush_hour_data["locations"], key=lambda x: x["volume"])["location"]
+        }
+        
+        return rush_hour_data
+        
     except Exception as e:
-        logger.error(f"Error simulating rush hour: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error generating rush hour simulation: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate simulation: {str(e)}")
 
 @app.get("/api/v1/demo/location-filter")
 async def demo_location_filter():
-    """Demo filtering traffic data by location"""
+    """Demo traffic data filtering by location"""
     try:
-        # Show different location filters
-        all_traffic = await traffic_service.get_current_conditions()
-        central_park = await traffic_service.get_current_conditions(location="Central Park")
-        broadway = await traffic_service.get_current_conditions(location="Broadway")
+        logger.info("Demonstrating location-based filtering")
         
-        return {
-            "demo": "Location Filtering",
-            "results": {
-                "all_locations": {
-                    "count": len(all_traffic),
-                    "locations": [t.location.address for t in all_traffic]
-                },
-                "central_park_area": {
-                    "count": len(central_park),
-                    "locations": [t.location.address for t in central_park]
-                },
-                "broadway_area": {
-                    "count": len(broadway),
-                    "locations": [t.location.address for t in broadway]
-                }
-            }
+        # Show traffic data for different location filters
+        demo_data = {
+            "demonstration": "Location-Based Traffic Filtering",
+            "filters_tested": []
         }
+        
+        test_filters = ["Central Park", "Times Square", "Bridge", "Tunnel"]
+        
+        for filter_term in test_filters:
+            filtered_conditions = await traffic_service.get_current_conditions(location=filter_term)
+            
+            filter_result = {
+                "filter": filter_term,
+                "matches_found": len(filtered_conditions),
+                "locations": [
+                    {
+                        "name": condition.location.address,
+                        "speed": condition.speed_mph,
+                        "congestion": condition.congestion_level
+                    }
+                    for condition in filtered_conditions
+                ]
+            }
+            demo_data["filters_tested"].append(filter_result)
+        
+        return demo_data
+        
     except Exception as e:
         logger.error(f"Error in location filter demo: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to run demo: {str(e)}")
 
 @app.get("/api/v1/demo/analytics-comparison")
 async def demo_analytics_comparison():
-    """Demo analytics for different time periods"""
+    """Demo analytics data for different time periods"""
     try:
-        analytics_1h = await traffic_service.get_analytics_summary("1h")
-        analytics_24h = await traffic_service.get_analytics_summary("24h")
-        analytics_7d = await traffic_service.get_analytics_summary("7d")
+        logger.info("Generating analytics comparison demo")
         
-        return {
-            "demo": "Analytics Period Comparison",
-            "comparison": {
-                "1_hour": {
-                    "vehicles": analytics_1h.total_vehicles,
-                    "avg_speed": analytics_1h.average_speed,
-                    "efficiency": analytics_1h.system_efficiency
-                },
-                "24_hours": {
-                    "vehicles": analytics_24h.total_vehicles,
-                    "avg_speed": analytics_24h.average_speed,
-                    "efficiency": analytics_24h.system_efficiency
-                },
-                "7_days": {
-                    "vehicles": analytics_7d.total_vehicles,
-                    "avg_speed": analytics_7d.average_speed,
-                    "efficiency": analytics_7d.system_efficiency
-                }
-            },
-            "insights": {
-                "daily_vehicle_growth": analytics_24h.total_vehicles / analytics_1h.total_vehicles,
-                "weekly_efficiency_trend": f"{((analytics_7d.system_efficiency - analytics_1h.system_efficiency) * 100):+.1f}%"
-            }
+        # Generate analytics for multiple time periods
+        periods = ["1h", "24h", "7d", "30d"]
+        comparison_data = {
+            "demonstration": "Traffic Analytics Comparison",
+            "time_periods": []
         }
+        
+        for period in periods:
+            summary = await traffic_service.get_analytics_summary(period)
+            
+            period_data = {
+                "period": period,
+                "total_vehicles": summary.total_vehicles,
+                "average_speed": summary.average_speed,
+                "incidents": summary.congestion_incidents,
+                "efficiency": summary.system_efficiency,
+                "fuel_savings": summary.fuel_savings,
+                "emission_reduction": summary.emission_reduction
+            }
+            comparison_data["time_periods"].append(period_data)
+        
+        # Add insights
+        comparison_data["insights"] = {
+            "peak_efficiency_period": max(comparison_data["time_periods"], 
+                                        key=lambda x: x["efficiency"])["period"],
+            "highest_traffic_period": max(comparison_data["time_periods"], 
+                                        key=lambda x: x["total_vehicles"])["period"],
+            "best_fuel_savings": max(comparison_data["time_periods"], 
+                                   key=lambda x: x["fuel_savings"])["fuel_savings"]
+        }
+        
+        return comparison_data
+        
     except Exception as e:
         logger.error(f"Error in analytics comparison demo: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to run demo: {str(e)}")
 
 if __name__ == "__main__":
     uvicorn.run(

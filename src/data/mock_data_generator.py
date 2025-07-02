@@ -8,7 +8,17 @@ from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
 import numpy as np
-from src.api.models import TrafficCondition, IncidentReport, TrafficSeverity, IncidentType, Location
+try:
+    from api.models import (
+        TrafficCondition, IncidentReport, TrafficSeverity, IncidentType, Location,
+        TrafficPrediction, Route, RoutePoint, RouteResponse
+    )
+except ImportError:
+    # Fallback for when running from different contexts
+    from src.api.models import (
+        TrafficCondition, IncidentReport, TrafficSeverity, IncidentType, Location,
+        TrafficPrediction, Route, RoutePoint, RouteResponse
+    )
 
 
 @dataclass
@@ -324,6 +334,124 @@ class MockDataGenerator:
             "emission_reduction": round(emission_reduction, 1),
             "system_efficiency": round(efficiency, 2),
             "peak_congestion_hours": [8, 9, 17, 18, 19]
+        }
+
+    def generate_traffic_predictions(self, location: str, hours_ahead: int) -> List[TrafficPrediction]:
+        """Generate realistic traffic predictions"""
+        predictions = []
+        
+        # Find closest sensor to the location
+        base_sensor = self.sensors[0]  # Default to first sensor
+        for sensor in self.sensors:
+            if location.lower() in sensor.name.lower():
+                base_sensor = sensor
+                break
+        
+        for hour in range(1, hours_ahead + 1):
+            prediction_time = datetime.now() + timedelta(hours=hour)
+            hour_of_day = prediction_time.hour
+            
+            # Predict speed based on time patterns
+            if hour_of_day in [8, 9, 17, 18, 19]:  # Rush hours
+                predicted_speed = base_sensor.baseline_speed * 0.6
+                predicted_volume = int(base_sensor.max_volume * 1.2)
+                severity = TrafficSeverity.HIGH
+            elif hour_of_day in [10, 11, 12, 13, 14, 15, 16]:  # Daytime
+                predicted_speed = base_sensor.baseline_speed * 0.8
+                predicted_volume = int(base_sensor.max_volume * 0.8)
+                severity = TrafficSeverity.MODERATE
+            else:  # Night/early morning
+                predicted_speed = base_sensor.baseline_speed * 1.1
+                predicted_volume = int(base_sensor.max_volume * 0.4)
+                severity = TrafficSeverity.LOW
+            
+            # Add some randomness
+            predicted_speed *= (0.9 + 0.2 * random.random())
+            predicted_volume = int(predicted_volume * (0.8 + 0.4 * random.random()))
+            
+            prediction = TrafficPrediction(
+                location=base_sensor.location,
+                prediction_time=prediction_time,
+                predicted_speed=round(predicted_speed, 1),
+                predicted_volume=predicted_volume,
+                predicted_severity=severity,
+                confidence=0.9 - (hour * 0.05),  # Confidence decreases with time
+                factors=self._get_prediction_factors(hour_of_day)
+            )
+            predictions.append(prediction)
+        
+        return predictions
+    
+    def _get_prediction_factors(self, hour: int) -> List[str]:
+        """Get factors affecting the prediction"""
+        factors = ["historical_patterns", "time_of_day"]
+        
+        if hour in [8, 9, 17, 18, 19]:
+            factors.append("rush_hour")
+        
+        if random.random() < 0.3:
+            factors.append("weather_impact")
+        
+        if random.random() < 0.1:
+            factors.append("special_event")
+        
+        return factors
+
+    def generate_route_data(self, origin: Location, destination: Location) -> Dict[str, Any]:
+        """Generate realistic route data"""
+        # Calculate basic route metrics
+        lat_diff = destination.latitude - origin.latitude
+        lng_diff = destination.longitude - origin.longitude
+        
+        # Estimate distance using Haversine formula (simplified)
+        distance = math.sqrt(lat_diff**2 + lng_diff**2) * 69  # Rough miles conversion
+        distance = max(1.0, distance)  # Minimum 1 mile
+        
+        # Generate route points
+        num_points = min(8, max(3, int(distance * 2)))  # 2 points per mile, max 8
+        route_points = []
+        
+        cumulative_distance = 0.0
+        cumulative_time = 0
+        
+        for i in range(num_points):
+            # Interpolate between origin and destination
+            progress = i / (num_points - 1) if num_points > 1 else 0
+            
+            lat = origin.latitude + (lat_diff * progress)
+            lng = origin.longitude + (lng_diff * progress)
+            
+            if i == 0:
+                address = origin.address or "Starting point"
+            elif i == num_points - 1:
+                address = destination.address or "Destination"
+            else:
+                address = f"Via point {i}"
+            
+            # Calculate segment metrics
+            segment_distance = distance / (num_points - 1) if num_points > 1 else distance
+            segment_speed = 25 + random.uniform(-5, 10)  # 20-35 mph average
+            segment_time = (segment_distance / segment_speed) * 60  # Convert to minutes
+            
+            cumulative_distance += segment_distance
+            cumulative_time += segment_time
+            
+            point = RoutePoint(
+                location=Location(
+                    latitude=round(lat, 6),
+                    longitude=round(lng, 6),
+                    address=address
+                ),
+                estimated_travel_time=int(cumulative_time),
+                distance_from_start=round(cumulative_distance, 1)
+            )
+            route_points.append(point)
+        
+        return {
+            "points": route_points,
+            "total_distance": round(distance, 1),
+            "total_time": int(cumulative_time),
+            "traffic_score": random.uniform(0.6, 0.9)
         }
 
 

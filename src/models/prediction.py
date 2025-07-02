@@ -8,6 +8,10 @@ from loguru import logger
 
 from src.api.models import TrafficPrediction, Location
 from src.core.config import get_settings
+from src.data.mock_data_generator import MockDataGenerator
+
+# Create a global instance
+_mock_generator = MockDataGenerator()
 
 
 class TrafficPredictor:
@@ -17,6 +21,7 @@ class TrafficPredictor:
         self.settings = get_settings()
         self.model = None  # Will load actual model here
         self.is_trained = False
+        self.mock_generator = _mock_generator
         logger.info("TrafficPredictor initialized")
     
     def load_model(self):
@@ -33,33 +38,18 @@ class TrafficPredictor:
         """Predict traffic conditions for specified location and time"""
         logger.info(f"Predicting traffic for {location}, {hours_ahead} hours ahead")
         
-        if not self.is_trained:
-            self.load_model()
-        
-        # TODO: Implement actual prediction logic using loaded model
-        predictions = []
-        
-        for hour in range(1, hours_ahead + 1):
-            prediction_time = datetime.now() + timedelta(hours=hour)
+        try:
+            if not self.is_trained:
+                self.load_model()
             
-            # Mock prediction - replace with actual model inference
-            prediction = TrafficPrediction(
-                location=Location(
-                    latitude=40.7831,
-                    longitude=-73.9712,
-                    address=location
-                ),
-                prediction_time=prediction_time,
-                predicted_speed=self._mock_speed_prediction(hour),
-                predicted_volume=self._mock_volume_prediction(hour),
-                predicted_severity=self._mock_severity_prediction(hour),
-                confidence=0.85 - (hour * 0.05),  # Confidence decreases with time
-                factors=self._get_prediction_factors(hour)
-            )
+            # Use enhanced mock data generator for realistic predictions
+            predictions = self.mock_generator.generate_traffic_predictions(location, hours_ahead)
+            return predictions
             
-            predictions.append(prediction)
-        
-        return predictions
+        except Exception as e:
+            logger.error(f"Error generating predictions: {e}")
+            # Return empty list as fallback
+            return []
     
     def _mock_speed_prediction(self, hour: int) -> float:
         """Mock speed prediction - replace with actual model"""

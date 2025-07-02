@@ -1,18 +1,82 @@
-
-.PHONY: help install dev-install start stop restart logs clean test lint format
+.PHONY: help venv-create venv-activate venv-install venv-status venv-deactivate venv-clean venv-recreate install install-full install-core install-conda dev-install quick-start quick-start-minimal start stop restart down logs clean test-api test-endpoints demo check-services logs-api logs-docker clean-logs reset-all dev-all dev-api-only api init-db setup-dashboards
 
 help: ## Show this help message
-	@echo 'Usage: make [target]'
-	@echo ''
-	@echo 'Targets:'
-	@egrep '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo "🚀 Urbanclear - Smart City Traffic Optimization System"
+	@echo ""
+	@echo "📋 Available commands:"
+	@echo ""
+	@echo "🐍 Virtual Environment:"
+	@echo "  venv-create      Create virtual environment"
+	@echo "  venv-activate    Show activation command"
+	@echo "  venv-install     Install packages in venv"
+	@echo "  venv-status      Check venv status"
+	@echo "  venv-deactivate  Show deactivation command"
+	@echo "  venv-clean       Remove virtual environment"
+	@echo "  venv-recreate    Recreate virtual environment"
+	@echo ""
+	@echo "📦 Installation:"
+	@echo "  install          Install minimal dependencies"
+	@echo "  install-full     Install all ML/AI packages"
+	@echo "  install-core     Install essential packages only"
+	@echo "  install-conda    Install with conda"
+	@echo ""
+	@echo "🚀 Quick Start:"
+	@echo "  quick-start      Complete setup with minimal deps"
+	@echo "  quick-start-minimal  Basic setup only"
+	@echo ""
+	@echo "🐳 Docker Services:"
+	@echo "  start           Start Docker services"
+	@echo "  stop            Stop Docker services"
+	@echo "  restart         Restart Docker services"
+	@echo "  down            Stop and remove containers"
+	@echo ""
+	@echo "🌐 API & Testing:"
+	@echo "  api             Start API server"
+	@echo "  test-api        Test API functionality"
+	@echo "  test-endpoints  Test with curl"
+	@echo "  demo            Run demo endpoints"
+	@echo ""
+	@echo "📊 Database & Setup:"
+	@echo "  init-db         Initialize database"
+	@echo "  setup-dashboards Setup Grafana dashboards"
+	@echo ""
+	@echo "🔍 Monitoring:"
+	@echo "  check-services  Check service status"
+	@echo "  logs-api        View API logs"
+	@echo "  logs-docker     View Docker logs"
+	@echo ""
+	@echo "🧹 Cleanup:"
+	@echo "  clean           Clean build artifacts"
+	@echo "  clean-logs      Clean log files"
+	@echo "  reset-all       Reset entire system"
+	@echo ""
+	@echo "💡 Tip: Always activate virtual environment first!"
+	@echo "   source urbanclear-env/bin/activate"
 
-install: ## Install Python dependencies
+# Installation commands
+install:
+	@echo "🔧 Installing Urbanclear dependencies..."
+	@if [ -z "$$VIRTUAL_ENV" ]; then \
+		echo "⚠️  Warning: Virtual environment not activated!"; \
+		echo "📝 Consider running: source urbanclear-env/bin/activate"; \
+		sleep 2; \
+	fi
+	pip install --upgrade pip setuptools wheel
+	pip install -r requirements-minimal.txt
+
+install-full:
+	@echo "🔧 Installing all Urbanclear dependencies (this may take a while)..."
+	pip install --upgrade pip setuptools wheel
 	pip install -r requirements.txt
 
-dev-install: ## Install development dependencies
-	pip install -r requirements.txt
-	pip install -e .
+install-core:
+	@echo "🔧 Installing core dependencies only..."
+	pip install --upgrade pip setuptools wheel
+	pip install fastapi uvicorn pydantic pydantic-settings pandas numpy loguru requests python-dotenv pyyaml psycopg2-binary
+
+dev-install: install
+	@echo "🔧 Installing development dependencies..."
+	pip install pytest pytest-asyncio black flake8 mypy
 
 start: ## Start all services with Docker Compose
 	docker-compose up -d
@@ -25,6 +89,21 @@ restart: ## Restart all services
 
 logs: ## Show logs from all services
 	docker-compose logs -f
+
+run-system: ## Start the complete Urbanclear system (Docker + API + ML + Dashboard)
+	@echo "🚀 Starting complete Urbanclear system..."
+	python scripts/start_urbanclear.py
+
+quick-demo: ## Quick demo setup with sample data
+	@echo "🎭 Setting up quick demo..."
+	make start
+	sleep 10
+	make init-db
+	python scripts/start_urbanclear.py
+
+run-simple: ## Start simplified Urbanclear system (API + Dashboard only)
+	@echo "🚀 Starting simplified Urbanclear system..."
+	python scripts/start_simple.py
 
 init-db: ## Initialize the database
 	python scripts/init_database.py
@@ -83,4 +162,121 @@ monitoring-status: ## Check status of monitoring services
 
 setup-dashboards: ## Setup and verify dashboard system
 	python scripts/setup_dashboards.py
+
+# Testing commands
+test-api:
+	@echo "🧪 Testing API functionality..."
+	python scripts/test_api.py
+
+test-endpoints:
+	@echo "🌐 Testing API endpoints with curl..."
+	@echo "Testing health endpoint..."
+	curl -s http://localhost:8000/health | jq .
+	@echo "\nTesting current traffic..."
+	curl -s "http://localhost:8000/api/v1/traffic/current" | jq '.[:2]'
+	@echo "\nTesting analytics..."
+	curl -s "http://localhost:8000/api/v1/analytics/summary?period=24h" | jq .
+
+# Demo commands
+demo:
+	@echo "🎭 Running API demos..."
+	@echo "Rush hour simulation:"
+	curl -s "http://localhost:8000/api/v1/demo/rush-hour-simulation" | jq .
+	@echo "\nLocation filtering demo:"
+	curl -s "http://localhost:8000/api/v1/demo/location-filter" | jq .
+	@echo "\nAnalytics comparison demo:"
+	curl -s "http://localhost:8000/api/v1/demo/analytics-comparison" | jq .
+
+# Quick start command
+quick-start: install start init-db
+	@echo "🚀 Quick starting Urbanclear system..."
+	@sleep 5
+	@make test-api
+	@echo "✅ System ready! Visit http://localhost:8000/docs for API documentation"
+
+quick-start-minimal: install-core start
+	@echo "🚀 Quick starting Urbanclear with minimal dependencies..."
+	@sleep 3
+	@echo "✅ Basic system ready! Run 'make api' to start the server"
+
+# Alternative installation methods
+install-conda:
+	@echo "🔧 Installing with conda..."
+	conda install -c conda-forge fastapi uvicorn pandas numpy psycopg2 redis-py pyyaml loguru requests
+
+# Monitoring commands
+check-services:
+	@echo "🔍 Checking service status..."
+	docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+logs-api:
+	@echo "📝 API logs..."
+	@if [ -f logs/urbanclear.log ]; then tail -f logs/urbanclear.log; else echo "No API logs found. Start the API first."; fi
+
+logs-docker:
+	@echo "📝 Docker logs..."
+	docker-compose logs -f --tail=50
+
+# Enhanced development
+dev-all: start init-db api
+	@echo "🔥 Full development environment started!"
+
+dev-api-only:
+	@echo "🔧 Starting API in development mode..."
+	cd src && python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+
+# Cleanup commands
+clean-logs:
+	@echo "🧹 Cleaning logs..."
+	rm -rf logs/*
+	mkdir -p logs
+
+reset-all: down clean clean-logs
+	@echo "🔄 Resetting entire system..."
+	docker system prune -f
+	@make quick-start
+
+# Virtual Environment commands
+venv-create:
+	@echo "🐍 Creating virtual environment..."
+	python -m venv urbanclear-env
+	@echo "✅ Virtual environment created in urbanclear-env/"
+	@echo "📝 Activate with: source urbanclear-env/bin/activate"
+
+venv-activate:
+	@echo "📝 To activate virtual environment, run:"
+	@echo "   source urbanclear-env/bin/activate"
+	@echo "🔍 Check if activated by looking for (urbanclear-env) in your prompt"
+
+venv-install: 
+	@echo "🔧 Installing packages in virtual environment..."
+	@echo "⚠️  Make sure virtual environment is activated first!"
+	pip install --upgrade pip setuptools wheel
+	pip install -r requirements-minimal.txt
+
+venv-status:
+	@echo "🔍 Virtual Environment Status:"
+	@echo "Current Python: $$(which python)"
+	@echo "Python version: $$(python --version)"
+	@echo "Virtual env: $$VIRTUAL_ENV"
+	@if [ -n "$$VIRTUAL_ENV" ]; then \
+		echo "✅ Virtual environment is ACTIVATED"; \
+	else \
+		echo "❌ Virtual environment is NOT activated"; \
+		echo "📝 Run: source urbanclear-env/bin/activate"; \
+	fi
+
+venv-deactivate:
+	@echo "📝 To deactivate virtual environment, run:"
+	@echo "   deactivate"
+
+venv-clean:
+	@echo "🧹 Removing virtual environment..."
+	rm -rf urbanclear-env
+	@echo "✅ Virtual environment removed"
+
+venv-recreate: venv-clean venv-create
+	@echo "🔄 Recreating virtual environment..."
+	@echo "📝 Don't forget to activate: source urbanclear-env/bin/activate"
+	@echo "📦 Then install packages: make venv-install"
 

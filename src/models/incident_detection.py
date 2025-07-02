@@ -6,9 +6,12 @@ import asyncio
 from datetime import datetime, timedelta
 from loguru import logger
 
-from src.api.models import IncidentReport, TrafficSeverity, IncidentType
+from src.api.models import IncidentReport, TrafficSeverity, IncidentType, Location
 from src.core.config import get_settings
-from src.data.mock_data_generator import mock_generator
+from src.data.mock_data_generator import MockDataGenerator
+
+# Create a global instance
+_mock_generator = MockDataGenerator()
 
 
 class IncidentDetector:
@@ -19,6 +22,7 @@ class IncidentDetector:
         self.anomaly_model = None
         self.cv_model = None
         self.active_incidents = []
+        self.mock_generator = _mock_generator
         logger.info("IncidentDetector initialized")
     
     def load_models(self):
@@ -83,15 +87,19 @@ class IncidentDetector:
         """Get currently active incidents"""
         logger.info(f"Getting active incidents for location: {location}, severity: {severity}")
         
-        # Use enhanced mock data generator
-        incidents = mock_generator.generate_incidents()
-        
-        # Filter by location and severity if specified
-        filtered_incidents = incidents
-        if severity:
-            filtered_incidents = [i for i in filtered_incidents if i.severity.value == severity]
-        
-        return filtered_incidents
+        try:
+            # Use enhanced mock data generator
+            incidents = self.mock_generator.generate_incidents()
+            
+            # Filter by location and severity if specified
+            filtered_incidents = incidents
+            if severity:
+                filtered_incidents = [i for i in filtered_incidents if i.severity.value == severity]
+            
+            return filtered_incidents
+        except Exception as e:
+            logger.error(f"Error getting active incidents: {e}")
+            return []
     
     async def report_incident(self, incident: IncidentReport) -> IncidentReport:
         """Report a new traffic incident"""
