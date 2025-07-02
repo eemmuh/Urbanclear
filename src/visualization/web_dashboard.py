@@ -95,9 +95,11 @@ class WebDashboard:
             marker=go.scattermapbox.Marker(
                 size=[20 + c * 30 for c in congestion],
                 color=congestion,
-                colorscale='RdYlGn_r',
+                colorscale='Viridis',
                 showscale=True,
-                colorbar=dict(title="Congestion Level")
+                colorbar=dict(title="Congestion Level"),
+                cmin=0,
+                cmax=1
             ),
             text=[f"{loc}<br>Congestion: {c:.2f}" for loc, c in zip(locations, congestion)],
             hovertemplate='%{text}<extra></extra>'
@@ -173,7 +175,7 @@ class WebDashboard:
             severities = list(severity_counts.keys())
             counts = list(severity_counts.values())
             
-        colors = ['green', 'orange', 'red', 'darkred'][:len(severities)]
+        colors = ['#2ecc71', '#f39c12', '#e74c3c', '#8b0000'][:len(severities)]
         
         fig = go.Figure(data=[
             go.Pie(
