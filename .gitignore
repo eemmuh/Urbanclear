@@ -1,6 +1,8 @@
-# Urbanclear Traffic System - .gitignore
+# Urbanclear - Comprehensive .gitignore
 
-# === Python ===
+# ==============================================
+# Python
+# ==============================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -24,78 +26,127 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# === Virtual Environments ===
-urbanclear-env/
-venv/
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# ==============================================
+# Virtual Environments
+# ==============================================
 env/
+venv/
 ENV/
 env.bak/
 venv.bak/
-.env
-.venv
+urbanclear-env/
+.venv/
+*.venv
 
-# === IDE and Editor Files ===
+# ==============================================
+# IDEs and Editors
+# ==============================================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.DS_Store
-Thumbs.db
 
-# === Jupyter Notebooks ===
-.ipynb_checkpoints/
-*.ipynb
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
 
-# === Logs and Databases ===
-logs/
-*.log
-*.sqlite
-*.sqlite3
-*.db
+# Vim
+*.swp
+*.swo
+*.un~
+Session.vim
+.netrwhist
 
-# === ML Models and Data ===
-models/trained/
-models/*.joblib
-models/*.pkl
-models/*.pickle
-models/*.h5
-models/*.pt
-models/*.pth
-data/processed/
-data/interim/
-data/external/
-*.csv
-*.parquet
-*.feather
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
 
-# === Configuration Files with Secrets ===
-config/config.yaml
-config/secrets.yaml
-.env.local
-.env.production
-.env.development
-*.key
-*.pem
-*.crt
-
-# === Docker Volumes and Data ===
-docker/data/
-docker/logs/
-volumes/
-.docker/
-
-# === Cache and Temporary Files ===
-.cache/
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# === OS Generated Files ===
+# ==============================================
+# Operating System Files
+# ==============================================
 .DS_Store
 .DS_Store?
 ._*
@@ -104,99 +155,499 @@ dmypy.json
 ehthumbs.db
 Thumbs.db
 
-# === Backup Files ===
+# Windows
+*.exe
+*.msi
+*.dll
+*.bat
+*.cmd
+
+# Linux
+*~
+
+# ==============================================
+# Node.js (React Dashboard)
+# ==============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+storybook-static
+
+# Temporary folders
+tmp/
+temp/
+
+# ==============================================
+# Environment Variables & Configuration
+# ==============================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*
+!.env.example
+
+# Configuration files with secrets
+config/config.yaml
+config/config.yml
+config/*.secret.*
+config/production.*
+config/staging.*
+
+# ==============================================
+# Database Files
+# ==============================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# PostgreSQL
+*.backup
+*.sql.gz
+*.dump
+
+# MongoDB
+*.bson
+
+# Redis dumps
+dump.rdb
+appendonly.aof
+
+# ==============================================
+# Logs
+# ==============================================
+logs/
+*.log
+*.log.*
+log/
+
+# Application logs
+urbanclear.log
+traffic.log
+api.log
+ml.log
+security.log
+
+# System logs
+syslog
+kern.log
+auth.log
+
+# ==============================================
+# Docker
+# ==============================================
+.dockerignore
+docker-compose.override.yml
+docker-compose.local.yml
+.docker/
+
+# ==============================================
+# Machine Learning & Data
+# ==============================================
+# Model files
+models/trained/
+*.pkl
+*.joblib
+*.h5
+*.pb
+*.onnx
+*.tflite
+*.pt
+*.pth
+*.model
+*.weights
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Data files
+data/raw/*.csv
+data/raw/*.json
+data/raw/*.parquet
+data/processed/
+data/interim/
+data/external/
+!data/sample/
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Experiment tracking
+experiments/
+wandb/
+
+# ==============================================
+# Monitoring & Metrics
+# ==============================================
+# Prometheus data
+prometheus_data/
+
+# Grafana data
+grafana_data/
+
+# Monitoring logs
+monitoring.log
+metrics.log
+
+# ==============================================
+# Security & Secrets
+# ==============================================
+# Private keys
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+
+# SSH keys
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# JWT secrets
+jwt_secret.txt
+*.secret
+
+# API keys
+api_keys.txt
+.api_key
+
+# Certificates
+ssl/
+certs/
+certificates/
+
+# ==============================================
+# Build & Distribution
+# ==============================================
+# Python builds
+build/
+dist/
+*.egg-info/
+
+# Compiled extensions
+*.so
+*.dylib
+*.dll
+
+# Frontend builds
+build/
+dist/
+static/
+
+# ==============================================
+# Testing & Coverage
+# ==============================================
+# Test databases
+test.db
+test_*.db
+*_test.db
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+coverage.json
+.nyc_output/
+
+# Performance test results
+performance-report.html
+load-test-results/
+
+# ==============================================
+# Temporary & Cache Files
+# ==============================================
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.cache
+
+# Cache directories
+.cache/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Backup files
 *.bak
 *.backup
 *.old
 *.orig
-*.tmp
 
-# === Runtime Files ===
-*.pid
-*.sock
-pids/
-tmp/
-temp/
+# ==============================================
+# Infrastructure & Deployment
+# ==============================================
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+terraform.tfvars
+*.tfplan
 
-# === Prometheus Data ===
-prometheus_data/
-grafana_data/
+# Kubernetes secrets
+k8s/secrets/
+kubernetes/secrets/
 
-# === API Keys and Secrets ===
-api_keys.txt
-secrets.txt
-.secrets
-credentials.json
+# Helm charts
+charts/*/charts/
+charts/*/requirements.lock
 
-# === Documentation Build ===
+# Ansible
+*.retry
+.vault_pass.txt
+
+# ==============================================
+# Documentation
+# ==============================================
+# Generated docs
 docs/_build/
 docs/build/
 site/
 
-# === Package Managers ===
-node_modules/
-package-lock.json
-yarn.lock
+# ==============================================
+# Local Development
+# ==============================================
+# Local overrides
+local/
+.local/
+dev/
+development/
 
-# === Generated Reports ===
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
+# Personal notes
+notes.txt
+TODO.md
+NOTES.md
 
-# === Profiling ===
-.prof
+# Local scripts
+local_*.py
+local_*.sh
+dev_*.py
+dev_*.sh
 
-# === CDK (Cloud Development Kit) ===
-.cdk.staging/
-cdk.out/
+# ==============================================
+# Cloud & External Services
+# ==============================================
+# AWS
+.aws/
+aws-exports.js
 
-# === Terraform ===
-*.tfstate
-*.tfstate.*
-.terraform/
-.terraform.lock.hcl
+# Google Cloud
+.gcloud/
+service-account.json
+*-service-account.json
 
-# === Local Development ===
-local_settings.py
-dev_settings.py
-debug.py
-test_script.py
-playground.py
+# Azure
+.azure/
 
-# === Deployment ===
-deploy/
-deployment/
-k8s/secrets/
+# ==============================================
+# Analytics & Reporting
+# ==============================================
+# Reports
+reports/
+*.report
 
-# === Streamlit ===
-.streamlit/secrets.toml
-.streamlit/config.toml
+# Analytics data
+analytics/
+insights/
 
-# === FastAPI ===
-*.openapi.json
+# ==============================================
+# Media & Assets
+# ==============================================
+# Large files
+*.zip
+*.tar.gz
+*.rar
+*.7z
 
-# === Monitoring and Metrics ===
-metrics/
-monitoring/
+# Images (if not needed in repo)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+!static/**/*.png
+!static/**/*.jpg
+!static/**/*.svg
 
-# === Custom Project Files ===
-# Add any project-specific files here
-experimental/
-sandbox/
-deprecated/
-archive/
+# Videos
+*.mp4
+*.avi
+*.mov
+*.wmv
 
-# === Keep Important Empty Directories ===
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/interim/.gitkeep
-!data/external/.gitkeep
-!logs/.gitkeep
-!models/trained/.gitkeep
+# ==============================================
+# Miscellaneous
+# ==============================================
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# === Allow Sample Data ===
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+
+# IDE files
+.vscode/settings.json
+.idea/
+
+# Compiled source
+*.com
+*.class
+*.exe
+*.o
+*.so
+
+# Packages
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# ==============================================
+# Project Specific
+# ==============================================
+# Urbanclear specific ignores
+traffic_data_large/
+sensor_backups/
+incident_archives/
+route_cache/
+prediction_cache/
+
+# Dashboard assets
+dashboard/build/
+dashboard/dist/
+dashboard/node_modules/
+
+# Scripts output
+scripts/output/
+scripts/logs/
+
+# Makefile outputs
+.make_*
+
+# Health check files
+health_*.json
+status_*.json
+
+# Performance benchmarks
+benchmarks/
+performance/
+
+# ==============================================
+# Keep These Files (Examples)
+# ==============================================
+# Keep example configurations
+!config/config.example.yaml
+!.env.example
+!docker-compose.example.yml
+
+# Keep sample data
 !data/sample/
-data/sample/*
-!data/sample/traffic_data.csv
-!data/sample/*.example.*
+!data/sample/**
+
+# Keep documentation
+!docs/
+!*.md
+!*.rst
+
+# Keep test fixtures
+!tests/fixtures/
+!tests/fixtures/**
