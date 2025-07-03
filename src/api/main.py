@@ -5,8 +5,10 @@ import os
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 import random
+import asyncio
+import uuid
 
-from fastapi import FastAPI, HTTPException, Depends, Query
+from fastapi import FastAPI, HTTPException, Depends, Query, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -24,6 +26,7 @@ from data.traffic_service import TrafficService
 from models.prediction import TrafficPredictor
 from models.optimization import RouteOptimizer
 from models.incident_detection import IncidentDetector
+from api.websocket_handler import websocket_endpoint, start_background_streaming, manager
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -330,12 +333,33 @@ async def get_system_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# WebSocket endpoint for real-time updates (placeholder)
-@app.websocket("/ws/traffic")
-async def websocket_endpoint(websocket):
+# WebSocket endpoint for real-time updates
+@app.websocket("/ws/traffic/{client_id}")
+async def websocket_traffic_endpoint(websocket: WebSocket, client_id: str):
     """WebSocket endpoint for real-time traffic updates"""
-    # Implementation for real-time traffic data streaming
-    pass
+    await websocket_endpoint(websocket, client_id)
+
+@app.websocket("/ws/traffic")
+async def websocket_traffic_auto_endpoint(websocket: WebSocket):
+    """WebSocket endpoint with auto-generated client ID"""
+    client_id = str(uuid.uuid4())
+    await websocket_endpoint(websocket, client_id)
+
+@app.on_event("startup")
+async def startup_event():
+    """Start background services"""
+    # Start WebSocket data streaming in background
+    asyncio.create_task(start_background_streaming())
+    logger.info("Background streaming started")
+
+@app.get("/api/v1/websocket/status")
+async def get_websocket_status():
+    """Get WebSocket connection status"""
+    return {
+        "active_connections": len(manager.active_connections),
+        "topics": list(manager.subscriptions.keys()) if manager.subscriptions else [],
+        "status": "active" if manager.active_connections else "inactive"
+    }
 
 # Demo Endpoints for Testing
 @app.get("/api/v1/demo/rush-hour-simulation")
