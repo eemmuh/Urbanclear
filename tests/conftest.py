@@ -30,8 +30,6 @@ try:
 except ImportError as e:
     print(f"Import error: {e}")
     # Create mock objects if imports fail
-    from unittest.mock import Mock
-
     app = Mock()
     get_db = Mock()
     TrafficService = Mock()
@@ -172,7 +170,7 @@ def test_client(test_db_session, mock_redis, mock_user):
         # Don't override cache and user dependencies if they don't exist
         # app.dependency_overrides[get_cache] = override_get_cache
         # app.dependency_overrides[get_current_user] = override_get_current_user
-    except:
+    except (AttributeError, KeyError):
         pass
 
     with TestClient(app) as client:

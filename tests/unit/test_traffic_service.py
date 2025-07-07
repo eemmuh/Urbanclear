@@ -1,8 +1,5 @@
-import pandas as pd
-import numpy as np
 from datetime import datetime, timedelta
 import pytest
-import asyncio
 
 from src.data.traffic_service import TrafficService
 from src.data.mock_data_generator import MockDataGenerator

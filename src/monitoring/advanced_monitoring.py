@@ -399,10 +399,10 @@ class AlertManager:
         Severity: {alert.severity}
         Component: {alert.affected_component}
         Time: {alert.timestamp}
-        
+
         Description:
         {alert.description}
-        
+
         Metrics:
         {json.dumps(alert.metrics, indent=2)}
         """
@@ -678,6 +678,17 @@ class AdvancedMonitoringSystem:
             "metrics_endpoint": "http://localhost:9091/metrics",
             "timestamp": datetime.now().isoformat(),
         }
+
+    def publish_event(self, topic: str, event_type: str, event_data: Dict[str, Any]):
+        """Publish an event to a topic"""
+        logger.info(f"Event published to {topic}: {event_type}")
+
+    def _format_alert_message(self, alert: Dict[str, Any]) -> str:
+        """Format alert message for notification"""
+        return (
+            f"ALERT: {alert['type']} - {alert['message']} "
+            f"(Severity: {alert['severity']})"
+        )
 
 
 # Global monitoring instance

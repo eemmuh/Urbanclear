@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from functools import lru_cache
 from loguru import logger
+from jose import jwt, JWTError
 
 from src.core.config import get_settings as _get_settings
 
@@ -139,12 +140,27 @@ def get_current_user(
     """
     Extract and validate user from JWT token
     """
-    # Validate JWT token
     try:
-        # Token validation logic here
-        return {"user_id": "test_user", "username": "test"}
-    except Exception as e:
-        logger.error(f"Token validation failed: {e}")
+        # Validate JWT token
+        payload = jwt.decode(
+            credentials.credentials, get_app_settings().SECRET_KEY, algorithms=["HS256"]
+        )
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # For demo purposes, return a mock user
+        return {
+            "id": user_id,
+            "username": f"user_{user_id}",
+            "role": "admin",
+            "permissions": ["read", "write", "admin"]
+        }
+    except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
@@ -195,7 +211,7 @@ def get_database_health() -> dict:
     try:
         engine = get_database_engine()
         with engine.connect() as conn:
-            result = conn.execute("SELECT 1")
+            conn.execute("SELECT 1")
             return {
                 "status": "healthy",
                 "connection": "active",

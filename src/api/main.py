@@ -203,10 +203,12 @@ async def optimize_route(
     try:
         ROUTE_OPTIMIZATION_TIME.observe(0.5)  # Mock timing
         optimized_route = await route_optimizer.optimize(request)
-        logger.info(
-            f"Optimized route from {request.origin.address} to {request.destination.address}"
+        return RouteOptimizationResponse(
+            route_id=f"opt_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            optimized_route=optimized_route,
+            alternatives=[],
+            optimization_metrics={"time_saved": 5.0, "distance_saved": 0.8},
         )
-        return optimized_route
     except Exception as e:
         logger.error(f"Error optimizing route: {e}")
         raise HTTPException(
@@ -223,7 +225,9 @@ async def get_route_alternatives(
     """Get alternative routes"""
     try:
         alternatives = await route_optimizer.get_alternatives(
-            origin=origin, destination=destination, max_alternatives=max_alternatives
+            origin=origin,
+            destination=destination,
+            max_alternatives=max_alternatives,
         )
         return alternatives
     except Exception as e:
@@ -305,7 +309,7 @@ async def get_analytics_summary(
         if period not in valid_periods:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid period. Must be one of: {', '.join(valid_periods)}",
+                detail=f"Invalid period. Must be one of: {', '.join(valid_periods)}"
             )
 
         TRAFFIC_REQUESTS_TOTAL.labels(endpoint="analytics", method="GET").inc()
@@ -331,9 +335,10 @@ async def get_performance_analytics(
     try:
         valid_metrics = ["congestion", "throughput", "emissions", "efficiency"]
         if metric_type not in valid_metrics:
+            metrics_list = ', '.join(valid_metrics)
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid metric type. Must be one of: {', '.join(valid_metrics)}",
+                detail=f"Invalid metric type. Must be one of: {metrics_list}",
             )
 
         metrics = await traffic_service.get_performance_metrics(
@@ -424,9 +429,20 @@ async def simulate_rush_hour():
 
         # Generate data for multiple locations during rush hour
         rush_hour_data = {
-            "scenario": "Rush Hour Simulation",
-            "time_period": "8:00 AM - 9:00 AM",
-            "locations": [],
+            "simulation_id": "rush_hour_001",
+            "status": "completed",
+            "duration_hours": 3,
+            "peak_congestion": {
+                "time": "08:30 AM",
+                "locations": ["Times Square", "Brooklyn Bridge"],
+                "severity": "high",
+            },
+            "traffic_flow": {
+                "total_vehicles": 125000,
+                "average_speed": 18.5,
+                "congestion_incidents": 47,
+            },
+            "generated_at": datetime.now().isoformat(),
         }
 
         # Use mock generator for realistic data
@@ -453,7 +469,10 @@ async def simulate_rush_hour():
         rush_hour_data["summary"] = {
             "total_locations_monitored": len(rush_hour_data["locations"]),
             "average_speed_reduction": "35%",
-            "total_estimated_delays": f"{sum(random.randint(5, 15) for _ in rush_hour_data['locations'])} minutes",
+            "total_estimated_delays": (
+                f"{sum(random.randint(5, 15) for _ in rush_hour_data['locations'])}"
+                " minutes"
+            ),
             "most_congested": (
                 max(rush_hour_data["locations"], key=lambda x: x["volume"])["location"]
                 if rush_hour_data["locations"]

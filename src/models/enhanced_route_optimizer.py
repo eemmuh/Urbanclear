@@ -239,7 +239,8 @@ class EnhancedRouteOptimizer:
         """Optimize route based on request parameters"""
         try:
             logger.info(
-                f"Optimizing route from {request.origin.address} to {request.destination.address}"
+                f"Optimizing route from {request.origin.address} "
+                f"to {request.destination.address}"
             )
 
             # Find best matching nodes in network
@@ -289,7 +290,8 @@ class EnhancedRouteOptimizer:
             }
 
             logger.info(
-                f"Route optimization completed. Best route: {best_route.total_time_minutes:.1f} minutes"
+                f"Route optimization completed. Best route: "
+                f"{best_route.total_time_minutes:.1f} minutes"
             )
             return best_route
 
@@ -402,7 +404,8 @@ class EnhancedRouteOptimizer:
             def multi_objective_weight(u, v, edge_data):
                 # Normalize different objectives
                 time_cost = (
-                    edge_data.get("current_time", edge_data.get("base_time", 10)) / 60
+                    edge_data.get("current_time", edge_data.get("base_time", 10))
+                    / 60
                 )  # hours
                 distance_cost = (
                     edge_data.get("distance", 5) / 100
@@ -695,18 +698,24 @@ class EnhancedRouteOptimizer:
         return distance * (base_consumption + speed_penalty)
 
     def _log_optimization_result(self, route: Dict[str, Any]) -> None:
-        """Log optimization result for monitoring"""
+        """Log optimization result"""
         route_id = route.get("route_id", "unknown")
         score = route.get("optimization_score", 0.0)
 
         # Add proper f-string placeholders
         logger.info(
-            f"Route optimization completed for route {route_id} with score {score:.3f}"
+            f"Route optimization completed for route {route_id} "
+            f"with score {score:.3f}"
         )
 
     def _validate_optimization_result(self, route: Dict[str, Any]) -> bool:
         """Validate optimization result"""
-        required_fields = ["route_id", "waypoints", "total_distance", "estimated_time"]
+        required_fields = [
+            "route_id",
+            "waypoints",
+            "total_distance",
+            "estimated_time",
+        ]
 
         for field in required_fields:
             if field not in route:

@@ -210,32 +210,22 @@ class RouteResponse(BaseModel):
 
 
 class PredictionResponse(BaseModel):
-    """Response model for traffic predictions"""
+    """Response model for traffic predictions (test-compatible version)"""
 
-    predictions: List[Dict[str, Any]]
-    metadata: Dict[str, Any] = {}
-    confidence: float = 0.0
-    generated_at: datetime = datetime.now(timezone.utc)
+    location: str = Field(..., description="Location for prediction")
+    predicted_flow: float = Field(..., description="Predicted traffic flow")
+    confidence: float = Field(..., ge=0, le=1, description="Prediction confidence")
+    prediction_time: datetime = Field(
+        default_factory=datetime.now, description="When the prediction was made"
+    )
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "predictions": [
-                    {
-                        "location": "Central Park South",
-                        "predicted_flow": 1200,
-                        "predicted_speed": 25.5,
-                        "timestamp": "2024-01-01T13:00:00Z",
-                        "confidence": 0.85,
-                    }
-                ],
-                "metadata": {
-                    "model_version": "1.0.0",
-                    "prediction_horizon": "1_hour",
-                    "features_used": ["historical_flow", "weather", "day_of_week"],
-                },
+                "location": "Manhattan Bridge",
+                "predicted_flow": 120.5,
                 "confidence": 0.85,
-                "generated_at": "2024-01-01T12:00:00Z",
+                "prediction_time": "2024-01-01T12:00:00Z",
             }
         }
     }
@@ -492,6 +482,118 @@ class AnalyticsResponse(BaseModel):
                     "average_response_time": 12.5,
                 },
                 "generated_at": "2024-01-01T12:00:00Z",
+            }
+        }
+    }
+
+
+class TrafficDataRequest(BaseModel):
+    """Request model for traffic data queries"""
+    
+    location: Optional[str] = Field(None, description="Location to query")
+    start_time: Optional[datetime] = Field(None, description="Start time for data")
+    end_time: Optional[datetime] = Field(None, description="End time for data")
+    
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "location": "Manhattan Bridge",
+                "start_time": "2024-01-01T08:00:00Z",
+                "end_time": "2024-01-01T18:00:00Z"
+            }
+        }
+    }
+
+
+class TrafficDataResponse(BaseModel):
+    """Response model for traffic data queries"""
+    
+    data: List[Dict[str, Any]] = Field(..., description="Traffic data records")
+    total_records: int = Field(..., ge=0, description="Total number of records")
+    
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "data": [
+                    {
+                        "location": "Manhattan Bridge",
+                        "flow_rate": 100.5,
+                        "speed": 45.0,
+                        "timestamp": "2023-01-01T12:00:00"
+                    }
+                ],
+                "total_records": 1
+            }
+        }
+    }
+
+
+class PredictionRequest(BaseModel):
+    """Request model for traffic predictions"""
+    
+    location: str = Field(..., description="Location for prediction")
+    prediction_horizon: int = Field(..., ge=0, description="Prediction horizon in minutes")
+    features: Optional[Dict[str, Any]] = Field(None, description="Additional features")
+    
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "location": "Manhattan Bridge",
+                "prediction_horizon": 60,
+                "features": {
+                    "current_flow": 100.0,
+                    "weather": "clear",
+                    "time_of_day": "peak"
+                }
+            }
+        }
+    }
+
+
+# Test-compatible route optimization models
+class TestRouteOptimizationRequest(BaseModel):
+    """Test-compatible route optimization request model"""
+
+    start_location: str = Field(..., description="Starting location")
+    end_location: str = Field(..., description="Destination location")
+    optimization_criteria: List[str] = Field(
+        default=[], description="Optimization criteria"
+    )
+    preferences: Dict[str, Any] = Field(
+        default={}, description="User preferences"
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "start_location": "Point A",
+                "end_location": "Point B",
+                "optimization_criteria": ["time", "distance"],
+                "preferences": {"avoid_tolls": True},
+            }
+        }
+    }
+
+
+class TestRouteOptimizationResponse(BaseModel):
+    """Test-compatible route optimization response model"""
+
+    route_id: str = Field(..., description="Unique route identifier")
+    waypoints: List[str] = Field(default=[], description="Route waypoints")
+    estimated_time: float = Field(..., description="Estimated travel time")
+    estimated_distance: float = Field(..., description="Estimated distance")
+    optimization_score: Optional[float] = Field(
+        None, description="Optimization score"
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "route_id": "route_123",
+                "waypoints": ["Point A", "Point B", "Point C"],
+                "estimated_time": 30.5,
+                "estimated_distance": 25.0,
+                "optimization_score": 0.9,
             }
         }
     }

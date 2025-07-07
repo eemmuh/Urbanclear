@@ -1,13 +1,15 @@
 """
-Enhanced ML model training and management system
+Machine Learning Model Training Pipeline for Traffic System
 """
 
 import logging
+import joblib
 from datetime import datetime, timedelta
 from typing import Dict, Any, Tuple
-import numpy as np
+from pathlib import Path
+
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
+import numpy as np
 from sklearn.ensemble import (
     RandomForestRegressor,
     GradientBoostingRegressor,
@@ -16,7 +18,7 @@ from sklearn.ensemble import (
 )
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.neural_network import MLPRegressor, MLPClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import (
     mean_squared_error,
     r2_score,
@@ -25,11 +27,9 @@ from sklearn.metrics import (
     recall_score,
     f1_score,
 )
-from sklearn.pipeline import Pipeline
-import joblib
-from pathlib import Path
+from sklearn.preprocessing import StandardScaler
 
-from ..data.mock_data_generator import MockDataGenerator
+from src.data.mock_data_generator import MockDataGenerator
 
 logger = logging.getLogger(__name__)
 

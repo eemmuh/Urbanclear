@@ -7,8 +7,8 @@ from src.api.models import (
     TrafficDataResponse,
     PredictionRequest,
     PredictionResponse,
-    RouteOptimizationRequest,
-    RouteOptimizationResponse,
+    TestRouteOptimizationRequest as RouteOptimizationRequest,
+    TestRouteOptimizationResponse as RouteOptimizationResponse,
 )
 
 

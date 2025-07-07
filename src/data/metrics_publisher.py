@@ -230,11 +230,11 @@ class MetricsPublisher:
                 for status in statuses:
                     # Most requests should be successful
                     if status == "200":
-                        count = random.randint(50, 200)
+                        random.randint(50, 200)
                     elif status == "400":
-                        count = random.randint(1, 10)
+                        random.randint(1, 10)
                     else:  # 500
-                        count = random.randint(0, 5)
+                        random.randint(0, 5)
 
                     # Note: Counter increment is not exposed, so we'll track separately
                     # In a real implementation, this would be incremented by actual API calls
@@ -260,7 +260,6 @@ class MetricsPublisher:
         if not data:
             return
 
-        # Remove unused variable 'count'
         logger.info(f"Processing {len(data)} traffic data points")
 
         for item in data:

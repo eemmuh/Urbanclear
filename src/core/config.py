@@ -356,7 +356,10 @@ def get_redis_url(settings: Settings = None) -> str:
         settings = get_settings()
 
     redis_config = settings.database.redis
-    return f"redis://:{redis_config.password}@{redis_config.host}:{redis_config.port}/{redis_config.database}"
+    return (
+        f"redis://:{redis_config.password}@{redis_config.host}:"
+        f"{redis_config.port}/{redis_config.database}"
+    )
 
 
 def setup_logging(settings: Settings = None):
@@ -371,7 +374,12 @@ def setup_logging(settings: Settings = None):
     logger.add(
         sink=lambda message: print(message, end=""),
         level=settings.app.log_level,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+        format=(
+            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+            "<level>{message}</level>"
+        ),
         colorize=True,
     )
 
@@ -381,7 +389,10 @@ def setup_logging(settings: Settings = None):
         rotation="1 day",
         retention="30 days",
         level=settings.app.log_level,
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
+        format=(
+            "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | "
+            "{name}:{function}:{line} - {message}"
+        ),
         compression="zip",
     )
 
@@ -391,7 +402,10 @@ def setup_logging(settings: Settings = None):
         rotation="1 day",
         retention="90 days",
         level="ERROR",
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
+        format=(
+            "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | "
+            "{name}:{function}:{line} - {message}"
+        ),
         compression="zip",
     )
 
