@@ -8,7 +8,7 @@ from src.api.models import (
     PredictionRequest,
     PredictionResponse,
     RouteOptimizationRequest,
-    RouteOptimizationResponse
+    RouteOptimizationResponse,
 )
 
 
@@ -20,7 +20,7 @@ class TestTrafficDataRequest:
         request = TrafficDataRequest(
             location="Manhattan Bridge",
             start_time=datetime.now(),
-            end_time=datetime.now()
+            end_time=datetime.now(),
         )
         assert request.location == "Manhattan Bridge"
         assert isinstance(request.start_time, datetime)
@@ -53,10 +53,10 @@ class TestTrafficDataResponse:
                     "location": "Manhattan Bridge",
                     "flow_rate": 100.5,
                     "speed": 45.0,
-                    "timestamp": "2023-01-01T12:00:00"
+                    "timestamp": "2023-01-01T12:00:00",
                 }
             ],
-            total_records=1
+            total_records=1,
         )
         assert len(response.data) == 1
         assert response.total_records == 1
@@ -77,11 +77,7 @@ class TestPredictionRequest:
         request = PredictionRequest(
             location="Manhattan Bridge",
             prediction_horizon=60,
-            features={
-                "current_flow": 100.0,
-                "weather": "clear",
-                "time_of_day": "peak"
-            }
+            features={"current_flow": 100.0, "weather": "clear", "time_of_day": "peak"},
         )
         assert request.location == "Manhattan Bridge"
         assert request.prediction_horizon == 60
@@ -94,18 +90,12 @@ class TestPredictionRequest:
 
     def test_prediction_horizon_validation(self):
         """Test prediction horizon validation"""
-        request = PredictionRequest(
-            location="Test Location",
-            prediction_horizon=30
-        )
+        request = PredictionRequest(location="Test Location", prediction_horizon=30)
         assert request.prediction_horizon == 30
 
         # Test negative horizon
         with pytest.raises(ValidationError):
-            PredictionRequest(
-                location="Test Location",
-                prediction_horizon=-10
-            )
+            PredictionRequest(location="Test Location", prediction_horizon=-10)
 
 
 class TestPredictionResponse:
@@ -117,7 +107,7 @@ class TestPredictionResponse:
             location="Manhattan Bridge",
             predicted_flow=120.5,
             confidence=0.85,
-            prediction_time=datetime.now()
+            prediction_time=datetime.now(),
         )
         assert response.location == "Manhattan Bridge"
         assert response.predicted_flow == 120.5
@@ -128,19 +118,13 @@ class TestPredictionResponse:
         """Test confidence score validation"""
         # Valid confidence
         response = PredictionResponse(
-            location="Test",
-            predicted_flow=100.0,
-            confidence=0.95
+            location="Test", predicted_flow=100.0, confidence=0.95
         )
         assert response.confidence == 0.95
 
         # Invalid confidence (outside 0-1 range)
         with pytest.raises(ValidationError):
-            PredictionResponse(
-                location="Test",
-                predicted_flow=100.0,
-                confidence=1.5
-            )
+            PredictionResponse(location="Test", predicted_flow=100.0, confidence=1.5)
 
 
 class TestRouteOptimizationRequest:
@@ -152,7 +136,7 @@ class TestRouteOptimizationRequest:
             start_location="Point A",
             end_location="Point B",
             optimization_criteria=["time", "distance"],
-            preferences={"avoid_tolls": True}
+            preferences={"avoid_tolls": True},
         )
         assert request.start_location == "Point A"
         assert request.end_location == "Point B"
@@ -167,9 +151,7 @@ class TestRouteOptimizationRequest:
     def test_optimization_criteria_validation(self):
         """Test optimization criteria validation"""
         request = RouteOptimizationRequest(
-            start_location="A",
-            end_location="B",
-            optimization_criteria=["time"]
+            start_location="A", end_location="B", optimization_criteria=["time"]
         )
         assert request.optimization_criteria == ["time"]
 
@@ -184,7 +166,7 @@ class TestRouteOptimizationResponse:
             waypoints=["Point A", "Point B", "Point C"],
             estimated_time=30.5,
             estimated_distance=25.0,
-            optimization_score=0.9
+            optimization_score=0.9,
         )
         assert response.route_id == "route_123"
         assert len(response.waypoints) == 3
@@ -198,7 +180,7 @@ class TestRouteOptimizationResponse:
             route_id="route_123",
             waypoints=[],
             estimated_time=0.0,
-            estimated_distance=0.0
+            estimated_distance=0.0,
         )
         assert len(response.waypoints) == 0
-        assert response.estimated_time == 0.0 
+        assert response.estimated_time == 0.0

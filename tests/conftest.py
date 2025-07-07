@@ -1,6 +1,7 @@
 """
 Pytest configuration and fixtures for Urbanclear testing
 """
+
 import pytest
 import asyncio
 import os
@@ -9,7 +10,6 @@ from unittest.mock import Mock, AsyncMock
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from redis import Redis
 import tempfile
 import shutil
 
@@ -20,7 +20,6 @@ from src.data.traffic_service import TrafficService
 from src.models.prediction import TrafficPredictor
 from src.models.optimization import RouteOptimizer
 from src.models.incident_detection import IncidentDetector
-from src.core.config import get_settings
 
 
 @pytest.fixture(scope="session")
@@ -43,30 +42,28 @@ def test_settings():
                 "username": "test_user",
                 "password": "test_password",
                 "pool_size": 5,
-                "max_overflow": 10
+                "max_overflow": 10,
             },
             "redis": {
                 "host": "localhost",
                 "port": 6379,
                 "database": 1,  # Use different DB for testing
-                "password": None
+                "password": None,
             },
             "mongodb": {
                 "host": "localhost",
                 "port": 27017,
                 "database": "test_traffic_logs",
                 "username": "test_user",
-                "password": "test_password"
-            }
+                "password": "test_password",
+            },
         },
         "api": {
-            "rate_limiting": {
-                "enabled": False  # Disable rate limiting in tests
-            },
+            "rate_limiting": {"enabled": False},  # Disable rate limiting in tests
             "authentication": {
                 "enabled": False  # Disable auth in tests unless specifically testing
-            }
-        }
+            },
+        },
     }
 
 
@@ -75,15 +72,16 @@ def test_database():
     """Create test database engine"""
     database_url = "sqlite:///./test.db"  # Use SQLite for testing
     engine = create_engine(database_url, connect_args={"check_same_thread": False})
-    
+
     # Create tables
     from src.api.models import Base
+
     Base.metadata.create_all(bind=engine)
-    
+
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    
+
     yield TestingSessionLocal
-    
+
     # Cleanup
     os.remove("./test.db")
 
@@ -123,33 +121,33 @@ def mock_user():
         "email": "test@example.com",
         "role": "admin",
         "permissions": ["read:all", "write:all", "admin:all"],
-        "is_active": True
+        "is_active": True,
     }
 
 
 @pytest.fixture
 def test_client(test_db_session, mock_redis, mock_user):
     """Create test client with mocked dependencies"""
-    
+
     def override_get_db():
         try:
             yield test_db_session
         finally:
             pass
-    
+
     def override_get_cache():
         return mock_redis
-    
+
     def override_get_current_user():
         return mock_user
-    
+
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_cache] = override_get_cache
     app.dependency_overrides[get_current_user] = override_get_current_user
-    
+
     with TestClient(app) as client:
         yield client
-    
+
     # Clear overrides
     app.dependency_overrides.clear()
 
@@ -163,27 +161,27 @@ def sample_traffic_data():
             "location": {
                 "latitude": 40.7831,
                 "longitude": -73.9712,
-                "address": "Central Park South & 5th Ave"
+                "address": "Central Park South & 5th Ave",
             },
             "speed": 25.5,
             "volume": 1200,
             "density": 48.0,
             "severity": "moderate",
-            "timestamp": "2024-01-01T12:00:00Z"
+            "timestamp": "2024-01-01T12:00:00Z",
         },
         {
             "sensor_id": "sensor_002",
             "location": {
                 "latitude": 40.7505,
                 "longitude": -73.9934,
-                "address": "Times Square & Broadway"
+                "address": "Times Square & Broadway",
             },
             "speed": 15.2,
             "volume": 1800,
             "density": 118.4,
             "severity": "high",
-            "timestamp": "2024-01-01T12:00:00Z"
-        }
+            "timestamp": "2024-01-01T12:00:00Z",
+        },
     ]
 
 
@@ -198,12 +196,12 @@ def sample_incident_data():
             "location": {
                 "latitude": 40.7589,
                 "longitude": -73.9851,
-                "address": "42nd St & 8th Ave"
+                "address": "42nd St & 8th Ave",
             },
             "description": "Multi-vehicle collision",
             "reported_at": "2024-01-01T11:30:00Z",
             "status": "active",
-            "estimated_clearance": "2024-01-01T13:00:00Z"
+            "estimated_clearance": "2024-01-01T13:00:00Z",
         }
     ]
 
@@ -213,22 +211,28 @@ def mock_traffic_service():
     """Mock traffic service for testing"""
     service = Mock(spec=TrafficService)
     service.get_current_conditions = AsyncMock(return_value=[])
-    service.get_analytics_summary = AsyncMock(return_value={
-        "total_vehicles": 12500,
-        "average_speed": 28.5,
-        "congestion_level": 0.65,
-        "incidents_count": 3
-    })
-    service.get_performance_metrics = AsyncMock(return_value={
-        "current_level": 0.65,
-        "trend": "stable",
-        "historical_average": 0.68
-    })
-    service.optimize_signals = AsyncMock(return_value={
-        "intersection_id": "test_intersection",
-        "optimization_score": 0.82,
-        "estimated_improvement": "15% reduction in wait time"
-    })
+    service.get_analytics_summary = AsyncMock(
+        return_value={
+            "total_vehicles": 12500,
+            "average_speed": 28.5,
+            "congestion_level": 0.65,
+            "incidents_count": 3,
+        }
+    )
+    service.get_performance_metrics = AsyncMock(
+        return_value={
+            "current_level": 0.65,
+            "trend": "stable",
+            "historical_average": 0.68,
+        }
+    )
+    service.optimize_signals = AsyncMock(
+        return_value={
+            "intersection_id": "test_intersection",
+            "optimization_score": 0.82,
+            "estimated_improvement": "15% reduction in wait time",
+        }
+    )
     return service
 
 
@@ -236,15 +240,17 @@ def mock_traffic_service():
 def mock_traffic_predictor():
     """Mock traffic predictor for testing"""
     predictor = Mock(spec=TrafficPredictor)
-    predictor.predict = AsyncMock(return_value=[
-        {
-            "timestamp": "2024-01-01T13:00:00Z",
-            "location": "Central Park South",
-            "predicted_speed": 22.5,
-            "predicted_volume": 1350,
-            "confidence": 0.85
-        }
-    ])
+    predictor.predict = AsyncMock(
+        return_value=[
+            {
+                "timestamp": "2024-01-01T13:00:00Z",
+                "location": "Central Park South",
+                "predicted_speed": 22.5,
+                "predicted_volume": 1350,
+                "confidence": 0.85,
+            }
+        ]
+    )
     predictor.retrain = AsyncMock(return_value={"status": "success", "accuracy": 0.87})
     return predictor
 
@@ -253,13 +259,15 @@ def mock_traffic_predictor():
 def mock_route_optimizer():
     """Mock route optimizer for testing"""
     optimizer = Mock(spec=RouteOptimizer)
-    optimizer.optimize_route = AsyncMock(return_value={
-        "route_id": "route_123",
-        "total_distance": 5.2,
-        "estimated_time": 18,
-        "optimization_score": 0.89,
-        "waypoints": []
-    })
+    optimizer.optimize_route = AsyncMock(
+        return_value={
+            "route_id": "route_123",
+            "total_distance": 5.2,
+            "estimated_time": 18,
+            "optimization_score": 0.89,
+            "waypoints": [],
+        }
+    )
     return optimizer
 
 
@@ -289,12 +297,12 @@ def mock_external_apis():
             "temperature": 22.5,
             "humidity": 65,
             "precipitation": 0.0,
-            "wind_speed": 10.2
+            "wind_speed": 10.2,
         },
         "traffic_sensors": {
             "sensor_001": {"speed": 25.5, "volume": 1200},
-            "sensor_002": {"speed": 15.2, "volume": 1800}
-        }
+            "sensor_002": {"speed": 15.2, "volume": 1800},
+        },
     }
 
 
@@ -308,8 +316,9 @@ def assert_response_structure(response_data: Dict[str, Any], expected_keys: list
 def assert_valid_timestamp(timestamp_str: str):
     """Assert that timestamp is valid ISO format"""
     from datetime import datetime
+
     try:
-        datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
         return True
     except ValueError:
         return False
@@ -328,4 +337,4 @@ pytest.mark.e2e = pytest.mark.e2e
 pytest.mark.slow = pytest.mark.slow
 pytest.mark.api = pytest.mark.api
 pytest.mark.ml = pytest.mark.ml
-pytest.mark.database = pytest.mark.database 
+pytest.mark.database = pytest.mark.database

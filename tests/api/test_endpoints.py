@@ -1,7 +1,5 @@
-import pytest
 from fastapi.testclient import TestClient
 from datetime import datetime, timedelta
-import json
 
 from src.api.main import app
 
@@ -39,12 +37,12 @@ class TestAPIEndpoints:
         """Test traffic data with time range parameters"""
         start_time = datetime.now() - timedelta(hours=1)
         end_time = datetime.now()
-        
+
         params = {
             "start_time": start_time.isoformat(),
-            "end_time": end_time.isoformat()
+            "end_time": end_time.isoformat(),
         }
-        
+
         response = client.get("/traffic/data", params=params)
         assert response.status_code == 200
 
@@ -84,10 +82,10 @@ class TestAPIEndpoints:
             "features": {
                 "current_flow": 100.0,
                 "weather": "clear",
-                "time_of_day": "peak"
-            }
+                "time_of_day": "peak",
+            },
         }
-        
+
         response = client.post("/ml/predict", json=payload)
         assert response.status_code == 200
         data = response.json()
@@ -100,9 +98,9 @@ class TestAPIEndpoints:
             "start_location": "40.7831,-73.9712",
             "end_location": "40.7589,-73.9851",
             "optimization_criteria": ["time", "distance"],
-            "preferences": {"avoid_tolls": True}
+            "preferences": {"avoid_tolls": True},
         }
-        
+
         response = client.post("/optimization/route", json=payload)
         assert response.status_code == 200
         data = response.json()
@@ -126,19 +124,16 @@ class TestAPIEndpoints:
         """Test prediction endpoint with invalid data"""
         payload = {
             "location": "",  # Invalid empty location
-            "prediction_horizon": -10  # Invalid negative horizon
+            "prediction_horizon": -10,  # Invalid negative horizon
         }
-        
+
         response = client.post("/ml/predict", json=payload)
         assert response.status_code == 422  # Validation error
 
     def test_route_optimization_validation_error(self):
         """Test route optimization with invalid data"""
-        payload = {
-            "start_location": "",  # Invalid empty location
-            "end_location": ""
-        }
-        
+        payload = {"start_location": "", "end_location": ""}  # Invalid empty location
+
         response = client.post("/optimization/route", json=payload)
         assert response.status_code == 422  # Validation error
 
@@ -157,4 +152,4 @@ class TestAPIEndpoints:
     def test_api_error_handling(self):
         """Test API error handling with malformed requests"""
         response = client.post("/ml/predict", data="invalid json")
-        assert response.status_code == 422 
+        assert response.status_code == 422

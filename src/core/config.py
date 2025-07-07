@@ -1,18 +1,20 @@
 """
 Urbanclear - Configuration management for the traffic optimization system
 """
+
 import os
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from functools import lru_cache
 
 import yaml
-from pydantic import Field, validator, ConfigDict
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 from loguru import logger
 
 
 class DatabaseConfig(BaseSettings):
     """Database configuration"""
+
     host: str = "localhost"
     port: int = 5432
     database: str = "traffic_db"
@@ -20,33 +22,36 @@ class DatabaseConfig(BaseSettings):
     password: str = "password"
     pool_size: int = 10
     max_overflow: int = 20
-    
+
     model_config = ConfigDict(env_prefix="DATABASE__POSTGRES__")
 
 
 class MongoConfig(BaseSettings):
     """MongoDB configuration"""
+
     host: str = "localhost"
     port: int = 27017
     database: str = "traffic_logs"
     username: str = "mongo_user"
     password: str = "password"
-    
+
     model_config = ConfigDict(env_prefix="DATABASE__MONGODB__")
 
 
 class RedisConfig(BaseSettings):
     """Redis configuration"""
+
     host: str = "localhost"
     port: int = 6379
     database: int = 0
     password: str = "password"
-    
+
     model_config = ConfigDict(env_prefix="DATABASE__REDIS__")
 
 
 class DatabaseSettings(BaseSettings):
     """All database settings"""
+
     postgres: DatabaseConfig = DatabaseConfig()
     mongodb: MongoConfig = MongoConfig()
     redis: RedisConfig = RedisConfig()
@@ -54,94 +59,92 @@ class DatabaseSettings(BaseSettings):
 
 class KafkaConfig(BaseSettings):
     """Kafka configuration"""
+
     bootstrap_servers: List[str] = ["localhost:9092"]
     topics: Dict[str, str] = {
         "traffic_data": "traffic-data",
         "incidents": "traffic-incidents",
         "predictions": "traffic-predictions",
-        "alerts": "traffic-alerts"
+        "alerts": "traffic-alerts",
     }
     consumer: Dict[str, Any] = {
         "group_id": "traffic-system",
-        "auto_offset_reset": "latest"
+        "auto_offset_reset": "latest",
     }
-    producer: Dict[str, Any] = {
-        "acks": "all",
-        "retries": 3
-    }
+    producer: Dict[str, Any] = {"acks": "all", "retries": 3}
 
 
 class SparkConfig(BaseSettings):
     """Spark configuration"""
+
     master: str = "local[*]"
     app_name: str = "TrafficOptimization"
     config: Dict[str, Any] = {
         "spark.sql.adaptive.enabled": True,
         "spark.sql.adaptive.coalescePartitions.enabled": True,
-        "spark.serializer": "org.apache.spark.serializer.KryoSerializer"
+        "spark.serializer": "org.apache.spark.serializer.KryoSerializer",
     }
 
 
 class ModelConfig(BaseSettings):
     """ML model configuration"""
+
     traffic_prediction: Dict[str, Any] = {
         "type": "lstm",
         "sequence_length": 24,
         "prediction_horizon": 6,
         "update_frequency": "hourly",
-        "model_path": "models/traffic_lstm.pkl"
+        "model_path": "models/traffic_lstm.pkl",
     }
     route_optimization: Dict[str, Any] = {
         "algorithm": "genetic",
         "population_size": 100,
         "generations": 50,
-        "mutation_rate": 0.1
+        "mutation_rate": 0.1,
     }
     incident_detection: Dict[str, Any] = {
         "type": "isolation_forest",
         "contamination": 0.1,
         "n_estimators": 100,
-        "model_path": "models/incident_detector.pkl"
+        "model_path": "models/incident_detector.pkl",
     }
 
 
 class DataSourceConfig(BaseSettings):
     """Data source configuration"""
+
     traffic_sensors: Dict[str, Any] = {
         "enabled": True,
         "update_interval": 30,
         "api_endpoint": "http://city-sensors.api/v1/traffic",
-        "api_key": "your_sensor_api_key"
+        "api_key": "your_sensor_api_key",
     }
     weather: Dict[str, Any] = {
         "enabled": True,
         "provider": "openweathermap",
         "api_key": "your_weather_api_key",
-        "update_interval": 300
+        "update_interval": 300,
     }
     cameras: Dict[str, Any] = {
         "enabled": True,
         "processing_interval": 60,
-        "model_path": "models/yolo_traffic.weights"
+        "model_path": "models/yolo_traffic.weights",
     }
     gps_data: Dict[str, Any] = {
         "enabled": False,
         "anonymization": True,
-        "retention_days": 7
+        "retention_days": 7,
     }
 
 
 class MonitoringConfig(BaseSettings):
     """Monitoring configuration"""
-    prometheus: Dict[str, Any] = {
-        "enabled": True,
-        "port": 9090,
-        "scrape_interval": 30
-    }
+
+    prometheus: Dict[str, Any] = {"enabled": True, "port": 9090, "scrape_interval": 30}
     grafana: Dict[str, Any] = {
         "enabled": True,
         "port": 3000,
-        "admin_password": "your_grafana_password"
+        "admin_password": "your_grafana_password",
     }
     alerts: Dict[str, Any] = {
         "email": {
@@ -149,39 +152,35 @@ class MonitoringConfig(BaseSettings):
             "smtp_server": "smtp.gmail.com",
             "smtp_port": 587,
             "username": "alerts@yourcompany.com",
-            "password": "your_email_password"
+            "password": "your_email_password",
         },
         "slack": {
             "enabled": False,
-            "webhook_url": "https://hooks.slack.com/your/webhook/url"
-        }
+            "webhook_url": "https://hooks.slack.com/your/webhook/url",
+        },
     }
 
 
 class APIConfig(BaseSettings):
     """API configuration"""
-    rate_limiting: Dict[str, Any] = {
-        "enabled": True,
-        "requests_per_minute": 100
-    }
+
+    rate_limiting: Dict[str, Any] = {"enabled": True, "requests_per_minute": 100}
     authentication: Dict[str, Any] = {
         "enabled": False,
         "jwt_secret": "your_jwt_secret_key",
-        "token_expiry": 3600
+        "token_expiry": 3600,
     }
-    cors: Dict[str, Any] = {
-        "enabled": True,
-        "allowed_origins": ["*"]
-    }
+    cors: Dict[str, Any] = {"enabled": True, "allowed_origins": ["*"]}
 
 
 class GeographyConfig(BaseSettings):
     """Geographic configuration"""
+
     city_bounds: Dict[str, float] = {
         "north": 40.7831,
         "south": 40.7489,
         "east": -73.9441,
-        "west": -73.9927
+        "west": -73.9927,
     }
     coordinate_system: str = "EPSG:4326"
     default_zoom: int = 12
@@ -189,6 +188,7 @@ class GeographyConfig(BaseSettings):
 
 class FeatureConfig(BaseSettings):
     """Feature engineering configuration"""
+
     time_windows: List[int] = [5, 15, 30, 60]
     spatial_aggregation: int = 500
     weather_features: List[str] = ["temperature", "precipitation", "wind_speed"]
@@ -197,39 +197,36 @@ class FeatureConfig(BaseSettings):
 
 class OptimizationConfig(BaseSettings):
     """System optimization configuration"""
+
     signal_timing: Dict[str, int] = {
         "min_green_time": 10,
         "max_green_time": 120,
         "yellow_time": 3,
-        "all_red_time": 2
+        "all_red_time": 2,
     }
     route_calculation: Dict[str, Any] = {
         "max_alternatives": 3,
         "max_distance_factor": 1.5,
         "avoid_construction": True,
-        "consider_real_time": True
+        "consider_real_time": True,
     }
 
 
 class SecurityConfig(BaseSettings):
     """Security configuration"""
-    encryption: Dict[str, Any] = {
-        "enabled": True,
-        "algorithm": "AES-256"
-    }
-    audit_logging: Dict[str, Any] = {
-        "enabled": True,
-        "retention_days": 90
-    }
+
+    encryption: Dict[str, Any] = {"enabled": True, "algorithm": "AES-256"}
+    audit_logging: Dict[str, Any] = {"enabled": True, "retention_days": 90}
     api_security: Dict[str, Any] = {
         "https_only": True,
         "certificate_path": "/path/to/ssl/cert.pem",
-        "private_key_path": "/path/to/ssl/private.key"
+        "private_key_path": "/path/to/ssl/private.key",
     }
 
 
 class AppSettings(BaseSettings):
     """Main application settings"""
+
     name: str = "Urbanclear"
     version: str = "1.0.0"
     debug: bool = False
@@ -240,6 +237,7 @@ class AppSettings(BaseSettings):
 
 class Settings(BaseSettings):
     """Complete system settings"""
+
     app: AppSettings = AppSettings()
     database: DatabaseSettings = DatabaseSettings()
     kafka: KafkaConfig = KafkaConfig()
@@ -253,45 +251,43 @@ class Settings(BaseSettings):
     optimization: OptimizationConfig = OptimizationConfig()
     security: SecurityConfig = SecurityConfig()
 
-    model_config = ConfigDict(
-        env_file=".env",
-        case_sensitive=False,
-        extra="ignore"
-    )
+    model_config = ConfigDict(env_file=".env", case_sensitive=False, extra="ignore")
 
     @classmethod
     def load_from_yaml(cls, config_path: str = "config/config.yaml"):
         """Load settings from YAML file"""
         try:
-            with open(config_path, 'r') as file:
+            with open(config_path, "r") as file:
                 config_data = yaml.safe_load(file)
-            
+
             # Create nested configuration objects with parsed data
-            app_config = AppSettings(**config_data.get('app', {}))
-            
+            app_config = AppSettings(**config_data.get("app", {}))
+
             # Database configurations
-            db_data = config_data.get('database', {})
-            postgres_config = DatabaseConfig(**db_data.get('postgres', {}))
-            mongodb_config = MongoConfig(**db_data.get('mongodb', {}))
-            redis_config = RedisConfig(**db_data.get('redis', {}))
+            db_data = config_data.get("database", {})
+            postgres_config = DatabaseConfig(**db_data.get("postgres", {}))
+            mongodb_config = MongoConfig(**db_data.get("mongodb", {}))
+            redis_config = RedisConfig(**db_data.get("redis", {}))
             database_config = DatabaseSettings(
-                postgres=postgres_config,
-                mongodb=mongodb_config,
-                redis=redis_config
+                postgres=postgres_config, mongodb=mongodb_config, redis=redis_config
             )
-            
+
             # Other configurations with default fallbacks
-            kafka_config = KafkaConfig(**config_data.get('kafka', {}))
-            spark_config = SparkConfig(**config_data.get('spark', {}))
-            models_config = ModelConfig(**config_data.get('models', {}))
-            data_sources_config = DataSourceConfig(**config_data.get('data_sources', {}))
-            monitoring_config = MonitoringConfig(**config_data.get('monitoring', {}))
-            api_config = APIConfig(**config_data.get('api', {}))
-            geography_config = GeographyConfig(**config_data.get('geography', {}))
-            features_config = FeatureConfig(**config_data.get('features', {}))
-            optimization_config = OptimizationConfig(**config_data.get('optimization', {}))
-            security_config = SecurityConfig(**config_data.get('security', {}))
-            
+            kafka_config = KafkaConfig(**config_data.get("kafka", {}))
+            spark_config = SparkConfig(**config_data.get("spark", {}))
+            models_config = ModelConfig(**config_data.get("models", {}))
+            data_sources_config = DataSourceConfig(
+                **config_data.get("data_sources", {})
+            )
+            monitoring_config = MonitoringConfig(**config_data.get("monitoring", {}))
+            api_config = APIConfig(**config_data.get("api", {}))
+            geography_config = GeographyConfig(**config_data.get("geography", {}))
+            features_config = FeatureConfig(**config_data.get("features", {}))
+            optimization_config = OptimizationConfig(
+                **config_data.get("optimization", {})
+            )
+            security_config = SecurityConfig(**config_data.get("security", {}))
+
             return cls(
                 app=app_config,
                 database=database_config,
@@ -304,11 +300,13 @@ class Settings(BaseSettings):
                 geography=geography_config,
                 features=features_config,
                 optimization=optimization_config,
-                security=security_config
+                security=security_config,
             )
-            
+
         except FileNotFoundError:
-            logger.warning(f"Config file {config_path} not found. Using default settings.")
+            logger.warning(
+                f"Config file {config_path} not found. Using default settings."
+            )
             return cls()
         except Exception as e:
             logger.error(f"Error loading config from {config_path}: {e}")
@@ -320,7 +318,7 @@ def get_settings() -> Settings:
     """Get cached settings instance"""
     # Try to load from YAML first, fallback to environment variables
     config_path = os.getenv("CONFIG_PATH", "config/config.yaml")
-    
+
     if os.path.exists(config_path):
         return Settings.load_from_yaml(config_path)
     else:
@@ -332,7 +330,7 @@ def get_database_url(settings: Settings = None) -> str:
     """Get database URL for SQLAlchemy"""
     if settings is None:
         settings = get_settings()
-    
+
     db_config = settings.database.postgres
     return (
         f"postgresql://{db_config.username}:{db_config.password}@"
@@ -344,7 +342,7 @@ def get_mongodb_url(settings: Settings = None) -> str:
     """Get MongoDB URL"""
     if settings is None:
         settings = get_settings()
-    
+
     mongo_config = settings.database.mongodb
     return (
         f"mongodb://{mongo_config.username}:{mongo_config.password}@"
@@ -356,7 +354,7 @@ def get_redis_url(settings: Settings = None) -> str:
     """Get Redis URL"""
     if settings is None:
         settings = get_settings()
-    
+
     redis_config = settings.database.redis
     return f"redis://:{redis_config.password}@{redis_config.host}:{redis_config.port}/{redis_config.database}"
 
@@ -365,18 +363,18 @@ def setup_logging(settings: Settings = None):
     """Setup logging configuration"""
     if settings is None:
         settings = get_settings()
-    
+
     # Configure loguru
     logger.remove()  # Remove default handler
-    
+
     # Add console handler
     logger.add(
         sink=lambda message: print(message, end=""),
         level=settings.app.log_level,
         format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
-        colorize=True
+        colorize=True,
     )
-    
+
     # Add file handler
     logger.add(
         "logs/traffic_system.log",
@@ -384,9 +382,9 @@ def setup_logging(settings: Settings = None):
         retention="30 days",
         level=settings.app.log_level,
         format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
-        compression="zip"
+        compression="zip",
     )
-    
+
     # Add error file handler
     logger.add(
         "logs/traffic_system_errors.log",
@@ -394,9 +392,9 @@ def setup_logging(settings: Settings = None):
         retention="90 days",
         level="ERROR",
         format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
-        compression="zip"
+        compression="zip",
     )
-    
+
     logger.info("Logging configured successfully")
 
 
@@ -418,4 +416,4 @@ def is_development() -> bool:
 
 def is_testing() -> bool:
     """Check if running in testing"""
-    return get_environment() == "testing" 
+    return get_environment() == "testing"

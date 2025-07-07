@@ -1,1 +1,1 @@
-# Core module for traffic optimization system 
+# Core module for traffic optimization system

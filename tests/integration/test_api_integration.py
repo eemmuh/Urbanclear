@@ -1,5 +1,4 @@
 import pytest
-import asyncio
 from httpx import AsyncClient
 from fastapi.testclient import TestClient
 from datetime import datetime, timedelta
@@ -50,10 +49,10 @@ class TestAPIIntegration:
         """Test traffic data endpoint with time range"""
         start_time = datetime.now() - timedelta(hours=1)
         end_time = datetime.now()
-        
+
         params = {
             "start_time": start_time.isoformat(),
-            "end_time": end_time.isoformat()
+            "end_time": end_time.isoformat(),
         }
         response = client.get("/traffic/data", params=params)
         assert response.status_code == 200
@@ -71,10 +70,7 @@ class TestAPIIntegration:
         payload = {
             "location": "Manhattan Bridge",
             "prediction_horizon": 60,
-            "features": {
-                "current_flow": 100.0,
-                "weather": "clear"
-            }
+            "features": {"current_flow": 100.0, "weather": "clear"},
         }
         response = client.post("/ml/predict", json=payload)
         assert response.status_code == 200
@@ -88,7 +84,7 @@ class TestAPIIntegration:
             "start_location": "40.7831,-73.9712",
             "end_location": "40.7589,-73.9851",
             "optimization_criteria": ["time", "distance"],
-            "preferences": {"avoid_tolls": True}
+            "preferences": {"avoid_tolls": True},
         }
         response = client.post("/optimization/route", json=payload)
         assert response.status_code == 200
@@ -128,17 +124,14 @@ class TestAPIIntegration:
         """Test prediction endpoint with invalid data"""
         payload = {
             "location": "",  # Invalid empty location
-            "prediction_horizon": -10  # Invalid negative horizon
+            "prediction_horizon": -10,  # Invalid negative horizon
         }
         response = client.post("/ml/predict", json=payload)
         assert response.status_code == 422  # Validation error
 
     def test_route_optimization_with_invalid_data(self, client):
         """Test route optimization with invalid data"""
-        payload = {
-            "start_location": "",  # Invalid empty location
-            "end_location": ""
-        }
+        payload = {"start_location": "", "end_location": ""}  # Invalid empty location
         response = client.post("/optimization/route", json=payload)
         assert response.status_code == 422  # Validation error
 
@@ -161,10 +154,7 @@ class TestAPIIntegration:
     @pytest.mark.asyncio
     async def test_async_prediction(self, async_client):
         """Test async prediction"""
-        payload = {
-            "location": "Manhattan Bridge",
-            "prediction_horizon": 30
-        }
+        payload = {"location": "Manhattan Bridge", "prediction_horizon": 30}
         response = await async_client.post("/ml/predict", json=payload)
         assert response.status_code == 200
         data = response.json()
@@ -192,9 +182,10 @@ class TestAPIIntegration:
     def test_api_response_time(self, client):
         """Test API response time is reasonable"""
         import time
+
         start_time = time.time()
         response = client.get("/health")
         end_time = time.time()
-        
+
         assert response.status_code == 200
-        assert (end_time - start_time) < 1.0  # Response should be under 1 second 
+        assert (end_time - start_time) < 1.0  # Response should be under 1 second
