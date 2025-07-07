@@ -77,6 +77,22 @@ black>=23.10.0
 flake8>=6.1.0
 mypy>=1.6.0
 
+# Security & Code Quality (for CI/CD)
+bandit>=1.7.5
+safety>=2.3.0
+
+# Performance Testing
+locust>=2.17.0
+
+# Additional Testing
+testfixtures>=7.2.0
+factory-boy>=3.3.0
+responses>=0.23.0
+
+# Development Tools
+pre-commit>=3.5.0
+codecov>=2.1.0
+
 # Utilities & Helpers
 click>=8.1.0
 rich>=13.6.0
@@ -84,6 +100,7 @@ tqdm>=4.66.0
 python-dateutil>=2.8.2
 pytz>=2023.3
 arrow>=1.3.0
+colorama>=0.4.6
 
 # Security & Authentication
 cryptography>=41.0.0
