@@ -696,23 +696,25 @@ class EnhancedRouteOptimizer:
 
     def _log_optimization_result(self, route: Dict[str, Any]) -> None:
         """Log optimization result for monitoring"""
-        route_id = route.get('route_id', 'unknown')
-        score = route.get('optimization_score', 0.0)
-        
+        route_id = route.get("route_id", "unknown")
+        score = route.get("optimization_score", 0.0)
+
         # Add proper f-string placeholders
-        logger.info(f"Route optimization completed for route {route_id} with score {score:.3f}")
+        logger.info(
+            f"Route optimization completed for route {route_id} with score {score:.3f}"
+        )
 
     def _validate_optimization_result(self, route: Dict[str, Any]) -> bool:
         """Validate optimization result"""
-        required_fields = ['route_id', 'waypoints', 'total_distance', 'estimated_time']
-        
+        required_fields = ["route_id", "waypoints", "total_distance", "estimated_time"]
+
         for field in required_fields:
             if field not in route:
                 logger.error(f"Missing required field in route: {field}")
                 return False
-        
+
         # Add proper f-string placeholders
-        route_id = route.get('route_id', 'unknown')
+        route_id = route.get("route_id", "unknown")
         logger.info(f"Route validation passed for route {route_id}")
         return True
 

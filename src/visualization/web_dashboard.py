@@ -265,15 +265,17 @@ class WebDashboard:
             health = metrics.get("system_health", "Unknown")
             st.metric(label="💚 System Health", value=health, delta=None)
 
-    def _generate_health_status_chart(self, health_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_health_status_chart(
+        self, health_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Generate health status visualization"""
-        services = health_data.get('services', {})
-        
+        services = health_data.get("services", {})
+
         # Create status indicators
         status_data = {
-            'services': list(services.keys()),
-            'status': [s.get('healthy', False) for s in services.values()],
-            'response_times': [s.get('response_time', 0) for s in services.values()]
+            "services": list(services.keys()),
+            "status": [s.get("healthy", False) for s in services.values()],
+            "response_times": [s.get("response_time", 0) for s in services.values()],
         }
 
         return status_data

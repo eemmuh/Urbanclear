@@ -26,11 +26,9 @@ from api.models import (
     PredictionResponse,
     RouteOptimizationRequest,
     RouteOptimizationResponse,
-    AnalyticsResponse
+    AnalyticsResponse,
 )
-from api.dependencies import (
-    get_db_session
-)
+from api.dependencies import get_db
 from data.traffic_service import TrafficService
 from models.prediction import TrafficPredictor
 from models.optimization import RouteOptimizer
@@ -152,7 +150,7 @@ async def get_current_traffic(
 async def predict_traffic(
     location: str = Query(..., description="Location for prediction"),
     hours_ahead: int = Query(1, ge=1, le=24, description="Hours ahead"),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db),
 ) -> PredictionResponse:
     """Get traffic predictions for a specific location"""
     try:
@@ -199,8 +197,7 @@ async def get_historical_traffic(
 # Route Optimization Endpoints
 @app.post("/api/v1/routes/optimize")
 async def optimize_route(
-    request: RouteOptimizationRequest,
-    db: AsyncSession = Depends(get_db_session)
+    request: RouteOptimizationRequest, db: AsyncSession = Depends(get_db)
 ) -> RouteOptimizationResponse:
     """Optimize a route based on current traffic conditions"""
     try:
@@ -241,7 +238,7 @@ async def get_route_alternatives(
 async def get_active_incidents(
     location: Optional[str] = Query(None, description="Filter by location"),
     severity: Optional[str] = Query(None, description="Filter by severity"),
-    db=Depends(get_db_session),
+    db=Depends(get_db),
 ):
     """Get active traffic incidents"""
     try:
@@ -254,7 +251,7 @@ async def get_active_incidents(
 
 
 @app.post("/api/v1/incidents/report")
-async def report_incident(incident: IncidentReport, db=Depends(get_db_session)):
+async def report_incident(incident: IncidentReport, db=Depends(get_db)):
     """Report a new traffic incident"""
     try:
         result = await incident_detector.report_incident(incident)
@@ -264,7 +261,7 @@ async def report_incident(incident: IncidentReport, db=Depends(get_db_session)):
 
 
 @app.put("/api/v1/incidents/{incident_id}/resolve")
-async def resolve_incident(incident_id: str, db=Depends(get_db_session)):
+async def resolve_incident(incident_id: str, db=Depends(get_db)):
     """Resolve a traffic incident"""
     try:
         await incident_detector.resolve_incident(incident_id)
@@ -275,7 +272,9 @@ async def resolve_incident(incident_id: str, db=Depends(get_db_session)):
 
 # Signal Optimization Endpoints
 @app.post("/api/v1/signals/optimize")
-async def optimize_signals(request: SignalOptimizationRequest, db=Depends(get_db_session)):
+async def optimize_signals(
+    request: SignalOptimizationRequest, db=Depends(get_db)
+):
     """Optimize traffic signal timing"""
     try:
         optimization = await traffic_service.optimize_signals(request)
@@ -287,7 +286,7 @@ async def optimize_signals(request: SignalOptimizationRequest, db=Depends(get_db
 @app.get("/api/v1/signals/status")
 async def get_signal_status(
     intersection_id: Optional[str] = Query(None, description="Specific intersection"),
-    db=Depends(get_db_session),
+    db=Depends(get_db),
 ):
     """Get traffic signal status"""
     try:
@@ -328,7 +327,7 @@ async def get_analytics_summary(
 @app.get("/api/v1/analytics/performance")
 async def get_performance_analytics(
     metric_type: str = Query(..., description="Type of performance metric"),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db),
 ) -> AnalyticsResponse:
     """Get performance analytics for various metrics"""
     try:

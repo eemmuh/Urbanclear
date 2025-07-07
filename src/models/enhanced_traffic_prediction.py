@@ -306,11 +306,11 @@ class EnhancedTrafficPredictor:
         if predictions is None or len(predictions) == 0:
             logger.error("Empty predictions array")
             return False
-        
+
         # Check for reasonable values
         if np.any(predictions < 0) or np.any(predictions > 200):
             logger.warning("Predictions contain unrealistic values")
-        
+
         # Add proper f-string placeholder
         prediction_count = len(predictions)
         logger.info(f"Validated {prediction_count} predictions successfully")

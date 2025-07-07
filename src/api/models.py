@@ -2,7 +2,7 @@
 Pydantic models for API request/response validation
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Dict, Any, Union
 from enum import Enum
 from pydantic import BaseModel, Field
@@ -181,16 +181,64 @@ class RouteRequest(BaseModel):
 
 
 class RouteResponse(BaseModel):
-    """Response with optimized routes"""
+    """Response model for route queries"""
 
-    primary_route: Route
-    alternative_routes: List[Route] = Field(default=[])
-    optimization_time: float = Field(
-        ..., description="Time taken to optimize in seconds"
-    )
-    factors_considered: List[str] = Field(
-        default=[], description="Factors in optimization"
-    )
+    route_id: str
+    waypoints: List[Dict[str, Any]]
+    total_distance: float
+    estimated_time: float
+    traffic_conditions: List[Dict[str, Any]]
+    alternative_routes: List[Dict[str, Any]] = []
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "route_id": "route_123",
+                "waypoints": [
+                    {"lat": 40.7831, "lng": -73.9712, "address": "Central Park"},
+                    {"lat": 40.7505, "lng": -73.9934, "address": "Times Square"},
+                ],
+                "total_distance": 2.5,
+                "estimated_time": 15.0,
+                "traffic_conditions": [
+                    {"segment": "segment_1", "congestion": "moderate", "delay": 3.0}
+                ],
+                "alternative_routes": [],
+            }
+        }
+    }
+
+
+class PredictionResponse(BaseModel):
+    """Response model for traffic predictions"""
+
+    predictions: List[Dict[str, Any]]
+    metadata: Dict[str, Any] = {}
+    confidence: float = 0.0
+    generated_at: datetime = datetime.now(timezone.utc)
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "predictions": [
+                    {
+                        "location": "Central Park South",
+                        "predicted_flow": 1200,
+                        "predicted_speed": 25.5,
+                        "timestamp": "2024-01-01T13:00:00Z",
+                        "confidence": 0.85,
+                    }
+                ],
+                "metadata": {
+                    "model_version": "1.0.0",
+                    "prediction_horizon": "1_hour",
+                    "features_used": ["historical_flow", "weather", "day_of_week"],
+                },
+                "confidence": 0.85,
+                "generated_at": "2024-01-01T12:00:00Z",
+            }
+        }
+    }
 
 
 class IncidentReport(BaseModel):
@@ -359,3 +407,87 @@ class SuccessResponse(BaseModel):
     message: str = Field(..., description="Success message")
     data: Optional[Dict[str, Any]] = Field(None, description="Response data")
     timestamp: datetime = Field(default_factory=datetime.now)
+
+
+class RouteOptimizationRequest(BaseModel):
+    """Request model for route optimization"""
+
+    origin: Dict[str, float]  # {"lat": float, "lng": float}
+    destination: Dict[str, float]  # {"lat": float, "lng": float}
+    waypoints: List[Dict[str, float]] = []
+    preferences: Dict[str, Any] = {}
+    constraints: Dict[str, Any] = {}
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "origin": {"lat": 40.7831, "lng": -73.9712},
+                "destination": {"lat": 40.7505, "lng": -73.9934},
+                "waypoints": [{"lat": 40.7614, "lng": -73.9776}],
+                "preferences": {"optimize_for": "time", "avoid_tolls": True},
+                "constraints": {"max_distance": 50.0, "vehicle_type": "car"},
+            }
+        }
+    }
+
+
+class RouteOptimizationResponse(BaseModel):
+    """Response model for route optimization"""
+
+    route_id: str
+    optimized_route: Dict[str, Any]
+    alternatives: List[Dict[str, Any]] = []
+    optimization_metrics: Dict[str, Any] = {}
+    generated_at: datetime = datetime.now(timezone.utc)
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "route_id": "opt_route_123",
+                "optimized_route": {
+                    "waypoints": [
+                        {"lat": 40.7831, "lng": -73.9712, "address": "Central Park"},
+                        {"lat": 40.7505, "lng": -73.9934, "address": "Times Square"},
+                    ],
+                    "total_distance": 2.5,
+                    "estimated_time": 15.0,
+                    "traffic_delay": 3.0,
+                },
+                "alternatives": [],
+                "optimization_metrics": {
+                    "time_saved": 5.0,
+                    "distance_saved": 0.5,
+                    "fuel_efficiency": 0.85,
+                },
+                "generated_at": "2024-01-01T12:00:00Z",
+            }
+        }
+    }
+
+
+class AnalyticsResponse(BaseModel):
+    """Response model for analytics queries"""
+
+    analytics: Dict[str, Any]
+    summary: Dict[str, Any] = {}
+    generated_at: datetime = datetime.now(timezone.utc)
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "analytics": {
+                    "congestion_levels": [
+                        {"location": "Times Square", "level": 0.8, "timestamp": "2024-01-01T12:00:00Z"}
+                    ],
+                    "average_speed": 25.5,
+                    "traffic_volume": 1200,
+                },
+                "summary": {
+                    "total_incidents": 5,
+                    "resolved_incidents": 3,
+                    "average_response_time": 12.5,
+                },
+                "generated_at": "2024-01-01T12:00:00Z",
+            }
+        }
+    }

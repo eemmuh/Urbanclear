@@ -1,6 +1,7 @@
 """
 FastAPI dependencies for the traffic system
 """
+
 from typing import Optional
 import redis
 from fastapi import Depends, HTTPException, status
@@ -133,7 +134,7 @@ class MockCache:
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Optional[dict]:
     """
     Extract and validate user from JWT token

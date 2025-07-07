@@ -259,10 +259,10 @@ class MetricsPublisher:
         """Process and publish traffic metrics"""
         if not data:
             return
-        
+
         # Remove unused variable 'count'
         logger.info(f"Processing {len(data)} traffic data points")
-        
+
         for item in data:
             # Publish individual metrics
             await self._publish_flow_rate(item)
