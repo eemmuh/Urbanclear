@@ -104,13 +104,24 @@ class TestPredictionResponse:
     def test_valid_response(self):
         """Test valid prediction response"""
         response = PredictionResponse(
-            location="Manhattan Bridge",
-            predicted_flow=120.5,
+            prediction={
+                "location": "Manhattan Bridge",
+                "predicted_speed": 25.0,
+                "predicted_volume": 120,
+                "predicted_severity": "moderate"
+            },
             confidence=0.85,
             prediction_time=datetime.now(),
+            predictions=[
+                {
+                    "location": "Manhattan Bridge",
+                    "predicted_speed": 25.0,
+                    "predicted_volume": 120
+                }
+            ]
         )
-        assert response.location == "Manhattan Bridge"
-        assert response.predicted_flow == 120.5
+        assert response.prediction["location"] == "Manhattan Bridge"
+        assert response.prediction["predicted_speed"] == 25.0
         assert response.confidence == 0.85
         assert isinstance(response.prediction_time, datetime)
 
@@ -118,13 +129,25 @@ class TestPredictionResponse:
         """Test confidence score validation"""
         # Valid confidence
         response = PredictionResponse(
-            location="Test", predicted_flow=100.0, confidence=0.95
+            prediction={
+                "location": "Test",
+                "predicted_speed": 30.0,
+                "predicted_volume": 100
+            },
+            confidence=0.95
         )
         assert response.confidence == 0.95
 
         # Invalid confidence (outside 0-1 range)
         with pytest.raises(ValidationError):
-            PredictionResponse(location="Test", predicted_flow=100.0, confidence=1.5)
+            PredictionResponse(
+                prediction={
+                    "location": "Test",
+                    "predicted_speed": 30.0,
+                    "predicted_volume": 100
+                },
+                confidence=1.5
+            )
 
 
 class TestRouteOptimizationRequest:

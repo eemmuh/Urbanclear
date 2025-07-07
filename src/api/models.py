@@ -212,20 +212,27 @@ class RouteResponse(BaseModel):
 class PredictionResponse(BaseModel):
     """Response model for traffic predictions (test-compatible version)"""
 
-    location: str = Field(..., description="Location for prediction")
-    predicted_flow: float = Field(..., description="Predicted traffic flow")
+    prediction: Dict[str, Any] = Field(..., description="Traffic prediction data")
     confidence: float = Field(..., ge=0, le=1, description="Prediction confidence")
     prediction_time: datetime = Field(
         default_factory=datetime.now, description="When the prediction was made"
+    )
+    predictions: Optional[List[Dict[str, Any]]] = Field(
+        None, description="List of traffic prediction dictionaries"
     )
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "location": "Manhattan Bridge",
-                "predicted_flow": 120.5,
+                "prediction": {
+                    "location": "Manhattan Bridge",
+                    "predicted_speed": 22.0,
+                    "predicted_volume": 1400,
+                    "predicted_severity": "high",
+                },
                 "confidence": 0.85,
-                "prediction_time": "2024-01-01T12:00:00Z",
+                "prediction_time": "2024-01-01T13:00:00Z",
+                "predictions": []
             }
         }
     }

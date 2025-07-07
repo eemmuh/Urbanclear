@@ -8,7 +8,9 @@ import random
 from datetime import datetime
 from loguru import logger
 
-from src.api.models import RouteRequest, RouteResponse, Route, RoutePoint, Location
+from src.api.models import (
+    RouteRequest, RouteResponse, Route, RoutePoint, Location
+)
 from src.core.config import get_settings
 from src.data.mock_data_generator import MockDataGenerator
 
@@ -25,37 +27,36 @@ class RouteOptimizer:
         logger.info("RouteOptimizer initialized")
 
     async def optimize(self, route_request: RouteRequest) -> RouteResponse:
-        """Optimize route based on current traffic conditions"""
+        """Optimize a route request and return the best route with alternatives"""
+        start_time = datetime.now()
+        
+        # Convert dict to Location objects if needed (for RouteOptimizationRequest compatibility)
+        if isinstance(route_request.origin, dict):
+            route_request.origin = Location(
+                latitude=route_request.origin.get("lat", 0.0),
+                longitude=route_request.origin.get("lng", 0.0),
+                address="Origin"
+            )
+            
+        if isinstance(route_request.destination, dict):
+            route_request.destination = Location(
+                latitude=route_request.destination.get("lat", 0.0),
+                longitude=route_request.destination.get("lng", 0.0),
+                address="Destination"
+            )
+
         logger.info(
-            f"Optimizing route from {route_request.origin} to "
-            f"{route_request.destination} with {len(route_request.waypoints)} waypoints"
+            f"Optimizing route from {route_request.origin} to {route_request.destination} "
+            f"with {getattr(route_request, 'waypoints', []) and len(getattr(route_request, 'waypoints', []))} waypoints"
         )
 
         try:
-            start_time = datetime.now()
+            # Calculate the optimal route
+            primary_route = await self._calculate_optimal_route(route_request)
 
-            # Generate primary route using enhanced mock data
-            primary_route_data = self.mock_generator.generate_route_data(
-                route_request.origin, route_request.destination
-            )
-
-            primary_route = Route(
-                points=primary_route_data["points"],
-                total_distance=primary_route_data["total_distance"],
-                total_time=primary_route_data["total_time"],
-                total_fuel_cost=self._calculate_fuel_cost(
-                    primary_route_data["total_distance"]
-                ),
-                toll_cost=0.0,
-                carbon_footprint=self._calculate_carbon_footprint(
-                    primary_route_data["total_distance"]
-                ),
-                traffic_score=primary_route_data["traffic_score"],
-            )
-
-            # Generate alternative routes
+            # Calculate alternative routes
             alternative_routes = await self._calculate_alternative_routes(
-                route_request, 2
+                route_request, num_alternatives=2
             )
 
             optimization_time = (datetime.now() - start_time).total_seconds()
@@ -156,11 +157,11 @@ class RouteOptimizer:
             if i == 0:
                 # Origin point
                 lat, lng = origin.latitude, origin.longitude
-                address = origin.address
+                address = origin.address or "Origin"
             elif i == num_points + 1:
                 # Destination point
                 lat, lng = destination.latitude, destination.longitude
-                address = destination.address
+                address = destination.address or "Destination"
             else:
                 # Intermediate points
                 lat = origin.latitude + (lat_step * i)
@@ -227,14 +228,33 @@ class RouteOptimizer:
 
     def _create_fallback_route(self, route_request: RouteRequest) -> RouteResponse:
         """Create a basic fallback route when optimization fails"""
+        # Convert dict to Location objects if needed
+        if isinstance(route_request.origin, dict):
+            origin = Location(
+                latitude=route_request.origin.get("lat", 0.0),
+                longitude=route_request.origin.get("lng", 0.0),
+                address="Origin"
+            )
+        else:
+            origin = route_request.origin
+            
+        if isinstance(route_request.destination, dict):
+            destination = Location(
+                latitude=route_request.destination.get("lat", 0.0),
+                longitude=route_request.destination.get("lng", 0.0),
+                address="Destination"
+            )
+        else:
+            destination = route_request.destination
+            
         fallback_points = [
             RoutePoint(
-                location=route_request.origin,
+                location=origin,
                 estimated_travel_time=0,
                 distance_from_start=0.0,
             ),
             RoutePoint(
-                location=route_request.destination,
+                location=destination,
                 estimated_travel_time=15,
                 distance_from_start=3.0,
             ),
