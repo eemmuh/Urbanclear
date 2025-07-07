@@ -236,8 +236,9 @@ class MetricsPublisher:
                     else:  # 500
                         random.randint(0, 5)
 
-                    # Note: Counter increment is not exposed, so we'll track separately
-                    # In a real implementation, this would be incremented by actual API calls
+                    # Note: Counter increment is not exposed, so we'll track
+                    # separately. In a real implementation, this would be
+                    # incremented by actual API calls
 
         except Exception as e:
             logger.error(f"Error updating system metrics: {e}")

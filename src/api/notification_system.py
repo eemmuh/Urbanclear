@@ -14,6 +14,8 @@ from pydantic import BaseModel
 
 from src.core.config import get_settings
 
+settings = get_settings()
+
 
 class NotificationChannel(Enum):
     """Notification channels"""
@@ -55,12 +57,10 @@ class NotificationRequest(BaseModel):
 
 
 class NotificationService:
-    """Service for sending notifications"""
+    """Enhanced notification service for traffic management"""
 
     def __init__(self):
-        self.settings = get_settings()
         self.templates = self._load_templates()
-        self.sent_notifications = {}  # Track sent notifications
 
     def _load_templates(self) -> Dict[str, NotificationTemplate]:
         """Load notification templates"""
@@ -75,12 +75,11 @@ Type: {incident_type}
 Severity: {severity}
 Status: {status}
 Estimated Duration: {duration}
-
 Details: {description}
 
-Time: {timestamp}
-
 Please take alternate routes and drive safely.
+
+Time: {timestamp}
 
 Urbanclear Traffic Management System
                 """,
@@ -90,7 +89,8 @@ Urbanclear Traffic Management System
 <h2>🚨 Traffic Incident Alert</h2>
 <p><strong>Location:</strong> {location}</p>
 <p><strong>Type:</strong> {incident_type}</p>
-<p><strong>Severity:</strong> <span style="color: {severity_color};">{severity}</span></p>
+<p><strong>Severity:</strong> <span style="color: {severity_color};">
+{severity}</span></p>
 <p><strong>Status:</strong> {status}</p>
 <p><strong>Estimated Duration:</strong> {duration}</p>
 <p><strong>Details:</strong> {description}</p>
@@ -288,37 +288,27 @@ Urbanclear Traffic Management System
             return True
 
         except Exception as e:
-            logger.error(f"Failed to send push notification: {e}")
+            logger.error(f"Failed to send push: {e}")
             return False
 
     def _get_priority_color(self, priority: NotificationPriority) -> str:
         """Get color for priority level"""
-        color_map = {
+        colors = {
             NotificationPriority.LOW: "good",
             NotificationPriority.MEDIUM: "warning",
             NotificationPriority.HIGH: "danger",
             NotificationPriority.CRITICAL: "#ff0000",
         }
-        return color_map.get(priority, "good")
+        return colors.get(priority, "warning")
 
     async def send_incident_alert(self, incident_data: Dict[str, Any]) -> bool:
         """Send incident alert notification"""
         try:
-            # Add severity color for HTML template
-            severity_colors = {
-                "low": "green",
-                "medium": "orange",
-                "high": "red",
-                "critical": "darkred",
-            }
-            incident_data["severity_color"] = severity_colors.get(
-                incident_data.get("severity", "medium"), "orange"
-            )
-
             template = self.templates["traffic_incident"]
+
             request = NotificationRequest(
                 channel=NotificationChannel.EMAIL,
-                recipients=["traffic@urbanclear.com"],  # Configure recipients
+                recipients=["admin@urbanclear.com"],
                 template=template,
                 data=incident_data,
                 incident_id=incident_data.get("id"),
@@ -326,7 +316,6 @@ Urbanclear Traffic Management System
             )
 
             return await self.send_notification(request)
-
         except Exception as e:
             logger.error(f"Failed to send incident alert: {e}")
             return False
@@ -335,16 +324,16 @@ Urbanclear Traffic Management System
         """Send congestion alert notification"""
         try:
             template = self.templates["congestion_alert"]
+
             request = NotificationRequest(
                 channel=NotificationChannel.SLACK,
-                recipients=["#traffic-alerts"],
+                recipients=["traffic-alerts"],
                 template=template,
                 data=congestion_data,
                 location=congestion_data.get("location"),
             )
 
             return await self.send_notification(request)
-
         except Exception as e:
             logger.error(f"Failed to send congestion alert: {e}")
             return False
@@ -353,15 +342,15 @@ Urbanclear Traffic Management System
         """Send system alert notification"""
         try:
             template = self.templates["system_alert"]
+
             request = NotificationRequest(
                 channel=NotificationChannel.WEBHOOK,
-                recipients=["system-admin"],
+                recipients=["system-alerts"],
                 template=template,
                 data=system_data,
             )
 
             return await self.send_notification(request)
-
         except Exception as e:
             logger.error(f"Failed to send system alert: {e}")
             return False
@@ -370,9 +359,10 @@ Urbanclear Traffic Management System
         """Send incident resolved notification"""
         try:
             template = self.templates["incident_resolved"]
+
             request = NotificationRequest(
                 channel=NotificationChannel.EMAIL,
-                recipients=["traffic@urbanclear.com"],
+                recipients=["admin@urbanclear.com"],
                 template=template,
                 data=incident_data,
                 incident_id=incident_data.get("id"),
@@ -380,30 +370,31 @@ Urbanclear Traffic Management System
             )
 
             return await self.send_notification(request)
-
         except Exception as e:
-            logger.error(f"Failed to send resolved notification: {e}")
+            logger.error(f"Failed to send incident resolved notification: {e}")
             return False
 
     async def send_bulk_notifications(
         self, notifications: List[NotificationRequest]
     ) -> Dict[str, int]:
-        """Send multiple notifications"""
+        """Send multiple notifications in bulk"""
         results = {"sent": 0, "failed": 0}
 
-        # Send notifications concurrently
-        tasks = [self.send_notification(request) for request in notifications]
-        responses = await asyncio.gather(*tasks, return_exceptions=True)
-
-        for response in responses:
-            if isinstance(response, Exception):
+        for notification in notifications:
+            try:
+                success = await self.send_notification(notification)
+                if success:
+                    results["sent"] += 1
+                else:
+                    results["failed"] += 1
+            except Exception as e:
+                logger.error(f"Failed to send bulk notification: {e}")
                 results["failed"] += 1
-            elif response:
-                results["sent"] += 1
-            else:
-                results["failed"] += 1
 
-        logger.info(f"Bulk notification results: {results}")
+        logger.info(
+            f"Bulk notifications completed: {results['sent']} sent, "
+            f"{results['failed']} failed"
+        )
         return results
 
 
@@ -448,6 +439,52 @@ async def demo_notifications():
     }
 
     await notification_service.send_system_alert(system_data)
+
+    # Incident resolved
+    incident_data = {
+        "location": "Times Square & Broadway",
+        "incident_type": "Vehicle Accident",
+        "duration": "30-45 minutes",
+        "status": "Resolved",
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
+    await notification_service.send_incident_resolved(incident_data)
+
+    # Bulk notifications
+    notifications = [
+        NotificationRequest(
+            channel=NotificationChannel.EMAIL,
+            recipients=["admin@urbanclear.com"],
+            template=notification_service.templates["traffic_incident"],
+            data=incident_data,
+            incident_id=incident_data.get("id"),
+            location=incident_data.get("location"),
+        ),
+        NotificationRequest(
+            channel=NotificationChannel.SLACK,
+            recipients=["traffic-alerts"],
+            template=notification_service.templates["congestion_alert"],
+            data=congestion_data,
+            location=congestion_data.get("location"),
+        ),
+        NotificationRequest(
+            channel=NotificationChannel.WEBHOOK,
+            recipients=["system-alerts"],
+            template=notification_service.templates["system_alert"],
+            data=system_data,
+        ),
+        NotificationRequest(
+            channel=NotificationChannel.EMAIL,
+            recipients=["admin@urbanclear.com"],
+            template=notification_service.templates["incident_resolved"],
+            data=incident_data,
+            incident_id=incident_data.get("id"),
+            location=incident_data.get("location"),
+        ),
+    ]
+
+    await notification_service.send_bulk_notifications(notifications)
 
 
 if __name__ == "__main__":

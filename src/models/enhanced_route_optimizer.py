@@ -772,23 +772,25 @@ def main():
             print(f"\nAlternative Routes: {len(optimized_route.alternative_routes)}")
             for i, alt_route in enumerate(optimized_route.alternative_routes):
                 print(
-                    f"  Alternative {i+1}: {alt_route.total_time_minutes:.1f} min, {alt_route.total_distance_km:.1f} km"
+                    f"  Alternative {i+1}: {alt_route.total_time_minutes:.1f} min, "
+                    f"{alt_route.total_distance_km:.1f} km"
                 )
 
         # Calculate metrics
         metrics = optimizer.calculate_route_metrics(optimized_route)
-        print(f"\nRoute Metrics:")
+        print("\nRoute Metrics:")
         print(
             f"  Average Speed: {metrics['basic_metrics']['average_speed_kmh']:.1f} km/h"
         )
         print(
-            f"  Average Congestion: {metrics['traffic_metrics']['average_congestion']:.2f}"
+            f"  Average Congestion: "
+            f"{metrics['traffic_metrics']['average_congestion']:.2f}"
         )
         print(f"  Eco Score: {metrics['environmental_impact']['eco_score']:.1f}/100")
 
         # Get real-time updates
         updates = optimizer.get_real_time_updates(optimized_route)
-        print(f"\nReal-time Updates:")
+        print("\nReal-time Updates:")
         print(f"  Status: {updates['status']}")
         print(f"  Traffic Alerts: {len(updates['traffic_alerts'])}")
 

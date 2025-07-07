@@ -283,7 +283,8 @@ class EnhancedMLPipeline:
             mlflow.sklearn.log_model(model, f"{config.model_type}_model")
 
         logger.info(
-            f"Model {config.model_type} trained successfully. R² score: {metrics.r2:.4f}"
+            f"Model {config.model_type} trained successfully. "
+            f"R² score: {metrics.r2:.4f}"
         )
         return metrics
 

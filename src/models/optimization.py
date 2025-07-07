@@ -27,8 +27,8 @@ class RouteOptimizer:
     async def optimize(self, route_request: RouteRequest) -> RouteResponse:
         """Optimize route based on current traffic conditions"""
         logger.info(
-            f"Optimizing route from {route_request.origin} to {route_request.destination} "
-            f"with {len(route_request.waypoints)} waypoints"
+            f"Optimizing route from {route_request.origin} to "
+            f"{route_request.destination} with {len(route_request.waypoints)} waypoints"
         )
 
         try:

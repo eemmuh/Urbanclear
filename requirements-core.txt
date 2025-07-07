@@ -1,0 +1,26 @@
+# Core dependencies for production
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+loguru==0.7.2
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+
+# Database
+sqlalchemy==2.0.23
+asyncpg==0.29.0
+
+# Data processing
+pandas==2.1.4
+numpy==1.24.4
+
+# HTTP requests
+httpx==0.25.2
+aiohttp==3.9.1
+
+# Monitoring & Metrics
+prometheus-client==0.19.0
+prometheus-fastapi-instrumentator==6.1.0
+
+# WebSocket support
+websockets==12.0 

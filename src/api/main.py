@@ -18,7 +18,7 @@ import uvicorn
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.models import (
+from src.api.models import (
     TrafficCondition,
     IncidentReport,
     AnalyticsSummary,
@@ -28,12 +28,12 @@ from api.models import (
     RouteOptimizationResponse,
     AnalyticsResponse,
 )
-from api.dependencies import get_db
-from data.traffic_service import TrafficService
-from models.prediction import TrafficPredictor
-from models.optimization import RouteOptimizer
-from models.incident_detection import IncidentDetector
-from api.websocket_handler import (
+from src.api.dependencies import get_db
+from src.data.traffic_service import TrafficService
+from src.models.prediction import TrafficPredictor
+from src.models.optimization import RouteOptimizer
+from src.models.incident_detection import IncidentDetector
+from src.api.websocket_handler import (
     websocket_endpoint,
     start_background_streaming,
     manager,

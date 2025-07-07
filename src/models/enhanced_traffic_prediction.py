@@ -380,7 +380,7 @@ def main():
     # Make sample prediction
     if predictor.is_trained:
         result = predictor.predict(data.tail(1), model_type="ensemble")
-        print(f"\nSAMPLE PREDICTION:")
+        print("\nSAMPLE PREDICTION:")
         print(f"  Predicted Congestion: {result.predicted_value:.3f}")
         print(f"  Confidence Interval: {result.confidence_interval}")
         print(f"  Model Used: {result.model_type}")
