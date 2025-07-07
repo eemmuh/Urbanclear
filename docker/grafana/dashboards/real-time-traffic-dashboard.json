@@ -356,7 +356,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "value"
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
