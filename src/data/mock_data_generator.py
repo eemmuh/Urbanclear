@@ -15,10 +15,34 @@ try:
     )
 except ImportError:
     # Fallback for when running from different contexts
-    from src.api.models import (
-        TrafficCondition, IncidentReport, TrafficSeverity, IncidentType, Location,
-        TrafficPrediction, Route, RoutePoint, RouteResponse
-    )
+    try:
+        from src.api.models import (
+            TrafficCondition, IncidentReport, TrafficSeverity, IncidentType, Location,
+            TrafficPrediction, Route, RoutePoint, RouteResponse
+        )
+    except ImportError:
+        # Define minimal classes as fallback to prevent import errors
+        from typing import NamedTuple
+        
+        class Location(NamedTuple):
+            latitude: float
+            longitude: float
+            address: str
+        
+        class TrafficSeverity:
+            LOW = "low"
+            MODERATE = "moderate"  
+            HIGH = "high"
+            SEVERE = "severe"
+        
+        class IncidentType:
+            ACCIDENT = "accident"
+            CONSTRUCTION = "construction"
+            ROAD_CLOSURE = "road_closure"
+            WEATHER = "weather"
+            EVENT = "event"
+            BREAKDOWN = "breakdown"
+            OTHER = "other"
 
 
 @dataclass
@@ -452,6 +476,128 @@ class MockDataGenerator:
             "total_distance": round(distance, 1),
             "total_time": int(cumulative_time),
             "traffic_score": random.uniform(0.6, 0.9)
+        }
+
+    def generate_real_time_data(self) -> Dict[str, Any]:
+        """Generate comprehensive real-time data for dashboards"""
+        conditions = self.generate_current_conditions()
+        incidents = self.generate_incidents()
+        
+        # Convert to dashboard-friendly format
+        sensors_data = []
+        for condition in conditions:
+            sensor_data = {
+                "id": condition.id,
+                "location": condition.location.address,
+                "coordinates": {
+                    "lat": condition.location.latitude,
+                    "lon": condition.location.longitude
+                },
+                "speed": condition.speed_mph,
+                "volume": condition.volume,
+                "congestion_level": condition.congestion_level,
+                "flow_rate": condition.volume * condition.speed_mph / 60,  # vehicles per minute
+                "timestamp": condition.timestamp.isoformat()
+            }
+            sensors_data.append(sensor_data)
+        
+        # System-wide metrics
+        total_volume = sum(s["volume"] for s in sensors_data)
+        avg_speed = sum(s["speed"] for s in sensors_data) / len(sensors_data) if sensors_data else 0
+        avg_congestion = sum(s["congestion_level"] for s in sensors_data) / len(sensors_data) if sensors_data else 0
+        
+        return {
+            "sensors": sensors_data,
+            "summary": {
+                "total_sensors": len(sensors_data),
+                "total_volume": total_volume,
+                "average_speed": round(avg_speed, 1),
+                "average_congestion": round(avg_congestion, 2),
+                "active_incidents": len(incidents),
+                "timestamp": datetime.now().isoformat()
+            },
+            "incidents": [
+                {
+                    "id": inc.id,
+                    "type": inc.type,
+                    "location": inc.location.address,
+                    "severity": inc.severity,
+                    "description": inc.description
+                } for inc in incidents
+            ]
+        }
+
+    def generate_traffic_conditions(self, count: int = 8) -> List[Dict[str, Any]]:
+        """Generate traffic conditions in dictionary format for WebSocket streaming"""
+        conditions = self.generate_current_conditions()[:count]
+        
+        return [
+            {
+                "id": condition.id,
+                "location": {
+                    "latitude": condition.location.latitude,
+                    "longitude": condition.location.longitude,
+                    "address": condition.location.address
+                },
+                "speed_mph": condition.speed_mph,
+                "volume": condition.volume,
+                "congestion_level": condition.congestion_level,
+                "timestamp": condition.timestamp.isoformat()
+            }
+            for condition in conditions
+        ]
+
+    def generate_performance_data(self) -> Dict[str, Any]:
+        """Generate system performance metrics"""
+        return {
+            "system_uptime": random.randint(3600, 86400),  # 1-24 hours
+            "total_vehicles_processed": random.randint(100000, 500000),
+            "api_response_time": round(random.uniform(50, 200), 1),  # milliseconds
+            "cache_hit_rate": round(random.uniform(0.85, 0.98), 3),
+            "prediction_accuracy": round(random.uniform(0.82, 0.95), 3),
+            "data_processing_rate": random.randint(1000, 5000),  # records per minute
+            "database_connections": random.randint(5, 50),
+            "memory_usage": round(random.uniform(0.3, 0.8), 2),  # 30-80%
+            "cpu_usage": round(random.uniform(0.2, 0.7), 2),  # 20-70%
+        }
+
+    def generate_geographic_data(self) -> Dict[str, Any]:
+        """Generate geographic traffic data for mapping"""
+        geographic_zones = [
+            {"name": "Manhattan", "bounds": {"north": 40.8176, "south": 40.7047, "east": -73.9442, "west": -74.0479}},
+            {"name": "Brooklyn", "bounds": {"north": 40.7394, "south": 40.5707, "east": -73.8333, "west": -74.0421}},
+            {"name": "Queens", "bounds": {"north": 40.8007, "south": 40.5434, "east": -73.7004, "west": -73.9626}},
+            {"name": "Bronx", "bounds": {"north": 40.9176, "south": 40.7856, "east": -73.7652, "west": -73.9335}}
+        ]
+        
+        zone_data = []
+        for zone in geographic_zones:
+            # Generate traffic metrics for each zone
+            zone_traffic = {
+                "zone": zone["name"],
+                "bounds": zone["bounds"],
+                "traffic_density": round(random.uniform(0.3, 0.9), 2),
+                "average_speed": round(random.uniform(15, 45), 1),
+                "incident_count": random.randint(0, 5),
+                "congestion_hotspots": [
+                    {
+                        "lat": random.uniform(zone["bounds"]["south"], zone["bounds"]["north"]),
+                        "lng": random.uniform(zone["bounds"]["west"], zone["bounds"]["east"]),
+                        "severity": random.choice(["low", "moderate", "high"])
+                    }
+                    for _ in range(random.randint(1, 4))
+                ]
+            }
+            zone_data.append(zone_traffic)
+        
+        return {
+            "zones": zone_data,
+            "citywide_metrics": {
+                "total_congestion_score": round(random.uniform(0.4, 0.8), 2),
+                "major_incidents": random.randint(2, 8),
+                "average_commute_time": random.randint(25, 45),  # minutes
+                "traffic_light_efficiency": round(random.uniform(0.7, 0.9), 2)
+            }
         }
 
 

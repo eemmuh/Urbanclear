@@ -2,7 +2,7 @@
 Urbanclear - Smart City Traffic Optimization System - Main API
 """
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 import random
 import asyncio
@@ -399,7 +399,7 @@ async def simulate_rush_hour():
             "total_locations_monitored": len(rush_hour_data["locations"]),
             "average_speed_reduction": "35%",
             "total_estimated_delays": f"{sum(random.randint(5, 15) for _ in rush_hour_data['locations'])} minutes",
-            "most_congested": max(rush_hour_data["locations"], key=lambda x: x["volume"])["location"]
+            "most_congested": max(rush_hour_data["locations"], key=lambda x: x["volume"])["location"] if rush_hour_data["locations"] else "N/A"
         }
         
         return rush_hour_data
@@ -408,85 +408,328 @@ async def simulate_rush_hour():
         logger.error(f"Error generating rush hour simulation: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to generate simulation: {str(e)}")
 
-@app.get("/api/v1/demo/location-filter")
-async def demo_location_filter():
-    """Demo traffic data filtering by location"""
+@app.get("/api/v1/demo/real-time-dashboard")
+async def get_real_time_dashboard():
+    """Get comprehensive real-time data for dashboard demonstration"""
     try:
-        logger.info("Demonstrating location-based filtering")
+        logger.info("Generating real-time dashboard data")
         
-        # Show traffic data for different location filters
-        demo_data = {
-            "demonstration": "Location-Based Traffic Filtering",
-            "filters_tested": []
+        # Get real-time data from mock generator
+        real_time_data = traffic_service.mock_generator.generate_real_time_data()
+        performance_data = traffic_service.mock_generator.generate_performance_data()
+        geographic_data = traffic_service.mock_generator.generate_geographic_data()
+        
+        dashboard_data = {
+            "timestamp": datetime.now().isoformat(),
+            "traffic_data": real_time_data,
+            "performance_metrics": performance_data,
+            "geographic_overview": geographic_data,
+            "system_status": {
+                "api_status": "operational",
+                "database_status": "connected",
+                "ml_models_status": "loaded",
+                "real_time_processing": "active",
+                "data_quality": "excellent"
+            }
         }
         
-        test_filters = ["Central Park", "Times Square", "Bridge", "Tunnel"]
+        return dashboard_data
         
-        for filter_term in test_filters:
-            filtered_conditions = await traffic_service.get_current_conditions(location=filter_term)
-            
-            filter_result = {
-                "filter": filter_term,
-                "matches_found": len(filtered_conditions),
-                "locations": [
+    except Exception as e:
+        logger.error(f"Error generating dashboard data: {e}")
+        return {
+            "error": str(e),
+            "fallback_data": {
+                "timestamp": datetime.now().isoformat(),
+                "status": "degraded",
+                "message": "Using fallback data due to service error"
+            }
+        }
+
+@app.get("/api/v1/demo/ml-showcase")
+async def ml_showcase():
+    """Showcase ML capabilities with sample predictions and optimizations"""
+    try:
+        logger.info("Generating ML capabilities showcase")
+        
+        # Sample predictions for different locations
+        sample_locations = ["Central Park", "Times Square", "Brooklyn Bridge"]
+        ml_demo = {
+            "traffic_predictions": [],
+            "route_optimizations": [],
+            "incident_detection": {
+                "model_accuracy": "94.2%",
+                "detection_latency": "< 30 seconds",
+                "false_positive_rate": "2.1%",
+                "recent_detections": [
                     {
-                        "name": condition.location.address,
-                        "speed": condition.speed_mph,
-                        "congestion": condition.congestion_level
+                        "location": "FDR Drive @ 42nd St",
+                        "type": "congestion_anomaly",
+                        "confidence": 0.89,
+                        "detected_at": (datetime.now() - timedelta(minutes=5)).isoformat()
+                    },
+                    {
+                        "location": "Lincoln Tunnel Approach",
+                        "type": "incident_likely", 
+                        "confidence": 0.76,
+                        "detected_at": (datetime.now() - timedelta(minutes=12)).isoformat()
                     }
-                    for condition in filtered_conditions
+                ]
+            },
+            "signal_optimization": {
+                "optimized_intersections": 147,
+                "average_improvement": "18.5% reduction in wait time",
+                "fuel_savings": "2,850 gallons/day",
+                "co2_reduction": "28.5 tons/month",
+                "recent_optimizations": [
+                    {
+                        "intersection": "5th Ave & 42nd St",
+                        "improvement": "22% wait time reduction",
+                        "updated_at": (datetime.now() - timedelta(hours=1)).isoformat()
+                    },
+                    {
+                        "intersection": "Broadway & Houston",
+                        "improvement": "15% throughput increase",
+                        "updated_at": (datetime.now() - timedelta(hours=3)).isoformat()
+                    }
                 ]
             }
-            demo_data["filters_tested"].append(filter_result)
-        
-        return demo_data
-        
-    except Exception as e:
-        logger.error(f"Error in location filter demo: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to run demo: {str(e)}")
-
-@app.get("/api/v1/demo/analytics-comparison")
-async def demo_analytics_comparison():
-    """Demo analytics data for different time periods"""
-    try:
-        logger.info("Generating analytics comparison demo")
-        
-        # Generate analytics for multiple time periods
-        periods = ["1h", "24h", "7d", "30d"]
-        comparison_data = {
-            "demonstration": "Traffic Analytics Comparison",
-            "time_periods": []
         }
         
-        for period in periods:
-            summary = await traffic_service.get_analytics_summary(period)
-            
-            period_data = {
-                "period": period,
-                "total_vehicles": summary.total_vehicles,
-                "average_speed": summary.average_speed,
-                "incidents": summary.congestion_incidents,
-                "efficiency": summary.system_efficiency,
-                "fuel_savings": summary.fuel_savings,
-                "emission_reduction": summary.emission_reduction
+        # Generate predictions for each location
+        for location in sample_locations:
+            predictions = await traffic_predictor.predict(location, hours_ahead=6)
+            prediction_summary = {
+                "location": location,
+                "predictions": [
+                    {
+                        "hour": i+1,
+                        "predicted_speed": pred.predicted_speed,
+                        "predicted_volume": pred.predicted_volume,
+                        "congestion_level": pred.predicted_severity,
+                        "confidence": pred.confidence
+                    }
+                    for i, pred in enumerate(predictions[:6])
+                ],
+                "model_info": {
+                    "algorithm": "LSTM Neural Network",
+                    "accuracy": "87.3%",
+                    "last_trained": (datetime.now() - timedelta(days=2)).isoformat()
+                }
             }
-            comparison_data["time_periods"].append(period_data)
+            ml_demo["traffic_predictions"].append(prediction_summary)
         
-        # Add insights
-        comparison_data["insights"] = {
-            "peak_efficiency_period": max(comparison_data["time_periods"], 
-                                        key=lambda x: x["efficiency"])["period"],
-            "highest_traffic_period": max(comparison_data["time_periods"], 
-                                        key=lambda x: x["total_vehicles"])["period"],
-            "best_fuel_savings": max(comparison_data["time_periods"], 
-                                   key=lambda x: x["fuel_savings"])["fuel_savings"]
-        }
+        # Sample route optimizations
+        sample_routes = [
+            {"from": "JFK Airport", "to": "Manhattan", "savings": "12 minutes"},
+            {"from": "Brooklyn", "to": "Queens", "savings": "8 minutes"},
+            {"from": "Bronx", "to": "Staten Island", "savings": "15 minutes"}
+        ]
         
-        return comparison_data
+        for route in sample_routes:
+            optimization = {
+                "route": f"{route['from']} → {route['to']}",
+                "original_time": f"{random.randint(35, 65)} minutes",
+                "optimized_time": f"{random.randint(25, 45)} minutes",
+                "time_savings": route["savings"],
+                "fuel_savings": f"{random.randint(2, 8)} gallons",
+                "alternative_routes": random.randint(2, 5),
+                "traffic_factors": ["current_congestion", "historical_patterns", "incident_data", "weather_conditions"]
+            }
+            ml_demo["route_optimizations"].append(optimization)
+        
+        return ml_demo
         
     except Exception as e:
-        logger.error(f"Error in analytics comparison demo: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to run demo: {str(e)}")
+        logger.error(f"Error generating ML showcase: {e}")
+        return {
+            "error": str(e),
+            "message": "ML showcase generation failed",
+            "fallback": {
+                "status": "ML models available",
+                "capabilities": ["traffic_prediction", "route_optimization", "incident_detection", "signal_optimization"]
+            }
+        }
+
+@app.get("/api/v1/demo/performance-metrics")
+async def get_performance_metrics_demo():
+    """Demonstrate comprehensive system performance metrics"""
+    try:
+        logger.info("Generating performance metrics demo")
+        
+        performance_data = traffic_service.mock_generator.generate_performance_data()
+        
+        # Add additional metrics for comprehensive demo
+        comprehensive_metrics = {
+            **performance_data,
+            "ml_performance": {
+                "model_inference_time": f"{random.randint(50, 150)}ms",
+                "batch_processing_rate": f"{random.randint(1000, 5000)} records/min",
+                "prediction_accuracy_7d": f"{random.randint(85, 95)}%",
+                "model_drift_score": round(random.uniform(0.1, 0.3), 3)
+            },
+            "data_pipeline": {
+                "ingestion_rate": f"{random.randint(500, 2000)} events/sec",
+                "processing_latency": f"{random.randint(100, 500)}ms",
+                "data_quality_score": round(random.uniform(0.92, 0.99), 3),
+                "storage_utilization": f"{random.randint(45, 75)}%"
+            },
+            "api_performance": {
+                "requests_per_minute": random.randint(500, 2000),
+                "p95_response_time": f"{random.randint(150, 300)}ms",
+                "error_rate": f"{round(random.uniform(0.1, 2.0), 2)}%",
+                "active_connections": random.randint(50, 200)
+            },
+            "infrastructure": {
+                "containers_running": random.randint(8, 15),
+                "kubernetes_pods": random.randint(12, 25),
+                "load_balancer_requests": random.randint(1000, 5000),
+                "cdn_cache_hit_rate": round(random.uniform(0.88, 0.97), 3)
+            }
+        }
+        
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "metrics": comprehensive_metrics,
+            "alerts": [
+                {
+                    "level": "info",
+                    "message": "Traffic volume 15% above normal for this time",
+                    "metric": "traffic_volume",
+                    "threshold": "normal_range"
+                },
+                {
+                    "level": "warning", 
+                    "message": "API response time slightly elevated",
+                    "metric": "api_response_time",
+                    "threshold": "200ms"
+                }
+            ],
+            "health_score": round(random.uniform(0.85, 0.98), 3)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating performance metrics: {e}")
+        return {
+            "error": str(e),
+            "basic_metrics": {
+                "status": "operational",
+                "uptime": "99.7%",
+                "last_updated": datetime.now().isoformat()
+            }
+        }
+
+@app.get("/api/v1/demo/geographic-heatmap")
+async def get_geographic_heatmap():
+    """Generate geographic traffic heatmap data"""
+    try:
+        logger.info("Generating geographic heatmap data")
+        
+        geographic_data = traffic_service.mock_generator.generate_geographic_data()
+        
+        # Add heatmap-specific data
+        heatmap_data = {
+            **geographic_data,
+            "heatmap_points": [],
+            "traffic_corridors": [
+                {
+                    "name": "FDR Drive",
+                    "coordinates": [
+                        {"lat": 40.7505, "lng": -73.9681, "intensity": 0.8},
+                        {"lat": 40.7831, "lng": -73.9442, "intensity": 0.9},
+                        {"lat": 40.8176, "lng": -73.9429, "intensity": 0.7}
+                    ]
+                },
+                {
+                    "name": "West Side Highway",
+                    "coordinates": [
+                        {"lat": 40.7047, "lng": -74.0479, "intensity": 0.6},
+                        {"lat": 40.7589, "lng": -73.9851, "intensity": 0.8},
+                        {"lat": 40.8007, "lng": -73.9626, "intensity": 0.5}
+                    ]
+                }
+            ]
+        }
+        
+        # Generate heatmap points
+        for _ in range(100):  # 100 random traffic intensity points
+            heatmap_data["heatmap_points"].append({
+                "lat": round(random.uniform(40.7047, 40.8176), 6),
+                "lng": round(random.uniform(-74.0479, -73.9442), 6),
+                "intensity": round(random.uniform(0.1, 1.0), 2),
+                "volume": random.randint(100, 2000)
+            })
+        
+        return heatmap_data
+        
+    except Exception as e:
+        logger.error(f"Error generating geographic heatmap: {e}")
+        return {
+            "error": str(e),
+            "fallback_zones": ["Manhattan", "Brooklyn", "Queens", "Bronx"],
+            "message": "Heatmap data generation failed"
+        }
+
+@app.get("/api/v1/demo/incident-timeline")
+async def get_incident_timeline():
+    """Generate incident timeline data for demonstration"""
+    try:
+        logger.info("Generating incident timeline data")
+        
+        # Generate incidents for the last 24 hours
+        timeline_data = {
+            "period": "24 hours",
+            "total_incidents": 0,
+            "resolved_incidents": 0,
+            "timeline": []
+        }
+        
+        # Generate hourly incident data
+        for hour in range(24):
+            timestamp = datetime.now() - timedelta(hours=23-hour)
+            
+            # More incidents during rush hours
+            if hour in [7, 8, 17, 18, 19]:
+                incident_count = random.randint(2, 6)
+            else:
+                incident_count = random.randint(0, 3)
+            
+            timeline_data["total_incidents"] += incident_count
+            
+            hour_data = {
+                "hour": timestamp.strftime("%H:00"),
+                "timestamp": timestamp.isoformat(),
+                "incidents": incident_count,
+                "resolved": random.randint(0, max(1, incident_count-1)),
+                "types": {
+                    "accidents": random.randint(0, max(1, incident_count//2)),
+                    "construction": random.randint(0, 1),
+                    "breakdowns": random.randint(0, max(1, incident_count//3)),
+                    "other": random.randint(0, 1)
+                }
+            }
+            
+            timeline_data["resolved_incidents"] += hour_data["resolved"]
+            timeline_data["timeline"].append(hour_data)
+        
+        # Add summary statistics
+        timeline_data["resolution_rate"] = round(
+            timeline_data["resolved_incidents"] / max(1, timeline_data["total_incidents"]), 2
+        )
+        timeline_data["peak_hour"] = max(
+            timeline_data["timeline"], 
+            key=lambda x: x["incidents"]
+        )["hour"]
+        
+        return timeline_data
+        
+    except Exception as e:
+        logger.error(f"Error generating incident timeline: {e}")
+        return {
+            "error": str(e),
+            "period": "24 hours",
+            "message": "Timeline generation failed"
+        }
 
 if __name__ == "__main__":
     uvicorn.run(
