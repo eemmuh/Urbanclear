@@ -489,17 +489,17 @@ class AnalyticsResponse(BaseModel):
 
 class TrafficDataRequest(BaseModel):
     """Request model for traffic data queries"""
-    
+
     location: Optional[str] = Field(None, description="Location to query")
     start_time: Optional[datetime] = Field(None, description="Start time for data")
     end_time: Optional[datetime] = Field(None, description="End time for data")
-    
+
     model_config = {
         "json_schema_extra": {
             "example": {
                 "location": "Manhattan Bridge",
                 "start_time": "2024-01-01T08:00:00Z",
-                "end_time": "2024-01-01T18:00:00Z"
+                "end_time": "2024-01-01T18:00:00Z",
             }
         }
     }
@@ -507,10 +507,10 @@ class TrafficDataRequest(BaseModel):
 
 class TrafficDataResponse(BaseModel):
     """Response model for traffic data queries"""
-    
+
     data: List[Dict[str, Any]] = Field(..., description="Traffic data records")
     total_records: int = Field(..., ge=0, description="Total number of records")
-    
+
     model_config = {
         "json_schema_extra": {
             "example": {
@@ -519,10 +519,10 @@ class TrafficDataResponse(BaseModel):
                         "location": "Manhattan Bridge",
                         "flow_rate": 100.5,
                         "speed": 45.0,
-                        "timestamp": "2023-01-01T12:00:00"
+                        "timestamp": "2023-01-01T12:00:00",
                     }
                 ],
-                "total_records": 1
+                "total_records": 1,
             }
         }
     }
@@ -530,11 +530,13 @@ class TrafficDataResponse(BaseModel):
 
 class PredictionRequest(BaseModel):
     """Request model for traffic predictions"""
-    
+
     location: str = Field(..., description="Location for prediction")
-    prediction_horizon: int = Field(..., ge=0, description="Prediction horizon in minutes")
+    prediction_horizon: int = Field(
+        ..., ge=0, description="Prediction horizon in minutes"
+    )
     features: Optional[Dict[str, Any]] = Field(None, description="Additional features")
-    
+
     model_config = {
         "json_schema_extra": {
             "example": {
@@ -543,8 +545,8 @@ class PredictionRequest(BaseModel):
                 "features": {
                     "current_flow": 100.0,
                     "weather": "clear",
-                    "time_of_day": "peak"
-                }
+                    "time_of_day": "peak",
+                },
             }
         }
     }
@@ -559,9 +561,7 @@ class TestRouteOptimizationRequest(BaseModel):
     optimization_criteria: List[str] = Field(
         default=[], description="Optimization criteria"
     )
-    preferences: Dict[str, Any] = Field(
-        default={}, description="User preferences"
-    )
+    preferences: Dict[str, Any] = Field(default={}, description="User preferences")
 
     model_config = {
         "json_schema_extra": {
@@ -582,9 +582,7 @@ class TestRouteOptimizationResponse(BaseModel):
     waypoints: List[str] = Field(default=[], description="Route waypoints")
     estimated_time: float = Field(..., description="Estimated travel time")
     estimated_distance: float = Field(..., description="Estimated distance")
-    optimization_score: Optional[float] = Field(
-        None, description="Optimization score"
-    )
+    optimization_score: Optional[float] = Field(None, description="Optimization score")
 
     model_config = {
         "json_schema_extra": {

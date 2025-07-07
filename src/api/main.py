@@ -309,7 +309,7 @@ async def get_analytics_summary(
         if period not in valid_periods:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid period. Must be one of: {', '.join(valid_periods)}"
+                detail=f"Invalid period. Must be one of: {', '.join(valid_periods)}",
             )
 
         TRAFFIC_REQUESTS_TOTAL.labels(endpoint="analytics", method="GET").inc()
@@ -335,7 +335,7 @@ async def get_performance_analytics(
     try:
         valid_metrics = ["congestion", "throughput", "emissions", "efficiency"]
         if metric_type not in valid_metrics:
-            metrics_list = ', '.join(valid_metrics)
+            metrics_list = ", ".join(valid_metrics)
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid metric type. Must be one of: {metrics_list}",

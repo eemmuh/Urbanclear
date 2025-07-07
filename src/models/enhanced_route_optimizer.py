@@ -404,8 +404,7 @@ class EnhancedRouteOptimizer:
             def multi_objective_weight(u, v, edge_data):
                 # Normalize different objectives
                 time_cost = (
-                    edge_data.get("current_time", edge_data.get("base_time", 10))
-                    / 60
+                    edge_data.get("current_time", edge_data.get("base_time", 10)) / 60
                 )  # hours
                 distance_cost = (
                     edge_data.get("distance", 5) / 100

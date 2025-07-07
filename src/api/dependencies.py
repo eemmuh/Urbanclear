@@ -158,7 +158,7 @@ def get_current_user(
             "id": user_id,
             "username": f"user_{user_id}",
             "role": "admin",
-            "permissions": ["read", "write", "admin"]
+            "permissions": ["read", "write", "admin"],
         }
     except JWTError:
         raise HTTPException(
