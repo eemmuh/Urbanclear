@@ -272,9 +272,7 @@ async def resolve_incident(incident_id: str, db=Depends(get_db)):
 
 # Signal Optimization Endpoints
 @app.post("/api/v1/signals/optimize")
-async def optimize_signals(
-    request: SignalOptimizationRequest, db=Depends(get_db)
-):
+async def optimize_signals(request: SignalOptimizationRequest, db=Depends(get_db)):
     """Optimize traffic signal timing"""
     try:
         optimization = await traffic_service.optimize_signals(request)

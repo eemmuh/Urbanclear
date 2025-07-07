@@ -17,7 +17,7 @@ import shutil
 # Add the project root to the Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
-sys.path.insert(0, os.path.join(project_root, 'src'))
+sys.path.insert(0, os.path.join(project_root, "src"))
 
 # Import the main app and dependencies
 try:
@@ -31,6 +31,7 @@ except ImportError as e:
     print(f"Import error: {e}")
     # Create mock objects if imports fail
     from unittest.mock import Mock
+
     app = Mock()
     get_db = Mock()
     TrafficService = Mock()
@@ -93,6 +94,7 @@ def test_database():
     # Create tables
     try:
         from src.api.models import Base
+
         Base.metadata.create_all(bind=engine)
     except ImportError:
         # Skip table creation if models don't exist
