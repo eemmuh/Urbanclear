@@ -456,6 +456,10 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
+# Security reports
+bandit-report.json
+safety-report.json
+
 # Backup files
 *.bak
 *.backup

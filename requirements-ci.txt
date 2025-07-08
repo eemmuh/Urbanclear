@@ -1,0 +1,69 @@
+# CI/CD Dependencies - Minimal set for testing
+# Only include what's needed for tests and code quality
+
+# Core API Framework (required for tests)
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.0.0
+
+# Database drivers (for integration tests)
+sqlalchemy==2.0.23
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+pymongo==4.6.0
+redis==5.0.1
+
+# Data processing (lightweight)
+pandas==2.1.4
+numpy==1.24.4
+
+# HTTP requests
+httpx==0.25.2
+aiohttp==3.9.1
+requests==2.31.0
+
+# Configuration
+python-dotenv==1.0.0
+pyyaml==6.0.1
+loguru==0.7.2
+
+# Testing framework
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+
+# Code quality
+black==23.12.0
+flake8==6.1.0
+mypy==1.7.1
+isort==5.13.0
+
+# Security scanning
+bandit==1.7.5
+safety==2.3.5
+
+# Development tools
+pre-commit==3.6.0
+
+# Authentication & Security
+cryptography==41.0.8
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# WebSocket support
+websockets==12.0
+
+# Date/time utilities
+python-dateutil==2.8.2
+
+# Monitoring (lightweight)
+prometheus-client==0.19.0
+prometheus-fastapi-instrumentator==6.1.0
+
+# Utilities
+click==8.1.7
+rich==13.7.0
+colorama==0.4.6 

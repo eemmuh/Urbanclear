@@ -108,7 +108,7 @@ class TestPredictionResponse:
                 "location": "Manhattan Bridge",
                 "predicted_speed": 25.0,
                 "predicted_volume": 120,
-                "predicted_severity": "moderate"
+                "predicted_severity": "moderate",
             },
             confidence=0.85,
             prediction_time=datetime.now(),
@@ -116,9 +116,9 @@ class TestPredictionResponse:
                 {
                     "location": "Manhattan Bridge",
                     "predicted_speed": 25.0,
-                    "predicted_volume": 120
+                    "predicted_volume": 120,
                 }
-            ]
+            ],
         )
         assert response.prediction["location"] == "Manhattan Bridge"
         assert response.prediction["predicted_speed"] == 25.0
@@ -132,9 +132,9 @@ class TestPredictionResponse:
             prediction={
                 "location": "Test",
                 "predicted_speed": 30.0,
-                "predicted_volume": 100
+                "predicted_volume": 100,
             },
-            confidence=0.95
+            confidence=0.95,
         )
         assert response.confidence == 0.95
 
@@ -144,9 +144,9 @@ class TestPredictionResponse:
                 prediction={
                     "location": "Test",
                     "predicted_speed": 30.0,
-                    "predicted_volume": 100
+                    "predicted_volume": 100,
                 },
-                confidence=1.5
+                confidence=1.5,
             )
 
 

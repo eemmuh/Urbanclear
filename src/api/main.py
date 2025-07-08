@@ -163,9 +163,9 @@ async def predict_traffic(
         predictions = await traffic_predictor.predict(
             location=location, hours_ahead=hours_ahead
         )
-        
+
         logger.info(f"Generated {len(predictions)} predictions for {location}")
-        
+
         # Create the response in the expected format
         if predictions:
             first_prediction = predictions[0]
@@ -177,7 +177,9 @@ async def predict_traffic(
                     "predicted_severity": first_prediction.predicted_severity,
                 },
                 "confidence": first_prediction.confidence,
-                "predictions": [pred.model_dump() for pred in predictions]  # Convert to dicts
+                "predictions": [
+                    pred.model_dump() for pred in predictions
+                ],  # Convert to dicts
             }
             return PredictionResponse(**response_data)
         else:
@@ -190,13 +192,15 @@ async def predict_traffic(
                     "predicted_severity": "moderate",
                 },
                 "confidence": 0.8,
-                "predictions": []
+                "predictions": [],
             }
             return PredictionResponse(**response_data)
-            
+
     except Exception as e:
         logger.error(f"Error predicting traffic: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to generate predictions: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate predictions: {e}"
+        )
 
 
 @app.get("/api/v1/traffic/historical")
@@ -234,16 +238,32 @@ async def optimize_route(
     try:
         ROUTE_OPTIMIZATION_TIME.observe(0.5)  # Mock timing
         optimized_route = await route_optimizer.optimize(request)
-        
+
         # Convert the RouteResponse to the expected format
         optimized_route_dict = {
             "route_id": f"opt_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
-            "primary_route": optimized_route.primary_route.model_dump() if hasattr(optimized_route, 'primary_route') else {},
-            "alternatives": [route.model_dump() for route in optimized_route.alternative_routes] if hasattr(optimized_route, 'alternative_routes') else [],
-            "optimization_time": optimized_route.optimization_time if hasattr(optimized_route, 'optimization_time') else 0.1,
-            "factors_considered": optimized_route.factors_considered if hasattr(optimized_route, 'factors_considered') else []
+            "primary_route": (
+                optimized_route.primary_route.model_dump()
+                if hasattr(optimized_route, "primary_route")
+                else {}
+            ),
+            "alternatives": (
+                [route.model_dump() for route in optimized_route.alternative_routes]
+                if hasattr(optimized_route, "alternative_routes")
+                else []
+            ),
+            "optimization_time": (
+                optimized_route.optimization_time
+                if hasattr(optimized_route, "optimization_time")
+                else 0.1
+            ),
+            "factors_considered": (
+                optimized_route.factors_considered
+                if hasattr(optimized_route, "factors_considered")
+                else []
+            ),
         }
-        
+
         return RouteOptimizationResponse(
             route_id=optimized_route_dict["route_id"],
             optimized_route=optimized_route_dict,

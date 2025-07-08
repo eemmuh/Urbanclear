@@ -17,19 +17,22 @@ try:
 except ImportError:
     try:
         import jwt
+
         class JWTError(Exception):
             pass
+
     except ImportError:
         # Mock for testing environments
         class MockJWT:
             @staticmethod
             def decode(*args, **kwargs):
                 return {"sub": "test_user"}
-        
+
         jwt = MockJWT()
-        
+
         class JWTError(Exception):
             pass
+
 
 from src.core.config import get_settings as _get_settings
 
@@ -104,23 +107,23 @@ async def get_db() -> AsyncSession:
 
 class MockDBSession:
     """Mock database session for testing"""
-    
+
     async def execute(self, query):
         return MockResult()
-    
+
     async def rollback(self):
         pass
-    
+
     async def close(self):
         pass
 
 
 class MockResult:
     """Mock database result for testing"""
-    
+
     def fetchall(self):
         return []
-    
+
     def fetchone(self):
         return None
 

@@ -8,9 +8,7 @@ import random
 from datetime import datetime
 from loguru import logger
 
-from src.api.models import (
-    RouteRequest, RouteResponse, Route, RoutePoint, Location
-)
+from src.api.models import RouteRequest, RouteResponse, Route, RoutePoint, Location
 from src.core.config import get_settings
 from src.data.mock_data_generator import MockDataGenerator
 
@@ -29,26 +27,29 @@ class RouteOptimizer:
     async def optimize(self, route_request: RouteRequest) -> RouteResponse:
         """Optimize a route request and return the best route with alternatives"""
         start_time = datetime.now()
-        
-        # Convert dict to Location objects if needed (for RouteOptimizationRequest compatibility)
+
+        waypoints = getattr(route_request, "waypoints", [])
+        waypoint_count = len(waypoints) if waypoints else 0
+        logger.info(
+            f"Optimizing route from {route_request.origin} to "
+            f"{route_request.destination} with {waypoint_count} waypoints"
+        )
+
+        # Convert dict to Location objects if needed
+        # (for RouteOptimizationRequest compatibility)
         if isinstance(route_request.origin, dict):
             route_request.origin = Location(
                 latitude=route_request.origin.get("lat", 0.0),
                 longitude=route_request.origin.get("lng", 0.0),
-                address="Origin"
+                address="Origin",
             )
-            
+
         if isinstance(route_request.destination, dict):
             route_request.destination = Location(
                 latitude=route_request.destination.get("lat", 0.0),
                 longitude=route_request.destination.get("lng", 0.0),
-                address="Destination"
+                address="Destination",
             )
-
-        logger.info(
-            f"Optimizing route from {route_request.origin} to {route_request.destination} "
-            f"with {getattr(route_request, 'waypoints', []) and len(getattr(route_request, 'waypoints', []))} waypoints"
-        )
 
         try:
             # Calculate the optimal route
@@ -212,8 +213,8 @@ class RouteOptimizer:
 
         for i in range(max_alternatives):
             alternative = {
-                "route_id": f"alt_{i+1}",
-                "summary": f"Alternative route {i+1}",
+                "route_id": f"alt_{i + 1}",
+                "summary": f"Alternative route {i + 1}",
                 "distance": 5.2 + (i * 0.5),
                 "time": 18 + (i * 3),
                 "traffic_level": ["low", "moderate", "high"][i % 3],
@@ -233,20 +234,20 @@ class RouteOptimizer:
             origin = Location(
                 latitude=route_request.origin.get("lat", 0.0),
                 longitude=route_request.origin.get("lng", 0.0),
-                address="Origin"
+                address="Origin",
             )
         else:
             origin = route_request.origin
-            
+
         if isinstance(route_request.destination, dict):
             destination = Location(
                 latitude=route_request.destination.get("lat", 0.0),
                 longitude=route_request.destination.get("lng", 0.0),
-                address="Destination"
+                address="Destination",
             )
         else:
             destination = route_request.destination
-            
+
         fallback_points = [
             RoutePoint(
                 location=origin,

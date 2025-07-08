@@ -772,7 +772,7 @@ def main():
             print(f"\nAlternative Routes: {len(optimized_route.alternative_routes)}")
             for i, alt_route in enumerate(optimized_route.alternative_routes):
                 print(
-                    f"  Alternative {i+1}: {alt_route.total_time_minutes:.1f} min, "
+                    f"  Alternative {i + 1}: {alt_route.total_time_minutes:.1f} min, "
                     f"{alt_route.total_distance_km:.1f} km"
                 )
 

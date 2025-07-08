@@ -1,5 +1,4 @@
 from fastapi.testclient import TestClient
-from datetime import datetime, timedelta
 
 from src.api.main import app
 
@@ -23,7 +22,7 @@ class TestAPIEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
-        
+
     def test_traffic_data_with_location(self):
         """Test traffic data with location parameter"""
         response = client.get("/api/v1/traffic/current?location=Manhattan Bridge")
@@ -36,7 +35,7 @@ class TestAPIEndpoints:
         params = {
             "location": "Manhattan Bridge",
             "start_date": "2024-01-01T12:00:00Z",
-            "end_date": "2024-01-01T13:00:00Z"
+            "end_date": "2024-01-01T13:00:00Z",
         }
 
         response = client.get("/api/v1/traffic/historical", params=params)
@@ -73,7 +72,9 @@ class TestAPIEndpoints:
 
     def test_prediction_endpoint(self):
         """Test ML prediction endpoint"""
-        response = client.get("/api/v1/traffic/predict?location=Manhattan Bridge&prediction_horizon=60")
+        response = client.get(
+            "/api/v1/traffic/predict?location=Manhattan Bridge&prediction_horizon=60"
+        )
         assert response.status_code == 200
         data = response.json()
         assert "prediction" in data
@@ -86,7 +87,7 @@ class TestAPIEndpoints:
             "destination": {"lat": 40.7589, "lng": -73.9851},
             "waypoints": [],
             "preferences": {},
-            "constraints": {}
+            "constraints": {},
         }
 
         try:
@@ -103,18 +104,16 @@ class TestAPIEndpoints:
         except Exception as e:
             # Handle RuntimeError from database context manager
             if "generator didn't stop after athrow" in str(e):
-                # This is a known issue with the error handling in the database dependency
-                # The test should pass as it's testing the route optimization endpoint behavior
+                # This is a known issue with the error handling in the
+                # database dependency. The test should pass as it's testing
+                # the route optimization endpoint behavior
                 pass
             else:
                 raise
 
     def test_route_status_endpoint(self):
         """Test route alternatives endpoint"""
-        params = {
-            "origin": "40.7831,-73.9712",
-            "destination": "40.7589,-73.9851"
-        }
+        params = {"origin": "40.7831,-73.9712", "destination": "40.7589,-73.9851"}
         response = client.get("/api/v1/routes/alternatives", params=params)
         assert response.status_code == 200
         data = response.json()
@@ -178,10 +177,10 @@ class TestAPIEndpoints:
             "location": {
                 "latitude": 40.7831,
                 "longitude": -73.9712,
-                "address": "Manhattan Bridge"
+                "address": "Manhattan Bridge",
             },
             "severity": "moderate",
-            "description": "Multi-vehicle accident blocking lanes"
+            "description": "Multi-vehicle accident blocking lanes",
         }
         response = client.post("/api/v1/incidents/report", json=payload)
         assert response.status_code == 200

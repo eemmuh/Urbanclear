@@ -232,7 +232,7 @@ class PredictionResponse(BaseModel):
                 },
                 "confidence": 0.85,
                 "prediction_time": "2024-01-01T13:00:00Z",
-                "predictions": []
+                "predictions": [],
             }
         }
     }
