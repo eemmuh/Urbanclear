@@ -48,12 +48,12 @@ jobs:
       run: flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
     
     - name: Type checking
-      run: mypy src/ --config-file=mypy.ini
-      continue-on-error: true  # Non-blocking until we fix more issues
+      run: mypy src/ --config-file=config/mypy.ini
+      continue-on-error: false  # Now that we fixed the issues
     
     - name: Security scanning
       run: |
-        bandit -r src/ -f json -o bandit-report.json
+        bandit -r src/ -c config/bandit.yaml -f json -o bandit-report.json
         safety check --json --output safety-report.json
     
     - name: Upload security reports
