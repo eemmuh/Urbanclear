@@ -8,6 +8,7 @@ from typing import List, Optional
 import random
 import asyncio
 import uuid
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Depends, Query, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,6 +40,19 @@ from src.api.websocket_handler import (
     manager,
 )
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan event handler for startup and shutdown"""
+    # Startup
+    logger.info("Starting up Urbanclear API...")
+    asyncio.create_task(start_background_streaming())
+    logger.info("Background streaming started")
+    
+    yield
+    
+    # Shutdown
+    logger.info("Shutting down Urbanclear API...")
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Urbanclear API",
@@ -46,6 +60,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
+    lifespan=lifespan,
 )
 
 # CORS middleware
@@ -463,12 +478,7 @@ async def websocket_traffic_auto_endpoint(websocket: WebSocket):
     await websocket_endpoint(websocket, client_id)
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Start background services"""
-    # Start WebSocket data streaming in background
-    asyncio.create_task(start_background_streaming())
-    logger.info("Background streaming started")
+
 
 
 @app.get("/api/v1/websocket/status")
