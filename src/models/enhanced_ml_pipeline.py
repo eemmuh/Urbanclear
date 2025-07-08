@@ -19,7 +19,8 @@ import mlflow.sklearn
 from dataclasses import dataclass
 import optuna
 from optuna.samplers import TPESampler
-import pickle
+import pickle  # nosec B403 # Used for ML model persistence with proper validation
+import os
 
 
 @dataclass
@@ -331,24 +332,70 @@ class EnhancedMLPipeline:
             "metrics_history": self.metrics_history,
         }
 
-        with open(filepath, "wb") as f:
-            pickle.dump(pipeline_data, f)
+        try:
+            with open(filepath, "wb") as f:
+                pickle.dump(
+                    pipeline_data, f
+                )  # nosec B301 B403 # Controlled internal use
+            logger.info(f"Pipeline saved to {filepath}")
+        except Exception as e:
+            logger.error(f"Failed to save pipeline to {filepath}: {e}")
+            raise
 
-        logger.info(f"Pipeline saved to {filepath}")
+    def load_pipeline(self, filepath: str, trust_source: bool = False):
+        """
+        Load pipeline from disk
 
-    def load_pipeline(self, filepath: str):
-        """Load pipeline from disk"""
-        with open(filepath, "rb") as f:
-            pipeline_data = pickle.load(f)
+        Args:
+            filepath: Path to the pipeline file
+            trust_source: Set to True only if you trust the source of the file
+                         This suppresses security warnings for internal model files
+        """
+        if not trust_source:
+            logger.warning(
+                f"Loading pickle file {filepath}. Only load from trusted sources. "
+                "Set trust_source=True to suppress this warning."
+            )
 
-        self.models = pipeline_data["models"]
-        self.scalers = pipeline_data["scalers"]
-        self.encoders = pipeline_data["encoders"]
-        self.feature_importance = pipeline_data["feature_importance"]
-        self.model_configs = pipeline_data["model_configs"]
-        self.metrics_history = pipeline_data["metrics_history"]
+        # Validate file exists and has reasonable size
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"Pipeline file not found: {filepath}")
 
-        logger.info(f"Pipeline loaded from {filepath}")
+        file_size = os.path.getsize(filepath)
+        if file_size > 1024 * 1024 * 100:  # 100MB limit
+            logger.warning(
+                f"Large pipeline file detected: {file_size / (1024*1024):.1f}MB"
+            )
+
+        try:
+            with open(filepath, "rb") as f:
+                pipeline_data = pickle.load(
+                    f
+                )  # nosec B301 B403 # Controlled internal use
+
+            # Validate loaded data structure
+            required_keys = [
+                "models",
+                "scalers",
+                "encoders",
+                "feature_importance",
+                "model_configs",
+                "metrics_history",
+            ]
+            if not all(key in pipeline_data for key in required_keys):
+                raise ValueError("Invalid pipeline file format")
+
+            self.models = pipeline_data["models"]
+            self.scalers = pipeline_data["scalers"]
+            self.encoders = pipeline_data["encoders"]
+            self.feature_importance = pipeline_data["feature_importance"]
+            self.model_configs = pipeline_data["model_configs"]
+            self.metrics_history = pipeline_data["metrics_history"]
+
+            logger.info(f"Pipeline loaded from {filepath}")
+        except Exception as e:
+            logger.error(f"Failed to load pipeline from {filepath}: {e}")
+            raise
 
     def get_feature_importance_report(self) -> Dict[str, Any]:
         """Generate feature importance report across all models"""

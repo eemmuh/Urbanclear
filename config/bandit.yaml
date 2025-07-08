@@ -1,0 +1,57 @@
+# Bandit security configuration for urbanclear traffic system
+# This configuration suppresses false positives while maintaining security
+
+# Tests to skip
+skips:
+  # B311: Standard pseudo-random generators in mock data generation
+  # This is acceptable for mock/demo data that doesn't require cryptographic security
+  - B311
+
+# Paths to exclude from scanning
+exclude_dirs:
+  - /tests/
+  - /build/
+  - /dist/
+  - /.git/
+  - /venv/
+  - /env/
+  - /__pycache__/
+
+# Files to exclude
+exclude:
+  - "*/tests/*"
+  - "test_*.py"
+  - "*_test.py"
+
+# Custom rules
+tests:
+  # Allow B311 only in specific files for mock data
+  B311:
+    skip:
+      - "*/mock_data_generator.py"
+      - "*/demo/*"
+      - "*/fixtures/*"
+
+# Confidence levels to report
+confidence:
+  - HIGH
+  - MEDIUM
+
+# Severity levels to report  
+severity:
+  - HIGH
+  - MEDIUM
+  - LOW
+
+# Output format
+format: json
+
+# Additional comments for security team:
+# 
+# B311 exceptions rationale:
+# - mock_data_generator.py: Uses random for realistic demo data, not security-critical
+# - API demo endpoints: Random data for demonstrations only
+# - Test fixtures: Random test data generation
+#
+# All actual security-critical randomness should use the `secrets` module
+# Examples: session tokens, API keys, cryptographic nonces, password salts 

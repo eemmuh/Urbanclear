@@ -896,9 +896,12 @@ async def get_incident_timeline():
 
 
 if __name__ == "__main__":
+    # Security: Use environment variable for host, default to localhost
+    # For production, set HOST=0.0.0.0 only when needed
+    host = os.getenv("HOST", "127.0.0.1")  # Secure default
     uvicorn.run(
         "src.api.main:app",
-        host="0.0.0.0",
+        host=host,
         port=int(os.getenv("PORT", 8000)),
         reload=True,
     )

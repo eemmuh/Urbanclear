@@ -49,6 +49,14 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Security scan reports
+bandit-report.json
+bandit-report.txt
+bandit-report.xml
+
+# Type checking cache
+.mypy_cache/
+
 # Translations
 *.mo
 *.pot
@@ -655,3 +663,10 @@ performance/
 # Keep test fixtures
 !tests/fixtures/
 !tests/fixtures/**
+
+# Additional cleanup prevention
+*.json.bak
+*.xml.bak
+cleanup_*.md
+*_report.json
+*_report.xml

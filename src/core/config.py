@@ -231,7 +231,8 @@ class AppSettings(BaseSettings):
     version: str = "1.0.0"
     debug: bool = False
     log_level: str = "INFO"
-    host: str = "0.0.0.0"
+    # Security: Default to localhost, allow override via environment
+    host: str = "127.0.0.1"  # Secure default - localhost only
     port: int = 8000
 
 
