@@ -64,6 +64,40 @@ urbanclear-env/
 *.venv
 
 # ==============================================
+# React Dashboard (Node.js/React)
+# ==============================================
+# Dashboard dependencies
+dashboard/node_modules/*
+dashboard/.npm
+dashboard/.eslintcache
+
+# Dashboard build outputs
+dashboard/dist/
+dashboard/build/
+dashboard/.vite/
+
+# Dashboard environment files
+dashboard/.env
+dashboard/.env.local
+dashboard/.env.development.local
+dashboard/.env.test.local
+dashboard/.env.production.local
+
+# Dashboard logs
+dashboard/npm-debug.log*
+dashboard/yarn-debug.log*
+dashboard/yarn-error.log*
+dashboard/lerna-debug.log*
+
+# Dashboard IDE
+dashboard/.vscode/
+dashboard/.idea/
+
+# Dashboard OS files
+dashboard/.DS_Store
+dashboard/Thumbs.db
+
+# ==============================================
 # Environment Variables & Configuration
 # ==============================================
 .env
