@@ -3,19 +3,10 @@ import { useTrafficStore } from '../stores/trafficStore'
 import IncidentsList from '../components/IncidentsList'
 
 export default function Incidents() {
-  const { incidents, updateIncident } = useTrafficStore()
+  const { incidents } = useTrafficStore()
 
-  const handleResolveIncident = (id: string) => {
-    updateIncident(id, { status: 'resolved' })
-  }
-
-  const handleDismissIncident = (id: string) => {
-    // In a real app, this might hide the incident from view
-    console.log('Dismiss incident:', id)
-  }
-
-  const activeIncidents = incidents.filter(i => i.status === 'active')
-  const resolvedIncidents = incidents.filter(i => i.status === 'resolved')
+  const activeIncidents = incidents.filter(i => !i.is_resolved)
+  const resolvedIncidents = incidents.filter(i => i.is_resolved)
 
   return (
     <motion.div
@@ -36,8 +27,6 @@ export default function Incidents() {
               <IncidentsList 
                 incidents={activeIncidents}
                 showActions={true}
-                onResolve={handleResolveIncident}
-                onDismiss={handleDismissIncident}
               />
             </div>
           </div>

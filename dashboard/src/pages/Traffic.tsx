@@ -4,8 +4,6 @@ import {
   MapIcon,
   AdjustmentsHorizontalIcon,
   MagnifyingGlassIcon,
-  EyeIcon,
-  EyeSlashIcon,
 } from '@heroicons/react/24/outline'
 import { useTrafficStore } from '../stores/trafficStore'
 import { useWebSocketStore } from '../stores/websocketStore'

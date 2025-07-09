@@ -18,11 +18,14 @@ interface TrafficState {
   updateTrafficData: (data: TrafficData[]) => void
   updateIncidents: (incidents: Incident[]) => void
   addIncident: (incident: Incident) => void
+  addTrafficData: (data: TrafficData[]) => void
+  setRoutes: (routes: Route[]) => void
+  setDashboardStats: (stats: DashboardStats) => void
   resolveIncident: (id: string) => Promise<void>
   clearError: () => void
 }
 
-export const useTrafficStore = create<TrafficState>((set, get) => ({
+export const useTrafficStore = create<TrafficState>((set) => ({
   trafficData: [],
   incidents: [],
   routes: [],
@@ -118,6 +121,18 @@ export const useTrafficStore = create<TrafficState>((set, get) => ({
     set(state => ({ 
       incidents: [incident, ...state.incidents]
     }))
+  },
+
+  addTrafficData: (data: TrafficData[]) => {
+    set({ trafficData: data })
+  },
+
+  setRoutes: (routes: Route[]) => {
+    set({ routes })
+  },
+
+  setDashboardStats: (stats: DashboardStats) => {
+    set({ dashboardStats: stats })
   },
 
   resolveIncident: async (id: string) => {
