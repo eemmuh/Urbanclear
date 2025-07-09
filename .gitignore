@@ -1,4 +1,4 @@
-# Urbanclear - Comprehensive .gitignore
+# Urbanclear Traffic System - .gitignore
 
 # ==============================================
 # Python
@@ -20,15 +20,10 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
 
 # Installer logs
 pip-log.txt
@@ -49,70 +44,16 @@ coverage.xml
 .pytest_cache/
 cover/
 
-# Security scan reports
-bandit-report.json
-bandit-report.txt
-bandit-report.xml
-
 # Type checking cache
 .mypy_cache/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# IPython
-profile_default/
-ipython_config.py
-
 # pyenv
 .python-version
 
-# pipenv
-Pipfile.lock
-
-# poetry
-poetry.lock
-
-# pdm
-.pdm.toml
-
-# PEP 582
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# ==============================================
 # Virtual Environments
-# ==============================================
 env/
 venv/
 ENV/
@@ -121,147 +62,6 @@ venv.bak/
 urbanclear-env/
 .venv/
 *.venv
-
-# ==============================================
-# IDEs and Editors
-# ==============================================
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-# Vim
-*.swp
-*.swo
-*.un~
-Session.vim
-.netrwhist
-
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
-
-# ==============================================
-# Operating System Files
-# ==============================================
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Windows
-*.exe
-*.msi
-*.dll
-*.bat
-*.cmd
-
-# Linux
-*~
-
-# ==============================================
-# Node.js (React Dashboard)
-# ==============================================
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
-
-# nyc test coverage
-.nyc_output
-
-# Grunt intermediate storage
-.grunt
-
-# Bower dependency directory
-bower_components
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons
-build/Release
-
-# Dependency directories
-jspm_packages/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional stylelint cache
-.stylelintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# parcel-bundler cache
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-out
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Gatsby files
-.cache/
-public
-
-# Storybook build outputs
-.out
-.storybook-out
-storybook-static
-
-# Temporary folders
-tmp/
-temp/
 
 # ==============================================
 # Environment Variables & Configuration
@@ -282,60 +82,11 @@ config/production.*
 config/staging.*
 
 # ==============================================
-# Database Files
-# ==============================================
-*.db
-*.sqlite
-*.sqlite3
-*.db-journal
-*.db-wal
-*.db-shm
-
-# PostgreSQL
-*.backup
-*.sql.gz
-*.dump
-
-# MongoDB
-*.bson
-
-# Redis dumps
-dump.rdb
-appendonly.aof
-
-# ==============================================
-# Logs
-# ==============================================
-logs/
-*.log
-*.log.*
-log/
-
-# Application logs
-urbanclear.log
-traffic.log
-api.log
-ml.log
-security.log
-
-# System logs
-syslog
-kern.log
-auth.log
-
-# ==============================================
-# Docker
-# ==============================================
-.dockerignore
-docker-compose.override.yml
-docker-compose.local.yml
-.docker/
-
-# ==============================================
 # Machine Learning & Data
 # ==============================================
 # Model files
 models/trained/
+models/simple_trained/
 *.pkl
 *.joblib
 *.h5
@@ -360,25 +111,59 @@ data/interim/
 data/external/
 !data/sample/
 
-# Notebooks checkpoints
-.ipynb_checkpoints/
-
 # Experiment tracking
 experiments/
 wandb/
 
 # ==============================================
-# Monitoring & Metrics
+# Database Files
 # ==============================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# PostgreSQL
+*.backup
+*.sql.gz
+*.dump
+
+# MongoDB
+*.bson
+
+# Redis dumps
+dump.rdb
+appendonly.aof
+
+# ==============================================
+# Logs & Monitoring
+# ==============================================
+logs/
+*.log
+*.log.*
+log/
+
+# Application logs
+urbanclear.log
+traffic.log
+api.log
+ml.log
+security.log
+
 # Prometheus data
 prometheus_data/
 
 # Grafana data
 grafana_data/
 
-# Monitoring logs
-monitoring.log
-metrics.log
+# ==============================================
+# Docker
+# ==============================================
+docker-compose.override.yml
+docker-compose.local.yml
+.docker/
 
 # ==============================================
 # Security & Secrets
@@ -411,174 +196,17 @@ certs/
 certificates/
 
 # ==============================================
-# Build & Distribution
+# IDEs and Editors
 # ==============================================
-# Python builds
-build/
-dist/
-*.egg-info/
-
-# Compiled extensions
-*.so
-*.dylib
-*.dll
-
-# Frontend builds
-build/
-dist/
-static/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
 # ==============================================
-# Testing & Coverage
+# Operating System Files
 # ==============================================
-# Test databases
-test.db
-test_*.db
-*_test.db
-
-# Coverage reports
-htmlcov/
-.coverage
-coverage.xml
-coverage.json
-.nyc_output/
-
-# Performance test results
-performance-report.html
-load-test-results/
-
-# ==============================================
-# Temporary & Cache Files
-# ==============================================
-# Temporary files
-tmp/
-temp/
-*.tmp
-*.temp
-*.cache
-
-# Cache directories
-.cache/
-__pycache__/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# Security reports
-bandit-report.json
-safety-report.json
-
-# Backup files
-*.bak
-*.backup
-*.old
-*.orig
-
-# ==============================================
-# Infrastructure & Deployment
-# ==============================================
-# Terraform
-*.tfstate
-*.tfstate.*
-.terraform/
-terraform.tfvars
-*.tfplan
-
-# Kubernetes secrets
-k8s/secrets/
-kubernetes/secrets/
-
-# Helm charts
-charts/*/charts/
-charts/*/requirements.lock
-
-# Ansible
-*.retry
-.vault_pass.txt
-
-# ==============================================
-# Documentation
-# ==============================================
-# Generated docs
-docs/_build/
-docs/build/
-site/
-
-# ==============================================
-# Local Development
-# ==============================================
-# Local overrides
-local/
-.local/
-dev/
-development/
-
-# Personal notes
-notes.txt
-TODO.md
-NOTES.md
-
-# Local scripts
-local_*.py
-local_*.sh
-dev_*.py
-dev_*.sh
-
-# ==============================================
-# Cloud & External Services
-# ==============================================
-# AWS
-.aws/
-aws-exports.js
-
-# Google Cloud
-.gcloud/
-service-account.json
-*-service-account.json
-
-# Azure
-.azure/
-
-# ==============================================
-# Analytics & Reporting
-# ==============================================
-# Reports
-reports/
-*.report
-
-# Analytics data
-analytics/
-insights/
-
-# ==============================================
-# Media & Assets
-# ==============================================
-# Large files
-*.zip
-*.tar.gz
-*.rar
-*.7z
-
-# Images (if not needed in repo)
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.svg
-!static/**/*.png
-!static/**/*.jpg
-!static/**/*.svg
-
-# Videos
-*.mp4
-*.avi
-*.mov
-*.wmv
-
-# ==============================================
-# Miscellaneous
-# ==============================================
-# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -587,31 +215,32 @@ insights/
 ehthumbs.db
 Thumbs.db
 
-# Archive files
-*.zip
-*.tar.gz
-*.rar
+# ==============================================
+# Temporary & Cache Files
+# ==============================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.cache
 
-# IDE files
-.vscode/settings.json
-.idea/
+# Cache directories
+.cache/
+.ruff_cache/
 
-# Compiled source
-*.com
-*.class
-*.exe
-*.o
-*.so
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
 
-# Packages
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
+# ==============================================
+# Testing
+# ==============================================
+# Test databases
+test.db
+test_*.db
+*_test.db
 
 # ==============================================
 # Project Specific
@@ -623,17 +252,9 @@ incident_archives/
 route_cache/
 prediction_cache/
 
-# Dashboard assets
-dashboard/build/
-dashboard/dist/
-dashboard/node_modules/
-
 # Scripts output
 scripts/output/
 scripts/logs/
-
-# Makefile outputs
-.make_*
 
 # Health check files
 health_*.json
@@ -644,97 +265,5 @@ benchmarks/
 performance/
 
 # Real Data Service - API Keys and Sensitive Data
-config/config.yaml
 config/secrets.yaml
 config/api_keys.yaml
-.env.local
-.env.production
-
-# Real Data Service - Cache Files
-cache/
-*.cache
-redis_data/
-cache_*.json
-
-# API Server - Log Files
-logs/api_*.log
-logs/error_*.log
-logs/access_*.log
-uvicorn_*.log
-fastapi_*.log
-
-# Demo and Testing Output
-demo_output/
-test_results/
-demo_*.json
-test_*.json
-
-# Mock Data Generation
-mock_data_generated/
-generated_*.json
-
-# Real-time Streaming Data
-stream_data/
-websocket_logs/
-streaming_*.log
-
-# Health Monitoring
-health_reports/
-monitoring_data/
-grafana_data/
-prometheus_data/
-
-# Development Artifacts
-.pytest_cache/
-.coverage.*
-coverage_report/
-test_coverage/
-
-# API Documentation Generation
-api_docs_generated/
-openapi_*.json
-
-# Temporary Development Files
-temp_*.py
-tmp_*.py
-debug_*.py
-test_*.py
-scratch_*.py
-
-# Database Files (if using SQLite for development)
-*.db
-*.sqlite
-*.sqlite3
-db_*.sql
-
-# Redis Dumps
-dump.rdb
-redis_*.rdb
-
-# ==============================================
-# Keep These Files (Examples)
-# ==============================================
-# Keep example configurations
-!config/config.example.yaml
-!.env.example
-!docker-compose.example.yml
-
-# Keep sample data
-!data/sample/
-!data/sample/**
-
-# Keep documentation
-!docs/
-!*.md
-!*.rst
-
-# Keep test fixtures
-!tests/fixtures/
-!tests/fixtures/**
-
-# Additional cleanup prevention
-*.json.bak
-*.xml.bak
-cleanup_*.md
-*_report.json
-*_report.xml
