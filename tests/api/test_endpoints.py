@@ -153,7 +153,7 @@ class TestAPIEndpoints:
 
     def test_api_error_handling(self):
         """Test API error handling with malformed requests"""
-        response = client.post("/api/v1/routes/optimize", data="invalid json")
+        response = client.post("/api/v1/routes/optimize", content="invalid json")
         assert response.status_code == 422
 
     def test_metrics_endpoint(self):

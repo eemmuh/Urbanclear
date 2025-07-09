@@ -643,6 +643,74 @@ status_*.json
 benchmarks/
 performance/
 
+# Real Data Service - API Keys and Sensitive Data
+config/config.yaml
+config/secrets.yaml
+config/api_keys.yaml
+.env.local
+.env.production
+
+# Real Data Service - Cache Files
+cache/
+*.cache
+redis_data/
+cache_*.json
+
+# API Server - Log Files
+logs/api_*.log
+logs/error_*.log
+logs/access_*.log
+uvicorn_*.log
+fastapi_*.log
+
+# Demo and Testing Output
+demo_output/
+test_results/
+demo_*.json
+test_*.json
+
+# Mock Data Generation
+mock_data_generated/
+generated_*.json
+
+# Real-time Streaming Data
+stream_data/
+websocket_logs/
+streaming_*.log
+
+# Health Monitoring
+health_reports/
+monitoring_data/
+grafana_data/
+prometheus_data/
+
+# Development Artifacts
+.pytest_cache/
+.coverage.*
+coverage_report/
+test_coverage/
+
+# API Documentation Generation
+api_docs_generated/
+openapi_*.json
+
+# Temporary Development Files
+temp_*.py
+tmp_*.py
+debug_*.py
+test_*.py
+scratch_*.py
+
+# Database Files (if using SQLite for development)
+*.db
+*.sqlite
+*.sqlite3
+db_*.sql
+
+# Redis Dumps
+dump.rdb
+redis_*.rdb
+
 # ==============================================
 # Keep These Files (Examples)
 # ==============================================

@@ -158,22 +158,22 @@ class ConnectionManager:
 
     async def _generate_incident_update(self) -> WebSocketMessage:
         """Generate incident update"""
-        incidents = self.data_generator.generate_incidents(count=3)
+        incidents = self.data_generator.generate_incidents()
 
         return WebSocketMessage(
             type="incident_update",
             data={
                 "incidents": [
                     {
-                        "id": incident["id"],
-                        "type": incident["type"],
-                        "location": incident["location"]["address"],
-                        "severity": incident["severity"],
-                        "status": incident["status"],
-                        "estimated_duration": incident["estimated_duration"],
+                        "id": incident.id,
+                        "type": incident.type,
+                        "location": incident.location.address,
+                        "severity": incident.severity,
+                        "status": "active" if not incident.is_resolved else "resolved",
+                        "estimated_duration": incident.estimated_duration,
                         "coordinates": {
-                            "lat": incident["location"]["latitude"],
-                            "lon": incident["location"]["longitude"],
+                            "lat": incident.location.latitude,
+                            "lon": incident.location.longitude,
                         },
                     }
                     for incident in incidents
@@ -184,7 +184,7 @@ class ConnectionManager:
 
     async def _generate_prediction_update(self) -> WebSocketMessage:
         """Generate prediction update"""
-        predictions = self.data_generator.generate_predictions(
+        predictions = self.data_generator.generate_traffic_predictions(
             location="Times Square", hours_ahead=6
         )
 
@@ -193,12 +193,12 @@ class ConnectionManager:
             data={
                 "predictions": [
                     {
-                        "timestamp": pred["timestamp"],
-                        "location": pred["location"],
-                        "predicted_speed": pred["predicted_speed"],
-                        "predicted_volume": pred["predicted_volume"],
-                        "confidence": pred["confidence"],
-                        "congestion_forecast": pred["congestion_level"],
+                        "timestamp": pred.prediction_time.isoformat(),
+                        "location": pred.location.address,
+                        "predicted_speed": pred.predicted_speed,
+                        "predicted_volume": pred.predicted_volume,
+                        "confidence": pred.confidence,
+                        "congestion_forecast": pred.predicted_severity,
                     }
                     for pred in predictions
                 ]

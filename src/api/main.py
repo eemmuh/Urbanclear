@@ -31,6 +31,7 @@ from src.api.models import (
 )
 from src.api.dependencies import get_db
 from src.data.traffic_service import TrafficService
+from src.data.real_data_service import real_data_service
 from src.models.prediction import TrafficPredictor
 from src.models.optimization import RouteOptimizer
 from src.models.incident_detection import IncidentDetector
@@ -40,6 +41,7 @@ from src.api.websocket_handler import (
     manager,
 )
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan event handler for startup and shutdown"""
@@ -47,11 +49,12 @@ async def lifespan(app: FastAPI):
     logger.info("Starting up Urbanclear API...")
     asyncio.create_task(start_background_streaming())
     logger.info("Background streaming started")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Urbanclear API...")
+
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -478,76 +481,316 @@ async def websocket_traffic_auto_endpoint(websocket: WebSocket):
     await websocket_endpoint(websocket, client_id)
 
 
-
-
-
 @app.get("/api/v1/websocket/status")
 async def get_websocket_status():
     """Get WebSocket connection status"""
     return {
-        "active_connections": len(manager.active_connections),
-        "topics": list(manager.subscriptions.keys()) if manager.subscriptions else [],
-        "status": "active" if manager.active_connections else "inactive",
+        "status": "operational",
+        "connections": manager.get_connection_count(),
+        "streaming": True,
+        "timestamp": datetime.now().isoformat(),
     }
 
 
-# Demo Endpoints for Testing
-@app.get("/api/v1/demo/rush-hour-simulation")
-async def simulate_rush_hour():
-    """Simulate rush hour traffic conditions"""
+# Real Data Integration Endpoints
+@app.post("/api/v1/real-data/geocode")
+async def geocode_address_endpoint(
+    address: str = Query(..., description="Address to geocode"),
+    prefer_source: Optional[str] = Query(None, description="Preferred data source")
+):
+    """Geocode an address using real data sources"""
     try:
-        logger.info("Generating rush hour simulation data")
+        async with real_data_service as service:
+            result = await service.geocode_address(address, prefer_source)
+            
+            if result:
+                return {
+                    "success": True,
+                    "data": result.data,
+                    "source": result.source,
+                    "quality": result.quality.value,
+                    "timestamp": result.timestamp.isoformat(),
+                    "cache_hit": result.cache_hit
+                }
+            else:
+                raise HTTPException(
+                    status_code=404, 
+                    detail=f"Could not geocode address: {address}"
+                )
+    except Exception as e:
+        logger.error(f"Error geocoding address {address}: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Geocoding failed: {str(e)}"
+        )
 
-        # Generate data for multiple locations during rush hour
-        rush_hour_data = {
-            "simulation_id": "rush_hour_001",
-            "status": "completed",
-            "duration_hours": 3,
-            "peak_congestion": {
-                "time": "08:30 AM",
-                "locations": ["Times Square", "Brooklyn Bridge"],
-                "severity": "high",
-            },
-            "traffic_flow": {
-                "total_vehicles": 125000,
-                "average_speed": 18.5,
-                "congestion_incidents": 47,
-            },
-            "generated_at": datetime.now().isoformat(),
+
+@app.post("/api/v1/real-data/route")
+async def get_real_route(
+    start_lat: float = Query(..., description="Start latitude"),
+    start_lon: float = Query(..., description="Start longitude"),
+    end_lat: float = Query(..., description="End latitude"),
+    end_lon: float = Query(..., description="End longitude"),
+    mode: str = Query("drive", description="Transportation mode"),
+    prefer_source: Optional[str] = Query(None, description="Preferred data source")
+):
+    """Get real route using external APIs"""
+    try:
+        async with real_data_service as service:
+            route = await service.get_route(
+                start_lat, start_lon, end_lat, end_lon, mode, prefer_source
+            )
+            
+            if route:
+                return {
+                    "success": True,
+                    "route": {
+                        "distance_meters": route.distance_meters,
+                        "duration_seconds": route.duration_seconds,
+                        "geometry": route.geometry,
+                        "steps": route.steps,
+                        "summary": route.summary,
+                        "warnings": route.warnings
+                    },
+                    "source": route.source,
+                    "quality": route.quality.value
+                }
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Could not calculate route"
+                )
+    except Exception as e:
+        logger.error(f"Error calculating route: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Route calculation failed: {str(e)}"
+        )
+
+
+@app.get("/api/v1/real-data/places/search")
+async def search_real_places(
+    query: str = Query(..., description="Search query"),
+    latitude: float = Query(..., description="Center latitude"),
+    longitude: float = Query(..., description="Center longitude"),
+    radius_km: int = Query(10, description="Search radius in kilometers"),
+    limit: int = Query(20, description="Maximum results"),
+    prefer_source: Optional[str] = Query(None, description="Preferred data source")
+):
+    """Search for places using real data sources"""
+    try:
+        async with real_data_service as service:
+            places = await service.search_places(
+                query, latitude, longitude, radius_km, limit, prefer_source
+            )
+            
+            return {
+                "success": True,
+                "places": [
+                    {
+                        "name": place.name,
+                        "latitude": place.latitude,
+                        "longitude": place.longitude,
+                        "address": place.address,
+                        "categories": place.categories,
+                        "distance": place.distance,
+                        "source": place.source,
+                        "properties": place.properties
+                    }
+                    for place in places
+                ],
+                "count": len(places),
+                "query": query,
+                "center": {"latitude": latitude, "longitude": longitude},
+                "radius_km": radius_km
+            }
+    except Exception as e:
+        logger.error(f"Error searching places: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Place search failed: {str(e)}"
+        )
+
+
+@app.get("/api/v1/real-data/matrix")
+async def get_real_matrix(
+    locations: str = Query(..., description="Comma-separated lat,lon pairs"),
+    prefer_source: Optional[str] = Query(None, description="Preferred data source")
+):
+    """Get distance/duration matrix using real data sources"""
+    try:
+        # Parse locations string: "lat1,lon1;lat2,lon2;..."
+        location_pairs = []
+        for pair in locations.split(';'):
+            lat, lon = map(float, pair.split(','))
+            location_pairs.append((lat, lon))
+        
+        if len(location_pairs) < 2:
+            raise HTTPException(
+                status_code=400,
+                detail="At least 2 locations required for matrix calculation"
+            )
+        
+        async with real_data_service as service:
+            result = await service.get_traffic_matrix(location_pairs, prefer_source)
+            
+            if result:
+                return {
+                    "success": True,
+                    "matrix": result.data,
+                    "source": result.source,
+                    "quality": result.quality.value,
+                    "timestamp": result.timestamp.isoformat(),
+                    "cache_hit": result.cache_hit
+                }
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Could not calculate matrix"
+                )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid location format: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Error calculating matrix: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Matrix calculation failed: {str(e)}"
+        )
+
+
+@app.get("/api/v1/real-data/isochrones")
+async def get_real_isochrones(
+    latitude: float = Query(..., description="Center latitude"),
+    longitude: float = Query(..., description="Center longitude"),
+    time_minutes: str = Query("15,30", description="Comma-separated time values in minutes"),
+    mode: str = Query("drive", description="Transportation mode"),
+    prefer_source: Optional[str] = Query(None, description="Preferred data source")
+):
+    """Get isochrones (reachable areas) using real data sources"""
+    try:
+        # Parse time values
+        time_values = [float(t.strip()) for t in time_minutes.split(',')]
+        
+        async with real_data_service as service:
+            result = await service.get_isochrones(
+                latitude, longitude, time_values, mode, prefer_source
+            )
+            
+            if result:
+                return {
+                    "success": True,
+                    "isochrones": result.data,
+                    "source": result.source,
+                    "quality": result.quality.value,
+                    "timestamp": result.timestamp.isoformat(),
+                    "cache_hit": result.cache_hit,
+                    "center": {"latitude": latitude, "longitude": longitude},
+                    "time_minutes": time_values,
+                    "mode": mode
+                }
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Could not calculate isochrones"
+                )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid time format: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Error calculating isochrones: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Isochrone calculation failed: {str(e)}"
+        )
+
+
+@app.get("/api/v1/real-data/health")
+async def get_real_data_health():
+    """Get health status of all real data sources"""
+    try:
+        async with real_data_service as service:
+            health_status = await service.get_health_status()
+            return health_status
+    except Exception as e:
+        logger.error(f"Error getting real data health: {e}")
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "overall_health": "error",
+            "error": str(e),
+            "sources": {}
         }
 
-        # Use mock generator for realistic data
-        conditions = await traffic_service.get_current_conditions()
 
-        for condition in conditions[:5]:  # Limit to 5 locations for demo
-            # Simulate rush hour impact
-            rush_condition = {
-                "location": condition.location.address,
-                "coordinates": {
-                    "lat": condition.location.latitude,
-                    "lng": condition.location.longitude,
+# Demo Endpoints
+@app.get("/api/v1/demo/rush-hour-simulation")
+async def simulate_rush_hour():
+    """Simulate rush hour traffic patterns for demonstration"""
+    try:
+        logger.info("Generating rush hour simulation")
+
+        # Generate comprehensive rush hour data
+        rush_hour_data = {
+            "simulation_id": f"rush_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            "timestamp": datetime.now().isoformat(),
+            "period": "morning_rush",
+            "duration_minutes": 180,
+            "traffic_flow": {
+                "peak_volume": random.randint(4500, 6000),
+                "average_speed": random.randint(15, 25),
+                "congestion_index": random.randint(75, 95),
+                "incidents_count": random.randint(8, 15),
+            },
+            "affected_routes": [
+                {
+                    "route": "I-95 Northbound",
+                    "delay_minutes": random.randint(15, 35),
+                    "volume_increase": f"{random.randint(200, 400)}%",
+                    "speed_reduction": f"{random.randint(40, 60)}%",
                 },
-                "normal_speed": condition.speed_mph
-                * 1.5,  # What speed would be normally
-                "rush_hour_speed": condition.speed_mph,
-                "congestion_increase": "40-60%",
-                "estimated_delay": f"{random.randint(5, 15)} minutes",
-                "volume": condition.volume,
-                "severity": condition.severity,
-            }
-            rush_hour_data["locations"].append(rush_condition)
-
-        rush_hour_data["summary"] = {
-            "total_locations_monitored": len(rush_hour_data["locations"]),
-            "average_speed_reduction": "35%",
-            "total_estimated_delays": (
-                f"{sum(random.randint(5, 15) for _ in rush_hour_data['locations'])}"
-                " minutes"
-            ),
-            "most_congested": (
-                max(rush_hour_data["locations"], key=lambda x: x["volume"])["location"]
-                if rush_hour_data["locations"]
-                else "N/A"
+                {
+                    "route": "FDR Drive",
+                    "delay_minutes": random.randint(20, 45),
+                    "volume_increase": f"{random.randint(150, 350)}%",
+                    "speed_reduction": f"{random.randint(45, 65)}%",
+                },
+                {
+                    "route": "Brooklyn Bridge",
+                    "delay_minutes": random.randint(10, 25),
+                    "volume_increase": f"{random.randint(180, 320)}%",
+                    "speed_reduction": f"{random.randint(35, 55)}%",
+                },
+            ],
+            "hotspots": [
+                {
+                    "location": "Midtown Manhattan",
+                    "severity": "critical",
+                    "congestion_score": random.randint(85, 100),
+                    "estimated_delays": f"{random.randint(25, 45)} minutes",
+                },
+                {
+                    "location": "Downtown Brooklyn",
+                    "severity": "high",
+                    "congestion_score": random.randint(70, 85),
+                    "estimated_delays": f"{random.randint(15, 30)} minutes",
+                },
+            ],
+            "predictions": {
+                "peak_time": (datetime.now() + timedelta(minutes=30)).isoformat(),
+                "recovery_time": (datetime.now() + timedelta(hours=2)).isoformat(),
+                "max_delay_expected": f"{random.randint(35, 60)} minutes",
+                "alternative_routes": [
+                    "Use public transportation",
+                    "Consider remote work",
+                    "Delay non-essential trips",
+                ],
+            },
+            "real_time_data": traffic_service.mock_generator.generate_real_time_data(
+                location="citywide", include_predictions=True
             ),
         }
 
