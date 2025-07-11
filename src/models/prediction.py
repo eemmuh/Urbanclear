@@ -32,10 +32,10 @@ class TrafficPredictor:
     def load_model(self):
         """Load the trained prediction model"""
         model_path = self.models_dir / "traffic_predictor.pkl"
-        
+
         if model_path.exists():
             try:
-                with open(model_path, 'rb') as f:
+                with open(model_path, "rb") as f:
                     self.model = pickle.load(f)
                 self.is_trained = True
                 logger.info("Real traffic prediction model loaded successfully")
@@ -49,15 +49,17 @@ class TrafficPredictor:
             self.is_trained = False
             return False
 
-    def _extract_features(self, location: str, prediction_time: datetime) -> List[float]:
+    def _extract_features(
+        self, location: str, prediction_time: datetime
+    ) -> List[float]:
         """Extract features for prediction"""
         # Extract features: [hour, day_of_week, weather_score, location_factor]
         hour = prediction_time.hour
         day_of_week = prediction_time.weekday()
-        
+
         # Simple weather score (0-1, where 1 is bad weather)
         weather_score = 0.2  # Default moderate weather
-        
+
         # Location factor based on location name
         location_factor = 0.5  # Default
         if "times square" in location.lower():
@@ -68,7 +70,7 @@ class TrafficPredictor:
             location_factor = 0.6
         elif "wall street" in location.lower():
             location_factor = 0.8
-        
+
         return [hour, day_of_week, weather_score, location_factor]
 
     async def predict(
@@ -90,17 +92,17 @@ class TrafficPredictor:
             # Use real model for predictions
             predictions = []
             current_time = datetime.now()
-            
+
             for hour in range(hours_ahead):
                 prediction_time = current_time + timedelta(hours=hour)
                 features = self._extract_features(location, prediction_time)
-                
+
                 # Make prediction using trained model
                 predicted_flow = self.model.predict_single(features)
-                
+
                 # Convert flow to congestion level (0-1)
                 congestion_level = min(1.0, max(0.0, (predicted_flow - 200) / 600))
-                
+
                 # Convert to traffic conditions
                 if congestion_level < 0.3:
                     conditions = "light"
@@ -110,7 +112,7 @@ class TrafficPredictor:
                     conditions = "heavy"
                 else:
                     conditions = "severe"
-                
+
                 prediction = TrafficPrediction(
                     location=location,
                     timestamp=prediction_time,
@@ -118,10 +120,10 @@ class TrafficPredictor:
                     congestion_level=congestion_level,
                     conditions=conditions,
                     confidence=0.85,  # Fixed confidence for now
-                    factors=["time_of_day", "day_of_week", "weather", "location"]
+                    factors=["time_of_day", "day_of_week", "weather", "location"],
                 )
                 predictions.append(prediction)
-            
+
             logger.info(f"Generated {len(predictions)} real ML predictions")
             return predictions
 
@@ -153,13 +155,13 @@ class TrafficPredictor:
         try:
             # Import and run the simple ML trainer
             from src.models.simple_ml_trainer import SimpleMLTrainer
-            
+
             trainer = SimpleMLTrainer()
             result = trainer.train_traffic_predictor(samples=5000)
-            
+
             # Reload the model
             self.load_model()
-            
+
             logger.info("Model retraining completed successfully")
             return {
                 "status": "completed",
@@ -168,15 +170,15 @@ class TrafficPredictor:
                 "mae": result.get("mae", 0),
                 "training_time": result.get("training_time", 0),
                 "trained_at": result.get("trained_at", datetime.now().isoformat()),
-                "samples_used": result.get("samples_used", 5000)
+                "samples_used": result.get("samples_used", 5000),
             }
-            
+
         except Exception as e:
             logger.error(f"Error during model retraining: {e}")
             return {
                 "status": "error",
                 "error": str(e),
-                "trained_at": datetime.now().isoformat()
+                "trained_at": datetime.now().isoformat(),
             }
 
     def get_model_info(self) -> Dict[str, Any]:
@@ -188,16 +190,8 @@ class TrafficPredictor:
                 "last_trained": datetime.now() - timedelta(minutes=30),
                 "is_loaded": True,
                 "training_samples": 2000,
-                "features": [
-                    "hour",
-                    "day_of_week", 
-                    "weather_score",
-                    "location_factor"
-                ],
-                "performance": {
-                    "mse": 3671.30,
-                    "mae": 47.05
-                }
+                "features": ["hour", "day_of_week", "weather_score", "location_factor"],
+                "performance": {"mse": 3671.30, "mae": 47.05},
             }
         else:
             return {
@@ -207,5 +201,5 @@ class TrafficPredictor:
                 "is_loaded": False,
                 "training_samples": 0,
                 "features": [],
-                "performance": {"note": "Using mock predictions"}
+                "performance": {"note": "Using mock predictions"},
             }

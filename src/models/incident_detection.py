@@ -34,10 +34,10 @@ class IncidentDetector:
     def load_models(self):
         """Load incident detection models"""
         model_path = self.models_dir / "incident_detector.pkl"
-        
+
         if model_path.exists():
             try:
-                with open(model_path, 'rb') as f:
+                with open(model_path, "rb") as f:
                     self.anomaly_model = pickle.load(f)
                 self.is_trained = True
                 logger.info("Real incident detection model loaded successfully")
@@ -47,7 +47,9 @@ class IncidentDetector:
                 self.is_trained = False
                 return False
         else:
-            logger.warning("No trained incident detection model found, using mock detection")
+            logger.warning(
+                "No trained incident detection model found, using mock detection"
+            )
             self.is_trained = False
             return False
 
@@ -58,14 +60,19 @@ class IncidentDetector:
         speed = sensor_data.get("speed", 30)
         congestion_level = sensor_data.get("congestion_level", 0.5)
         weather_condition = sensor_data.get("weather_condition", 0.2)  # 0=good, 1=bad
-        
+
         # Normalize flow_rate to 0-1 range
         flow_rate_normalized = min(1.0, flow_rate / 1000.0)
-        
+
         # Normalize speed to 0-1 range
         speed_normalized = min(1.0, speed / 80.0)
-        
-        return [flow_rate_normalized, speed_normalized, congestion_level, weather_condition]
+
+        return [
+            flow_rate_normalized,
+            speed_normalized,
+            congestion_level,
+            weather_condition,
+        ]
 
     async def detect_incidents(
         self, sensor_data: Dict[str, Any]
@@ -87,22 +94,24 @@ class IncidentDetector:
         try:
             # Extract features for the model
             features = self._extract_features(sensor_data)
-            
+
             # Use real model for incident detection
             incident_probability = self.anomaly_model.predict_single(features)
-            
+
             # Convert probability to binary decision (threshold = 0.5)
             has_incident = incident_probability > 0.5
-            
-            logger.info(f"Incident probability: {incident_probability:.3f}, Has incident: {has_incident}")
-            
+
+            logger.info(
+                f"Incident probability: {incident_probability:.3f}, Has incident: {has_incident}"
+            )
+
             if has_incident:
                 incident = await self._create_incident_from_anomaly(sensor_data)
                 incidents.append(incident)
                 logger.info(f"Real ML model detected incident: {incident.id}")
-            
+
             return incidents
-            
+
         except Exception as e:
             logger.error(f"Error in real incident detection: {e}")
             # Fallback to mock detection
@@ -115,6 +124,7 @@ class IncidentDetector:
     def _detect_anomaly_mock(self, sensor_data: Dict[str, Any]) -> bool:
         """Mock anomaly detection for fallback"""
         import random
+
         return random.random() < 0.1  # 10% chance of detecting anomaly
 
     async def _create_incident_from_anomaly(
@@ -125,7 +135,7 @@ class IncidentDetector:
         flow_rate = sensor_data.get("flow_rate", 500)
         speed = sensor_data.get("speed", 30)
         congestion_level = sensor_data.get("congestion_level", 0.5)
-        
+
         # Logic to determine incident type
         if speed < 10:
             incident_type = IncidentType.ACCIDENT
@@ -139,7 +149,7 @@ class IncidentDetector:
         else:
             incident_type = IncidentType.ACCIDENT
             severity = TrafficSeverity.LOW
-        
+
         return IncidentReport(
             id=f"incident_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
             type=incident_type,
@@ -235,13 +245,13 @@ class IncidentDetector:
         try:
             # Import and run the simple ML trainer
             from src.models.simple_ml_trainer import SimpleMLTrainer
-            
+
             trainer = SimpleMLTrainer()
             result = trainer.train_incident_detector(samples=5000)
-            
+
             # Reload the model
             self.load_models()
-            
+
             logger.info("Incident detection model retraining completed successfully")
             return {
                 "status": "completed",
@@ -249,15 +259,15 @@ class IncidentDetector:
                 "accuracy": result.get("accuracy", 0),
                 "training_time": result.get("training_time", 0),
                 "trained_at": result.get("trained_at", datetime.now().isoformat()),
-                "samples_used": result.get("samples_used", 5000)
+                "samples_used": result.get("samples_used", 5000),
             }
-            
+
         except Exception as e:
             logger.error(f"Error during incident detection model retraining: {e}")
             return {
                 "status": "error",
                 "error": str(e),
-                "trained_at": datetime.now().isoformat()
+                "trained_at": datetime.now().isoformat(),
             }
 
     def get_incident_statistics(self) -> Dict[str, Any]:
@@ -277,7 +287,7 @@ class IncidentDetector:
                 "detection_accuracy": 0.662,  # From trained model
                 "false_positive_rate": 0.338,
                 "model_type": "SimpleDecisionTree",
-                "is_using_real_model": True
+                "is_using_real_model": True,
             }
         else:
             return {
@@ -294,5 +304,5 @@ class IncidentDetector:
                 "detection_accuracy": 0.5,  # Mock accuracy
                 "false_positive_rate": 0.1,
                 "model_type": "Mock",
-                "is_using_real_model": False
+                "is_using_real_model": False,
             }

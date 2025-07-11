@@ -496,13 +496,13 @@ async def get_websocket_status():
 @app.post("/api/v1/real-data/geocode")
 async def geocode_address_endpoint(
     address: str = Query(..., description="Address to geocode"),
-    prefer_source: Optional[str] = Query(None, description="Preferred data source")
+    prefer_source: Optional[str] = Query(None, description="Preferred data source"),
 ):
     """Geocode an address using real data sources"""
     try:
         async with real_data_service as service:
             result = await service.geocode_address(address, prefer_source)
-            
+
             if result:
                 return {
                     "success": True,
@@ -510,19 +510,15 @@ async def geocode_address_endpoint(
                     "source": result.source,
                     "quality": result.quality.value,
                     "timestamp": result.timestamp.isoformat(),
-                    "cache_hit": result.cache_hit
+                    "cache_hit": result.cache_hit,
                 }
             else:
                 raise HTTPException(
-                    status_code=404, 
-                    detail=f"Could not geocode address: {address}"
+                    status_code=404, detail=f"Could not geocode address: {address}"
                 )
     except Exception as e:
         logger.error(f"Error geocoding address {address}: {e}")
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Geocoding failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Geocoding failed: {str(e)}")
 
 
 @app.post("/api/v1/real-data/route")
@@ -532,7 +528,7 @@ async def get_real_route(
     end_lat: float = Query(..., description="End latitude"),
     end_lon: float = Query(..., description="End longitude"),
     mode: str = Query("drive", description="Transportation mode"),
-    prefer_source: Optional[str] = Query(None, description="Preferred data source")
+    prefer_source: Optional[str] = Query(None, description="Preferred data source"),
 ):
     """Get real route using external APIs"""
     try:
@@ -540,7 +536,7 @@ async def get_real_route(
             route = await service.get_route(
                 start_lat, start_lon, end_lat, end_lon, mode, prefer_source
             )
-            
+
             if route:
                 return {
                     "success": True,
@@ -550,21 +546,17 @@ async def get_real_route(
                         "geometry": route.geometry,
                         "steps": route.steps,
                         "summary": route.summary,
-                        "warnings": route.warnings
+                        "warnings": route.warnings,
                     },
                     "source": route.source,
-                    "quality": route.quality.value
+                    "quality": route.quality.value,
                 }
             else:
-                raise HTTPException(
-                    status_code=404,
-                    detail="Could not calculate route"
-                )
+                raise HTTPException(status_code=404, detail="Could not calculate route")
     except Exception as e:
         logger.error(f"Error calculating route: {e}")
         raise HTTPException(
-            status_code=500,
-            detail=f"Route calculation failed: {str(e)}"
+            status_code=500, detail=f"Route calculation failed: {str(e)}"
         )
 
 
@@ -575,7 +567,7 @@ async def search_real_places(
     longitude: float = Query(..., description="Center longitude"),
     radius_km: int = Query(10, description="Search radius in kilometers"),
     limit: int = Query(20, description="Maximum results"),
-    prefer_source: Optional[str] = Query(None, description="Preferred data source")
+    prefer_source: Optional[str] = Query(None, description="Preferred data source"),
 ):
     """Search for places using real data sources"""
     try:
@@ -583,7 +575,7 @@ async def search_real_places(
             places = await service.search_places(
                 query, latitude, longitude, radius_km, limit, prefer_source
             )
-            
+
             return {
                 "success": True,
                 "places": [
@@ -595,45 +587,42 @@ async def search_real_places(
                         "categories": place.categories,
                         "distance": place.distance,
                         "source": place.source,
-                        "properties": place.properties
+                        "properties": place.properties,
                     }
                     for place in places
                 ],
                 "count": len(places),
                 "query": query,
                 "center": {"latitude": latitude, "longitude": longitude},
-                "radius_km": radius_km
+                "radius_km": radius_km,
             }
     except Exception as e:
         logger.error(f"Error searching places: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Place search failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Place search failed: {str(e)}")
 
 
 @app.get("/api/v1/real-data/matrix")
 async def get_real_matrix(
     locations: str = Query(..., description="Comma-separated lat,lon pairs"),
-    prefer_source: Optional[str] = Query(None, description="Preferred data source")
+    prefer_source: Optional[str] = Query(None, description="Preferred data source"),
 ):
     """Get distance/duration matrix using real data sources"""
     try:
         # Parse locations string: "lat1,lon1;lat2,lon2;..."
         location_pairs = []
-        for pair in locations.split(';'):
-            lat, lon = map(float, pair.split(','))
+        for pair in locations.split(";"):
+            lat, lon = map(float, pair.split(","))
             location_pairs.append((lat, lon))
-        
+
         if len(location_pairs) < 2:
             raise HTTPException(
                 status_code=400,
-                detail="At least 2 locations required for matrix calculation"
+                detail="At least 2 locations required for matrix calculation",
             )
-        
+
         async with real_data_service as service:
             result = await service.get_traffic_matrix(location_pairs, prefer_source)
-            
+
             if result:
                 return {
                     "success": True,
@@ -641,23 +630,20 @@ async def get_real_matrix(
                     "source": result.source,
                     "quality": result.quality.value,
                     "timestamp": result.timestamp.isoformat(),
-                    "cache_hit": result.cache_hit
+                    "cache_hit": result.cache_hit,
                 }
             else:
                 raise HTTPException(
-                    status_code=404,
-                    detail="Could not calculate matrix"
+                    status_code=404, detail="Could not calculate matrix"
                 )
     except ValueError as e:
         raise HTTPException(
-            status_code=400,
-            detail=f"Invalid location format: {str(e)}"
+            status_code=400, detail=f"Invalid location format: {str(e)}"
         )
     except Exception as e:
         logger.error(f"Error calculating matrix: {e}")
         raise HTTPException(
-            status_code=500,
-            detail=f"Matrix calculation failed: {str(e)}"
+            status_code=500, detail=f"Matrix calculation failed: {str(e)}"
         )
 
 
@@ -665,20 +651,22 @@ async def get_real_matrix(
 async def get_real_isochrones(
     latitude: float = Query(..., description="Center latitude"),
     longitude: float = Query(..., description="Center longitude"),
-    time_minutes: str = Query("15,30", description="Comma-separated time values in minutes"),
+    time_minutes: str = Query(
+        "15,30", description="Comma-separated time values in minutes"
+    ),
     mode: str = Query("drive", description="Transportation mode"),
-    prefer_source: Optional[str] = Query(None, description="Preferred data source")
+    prefer_source: Optional[str] = Query(None, description="Preferred data source"),
 ):
     """Get isochrones (reachable areas) using real data sources"""
     try:
         # Parse time values
-        time_values = [float(t.strip()) for t in time_minutes.split(',')]
-        
+        time_values = [float(t.strip()) for t in time_minutes.split(",")]
+
         async with real_data_service as service:
             result = await service.get_isochrones(
                 latitude, longitude, time_values, mode, prefer_source
             )
-            
+
             if result:
                 return {
                     "success": True,
@@ -689,23 +677,18 @@ async def get_real_isochrones(
                     "cache_hit": result.cache_hit,
                     "center": {"latitude": latitude, "longitude": longitude},
                     "time_minutes": time_values,
-                    "mode": mode
+                    "mode": mode,
                 }
             else:
                 raise HTTPException(
-                    status_code=404,
-                    detail="Could not calculate isochrones"
+                    status_code=404, detail="Could not calculate isochrones"
                 )
     except ValueError as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid time format: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid time format: {str(e)}")
     except Exception as e:
         logger.error(f"Error calculating isochrones: {e}")
         raise HTTPException(
-            status_code=500,
-            detail=f"Isochrone calculation failed: {str(e)}"
+            status_code=500, detail=f"Isochrone calculation failed: {str(e)}"
         )
 
 
@@ -722,7 +705,7 @@ async def get_real_data_health():
             "timestamp": datetime.now().isoformat(),
             "overall_health": "error",
             "error": str(e),
-            "sources": {}
+            "sources": {},
         }
 
 
