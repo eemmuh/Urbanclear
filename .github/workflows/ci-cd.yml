@@ -86,9 +86,21 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-ci.txt
     
+    - name: Debug environment
+      run: |
+        python --version
+        pip list
+        ls -la tests/unit/
+        python -c "import pytest; print('pytest version:', pytest.__version__)"
+        python -c "import coverage; print('coverage version:', coverage.__version__)"
+    
     - name: Run unit tests
       run: |
-        pytest tests/unit/ -v --cov=src --cov-report=xml --cov-report=html
+        python -m pytest tests/unit/ -v --cov=src --cov-report=xml --cov-report=html --tb=short
+    
+    - name: Check coverage files
+      run: |
+        ls -la coverage.xml htmlcov/ || echo "Coverage files not found"
     
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
@@ -170,13 +182,19 @@ jobs:
       run: |
         sleep 30
     
+    - name: Debug environment
+      run: |
+        python --version
+        pip list | grep -E "(pytest|coverage|fastapi)"
+        ls -la tests/integration/
+    
     - name: Run integration tests
       env:
         DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_traffic_db
         REDIS_URL: redis://localhost:6379/0
         MONGODB_URL: mongodb://test_user:test_password@localhost:27017/test_traffic_logs
       run: |
-        pytest tests/integration/ -v --maxfail=3
+        python -m pytest tests/integration/ -v --maxfail=3 --tb=short
 
   # API Tests
   api-tests:
@@ -196,6 +214,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-ci.txt
     
+    - name: Debug environment
+      run: |
+        python --version
+        pip list | grep -E "(pytest|fastapi|uvicorn)"
+        ls -la tests/api/
+    
     - name: Start API server
       run: |
         uvicorn src.api.main:app --host 0.0.0.0 --port 8000 &
@@ -203,7 +227,7 @@ jobs:
     
     - name: Run API tests
       run: |
-        pytest tests/api/ -v
+        python -m pytest tests/api/ -v --tb=short
     
     - name: API Health Check
       run: |
