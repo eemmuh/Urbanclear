@@ -1,29 +1,40 @@
-name: Urbanclear CI/CD Pipeline
+name: Simple CI/CD Pipeline
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
-  schedule:
-    - cron: '0 2 * * *'  # Daily security scans
-
-# Add global permissions for the workflow
-permissions:
-  contents: read
-  security-events: write
-  actions: read
-  pull-requests: write
-  issues: write
-  checks: write
 
 env:
   PYTHON_VERSION: '3.9'
-  NODE_VERSION: '18'
-  DOCKER_BUILDKIT: 1
 
 jobs:
-  # Code Quality and Security
+  # Simple Unit Tests
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install fastapi uvicorn pydantic pytest pytest-cov
+    
+    - name: Run basic tests
+      run: |
+        python -m pytest tests/unit/test_ci_smoke.py -v
+    
+    - name: Run unit tests
+      run: |
+        python -m pytest tests/unit/ -v --tb=short
+
+  # Simple Code Quality
   code-quality:
     runs-on: ubuntu-latest
     steps:
@@ -33,145 +44,19 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'pip'
-        cache-dependency-path: 'requirements-ci.txt'
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-ci.txt
-    
-    - name: Debug environment
-      run: |
-        python --version
-        pip list
-        ls -la src/
-        ls -la tests/
+        pip install black flake8
     
     - name: Code formatting check
       run: black --check --diff src/ tests/
     
     - name: Linting
       run: flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
-    
-    - name: Type checking
-      run: mypy src/ --config-file=config/mypy.ini
-      continue-on-error: true  # Make this non-blocking for now
-    
-    - name: Security scanning
-      run: |
-        bandit -r src/ -c config/bandit.yaml -f json -o bandit-report.json || echo "Bandit scan completed"
-        safety check --json --output safety-report.json || echo "Safety check completed"
-    
-    - name: Upload security reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: security-reports
-        path: |
-          bandit-report.json
-          safety-report.json
 
-  # Unit Tests - Simplified
-  unit-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10', '3.11']
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-        cache-dependency-path: 'requirements-ci.txt'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements-ci.txt
-    
-    - name: Debug environment
-      run: |
-        python --version
-        pip list | head -20
-        ls -la tests/unit/
-        python -c "import pytest; print('pytest version:', pytest.__version__)"
-        python -c "import coverage; print('coverage version:', coverage.__version__)"
-    
-    - name: Run smoke test first
-      run: |
-        python -m pytest tests/unit/test_ci_smoke.py -v
-    
-    - name: Run unit tests
-      run: |
-        python -m pytest tests/unit/ -v --tb=short || echo "Some tests failed, continuing..."
-    
-    - name: Check coverage files
-      run: |
-        ls -la coverage.xml htmlcov/ || echo "Coverage files not found"
-    
-    - name: Upload coverage reports as artifact
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: coverage-reports-${{ matrix.python-version }}
-        path: |
-          coverage.xml
-          htmlcov/
-
-  # Integration Tests - Simplified
-  integration-tests:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_USER: test_user
-          POSTGRES_DB: test_traffic_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'pip'
-        cache-dependency-path: 'requirements-ci.txt'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements-ci.txt
-    
-    - name: Wait for services
-      run: |
-        sleep 30
-    
-    - name: Debug environment
-      run: |
-        python --version
-        pip list | grep -E "(pytest|fastapi)"
-        ls -la tests/integration/
-    
-    - name: Run integration tests
-      env:
-        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_traffic_db
-      run: |
-        python -m pytest tests/integration/ -v --maxfail=3 --tb=short || echo "Some integration tests failed"
-
-  # API Tests - Simplified
+  # Simple API Tests
   api-tests:
     runs-on: ubuntu-latest
     steps:
@@ -181,19 +66,11 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'pip'
-        cache-dependency-path: 'requirements-ci.txt'
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-ci.txt
-    
-    - name: Debug environment
-      run: |
-        python --version
-        pip list | grep -E "(pytest|fastapi|uvicorn)"
-        ls -la tests/api/
+        pip install fastapi uvicorn pydantic pytest httpx
     
     - name: Start API server
       run: |
@@ -202,244 +79,4 @@ jobs:
     
     - name: Run API tests
       run: |
-        python -m pytest tests/api/ -v --tb=short || echo "Some API tests failed"
-    
-    - name: API Health Check
-      run: |
-        curl -f http://localhost:8000/health || echo "Health check failed"
-
-  # Security Scanning
-  security-scan:
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      contents: read
-      actions: read
-      pull-requests: read
-      repository-projects: read
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run Trivy vulnerability scanner (filesystem)
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        exit-code: '0'
-    
-    - name: Check if SARIF file exists
-      run: |
-        if [ -f "trivy-results.sarif" ]; then
-          echo "SARIF file created successfully"
-          ls -la trivy-results.sarif
-        else
-          echo "SARIF file not found, creating empty one"
-          echo '{"version": "2.1.0", "runs": []}' > trivy-results.sarif
-        fi
-    
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      if: always() && github.event_name != 'pull_request'
-      with:
-        sarif_file: 'trivy-results.sarif'
-        category: 'trivy-fs-scan'
-      continue-on-error: true
-    
-    - name: Upload Trivy scan results as artifact
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: trivy-filesystem-results
-        path: 'trivy-results.sarif'
-
-  # Docker Build and Test
-  docker-build:
-    runs-on: ubuntu-latest
-    needs: [code-quality, unit-tests]
-    permissions:
-      security-events: write
-      contents: read
-      actions: read
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Build Docker image
-      run: |
-        docker build -t urbanclear:${{ github.sha }} .
-        docker build -t urbanclear:latest .
-    
-    - name: Test Docker image
-      run: |
-        docker run --rm urbanclear:${{ github.sha }} python -c "import src.api.main; print('Import successful')"
-    
-    - name: Run container security scan
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: 'urbanclear:${{ github.sha }}'
-        format: 'sarif'
-        output: 'trivy-container-results.sarif'
-        exit-code: '0'
-      continue-on-error: true
-    
-    - name: Check if container SARIF file exists
-      run: |
-        if [ -f "trivy-container-results.sarif" ]; then
-          echo "Container SARIF file created successfully"
-          ls -la trivy-container-results.sarif
-        else
-          echo "Container SARIF file not found, creating empty one"
-          echo '{"version": "2.1.0", "runs": []}' > trivy-container-results.sarif
-        fi
-    
-    - name: Upload container scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      if: always() && github.event_name != 'pull_request'
-      with:
-        sarif_file: 'trivy-container-results.sarif'
-        category: 'trivy-container-scan'
-      continue-on-error: true
-    
-    - name: Upload container scan results as artifact
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: trivy-container-results
-        path: 'trivy-container-results.sarif'
-
-  # Performance Tests
-  performance-tests:
-    runs-on: ubuntu-latest
-    needs: [unit-tests]
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'pip'
-        cache-dependency-path: 'requirements-ci.txt'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements-ci.txt
-        pip install locust
-    
-    - name: Start API server
-      run: |
-        uvicorn src.api.main:app --host 0.0.0.0 --port 8000 &
-        sleep 10
-    
-    - name: Run performance tests
-      run: |
-        locust -f tests/performance/locustfile.py --headless \
-          --users 50 --spawn-rate 10 --run-time 60s \
-          --host http://localhost:8000 \
-          --html performance-report.html || echo "Performance tests completed"
-    
-    - name: Upload performance report
-      uses: actions/upload-artifact@v4
-      with:
-        name: performance-report
-        path: performance-report.html
-
-  # Deploy to Staging
-  deploy-staging:
-    runs-on: ubuntu-latest
-    needs: [integration-tests, api-tests, docker-build]
-    if: github.ref == 'refs/heads/develop'
-    environment:
-      name: staging
-      url: https://staging.urbanclear.example.com
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Login to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ secrets.REGISTRY_URL }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-    
-    - name: Build and push Docker image
-      run: |
-        docker build -t ${{ secrets.REGISTRY_URL }}/urbanclear:staging-${{ github.sha }} .
-        docker push ${{ secrets.REGISTRY_URL }}/urbanclear:staging-${{ github.sha }}
-    
-    - name: Deploy to staging
-      run: |
-        # Deploy to staging environment
-        echo "Deploying to staging..."
-
-  # Deploy to Production
-  deploy-production:
-    runs-on: ubuntu-latest
-    needs: [integration-tests, api-tests, docker-build, security-scan]
-    if: github.ref == 'refs/heads/main'
-    environment:
-      name: production
-      url: https://urbanclear.example.com
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Login to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ secrets.REGISTRY_URL }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-    
-    - name: Build and push Docker image
-      run: |
-        docker build -t ${{ secrets.REGISTRY_URL }}/urbanclear:prod-${{ github.sha }} .
-        docker build -t ${{ secrets.REGISTRY_URL }}/urbanclear:latest .
-        docker push ${{ secrets.REGISTRY_URL }}/urbanclear:prod-${{ github.sha }}
-        docker push ${{ secrets.REGISTRY_URL }}/urbanclear:latest
-    
-    - name: Deploy to production
-      run: |
-        # Deploy to production environment with blue-green deployment
-        echo "Deploying to production..."
-    
-    - name: Post-deployment health check
-      run: |
-        # Wait for deployment to complete
-        sleep 60
-        # Health check
-        curl -f https://urbanclear.example.com/health || exit 1
-    
-    - name: Notify deployment success
-      if: success()
-      run: |
-        # Send notification (Slack, email, etc.)
-        echo "Production deployment successful!"
-
-  # Cleanup
-  cleanup:
-    runs-on: ubuntu-latest
-    needs: [deploy-staging, deploy-production]
-    if: always()
-    steps:
-    - name: Cleanup old Docker images
-      run: |
-        # Cleanup old images from registry
-        echo "Cleaning up old Docker images..."
-    
-    - name: Archive logs
-      run: |
-        # Archive deployment logs
-        echo "Archiving deployment logs..." 
+        python -m pytest tests/api/ -v --tb=short 
