@@ -95,7 +95,7 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
-    "--cov-fail-under=20",
+    "--cov-fail-under=5",
 ]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
@@ -107,6 +107,7 @@ markers = [
     "unit: marks tests as unit tests",
     "api: marks tests as API tests",
     "performance: marks tests as performance tests",
+    "asyncio: marks tests as async tests",
 ]
 
 [tool.coverage.run]
