@@ -18,6 +18,7 @@ from prometheus_client import Counter, Histogram, Gauge, generate_latest
 import uvicorn
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
+import socketio
 
 from src.api.models import (
     TrafficCondition,
@@ -40,6 +41,7 @@ from src.api.websocket_handler import (
     start_background_streaming,
     manager,
 )
+from src.api.socketio_handler import socketio_handler
 
 
 @asynccontextmanager
@@ -48,6 +50,7 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting up Urbanclear API...")
     asyncio.create_task(start_background_streaming())
+    asyncio.create_task(socketio_handler.start_data_streaming())
     logger.info("Background streaming started")
 
     yield
@@ -78,6 +81,9 @@ app.add_middleware(
 # Prometheus metrics setup
 instrumentator = Instrumentator()
 instrumentator.instrument(app).expose(app)
+
+# Mount Socket.io app
+# app = socketio.ASGIApp(socketio_handler.sio, app) # This line is moved to the end
 
 # Custom metrics
 TRAFFIC_REQUESTS_TOTAL = Counter(
@@ -464,6 +470,43 @@ async def get_system_stats():
         stats = await traffic_service.get_system_stats()
         return stats
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/dashboard/stats")
+async def get_dashboard_stats():
+    """Get dashboard statistics for the frontend"""
+    try:
+        # Get current traffic data
+        traffic_conditions = await traffic_service.get_current_conditions()
+        
+        # Get active incidents
+        incidents = await traffic_service.get_incidents()
+        active_incidents = [inc for inc in incidents if not inc.get('is_resolved', False)]
+        
+        # Calculate statistics
+        total_intersections = len(traffic_conditions)
+        avg_speed = sum(cond.speed_mph for cond in traffic_conditions) / max(total_intersections, 1)
+        avg_congestion = sum(cond.congestion_level for cond in traffic_conditions) / max(total_intersections, 1)
+        
+        # Determine system health based on incidents and congestion
+        if len(active_incidents) > 5 or avg_congestion > 0.7:
+            system_health = "degraded"
+        elif len(active_incidents) > 2 or avg_congestion > 0.4:
+            system_health = "warning"
+        else:
+            system_health = "healthy"
+        
+        return {
+            "total_intersections": total_intersections,
+            "active_incidents": len(active_incidents),
+            "average_speed": round(avg_speed, 1),
+            "congestion_percentage": round(avg_congestion * 100, 1),
+            "system_health": system_health,
+            "last_updated": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error getting dashboard stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -1141,3 +1184,5 @@ if __name__ == "__main__":
         port=int(os.getenv("PORT", 8000)),
         reload=True,
     )
+
+app = socketio.ASGIApp(socketio_handler.sio, app)

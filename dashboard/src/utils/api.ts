@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { TrafficData, Incident, Route, DashboardStats, ApiResponse } from '../types'
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = '' // Use relative URLs to work with Vite proxy
 
 // Create axios instance with default config
 const apiClient = axios.create({

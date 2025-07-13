@@ -60,6 +60,10 @@ class ConnectionManager:
             self.subscriptions[client_id].discard(topic)
         logger.info(f"Client {client_id} unsubscribed from {topic}")
 
+    def get_connection_count(self) -> int:
+        """Get the number of active connections"""
+        return len(self.active_connections)
+
     async def send_personal_message(self, message: str, client_id: str):
         """Send message to specific client"""
         if client_id in self.active_connections:

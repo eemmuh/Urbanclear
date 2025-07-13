@@ -27,7 +27,7 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
   maxRetries: 5,
 
   connect: () => {
-    const socket = io('ws://localhost:8000', {
+    const socket = io('/ws/traffic', {
       transports: ['websocket'],
       autoConnect: true,
       reconnection: true,

@@ -98,6 +98,17 @@ class TrafficService:
                 "last_updated": datetime.now(),
             }
 
+    async def get_incidents(self) -> list:
+        """Get current traffic incidents (mock)"""
+        logger.info("Getting current incidents (mock)")
+        try:
+            incidents = self.mock_generator.generate_incidents()
+            # Convert dataclass or pydantic models to dicts if needed
+            return [inc.dict() if hasattr(inc, 'dict') else inc for inc in incidents]
+        except Exception as e:
+            logger.error(f"Error generating incidents: {e}")
+            return []
+
     async def get_analytics_summary(self, period: str) -> AnalyticsSummary:
         """Get traffic analytics summary"""
         logger.info(f"Getting analytics summary for period: {period}")
