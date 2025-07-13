@@ -1,6 +1,6 @@
 # 🚦 Urbanclear Traffic Management System
 
-A comprehensive AI-powered traffic management system with **real-time data integration**, **intelligent fallback systems**, and **production-ready APIs** for smart city traffic optimization.
+A comprehensive AI-powered traffic management system with **real-time data integration**, **intelligent fallback systems**, **modern React dashboard**, and **production-ready APIs** for smart city traffic optimization.
 
 ## 🎯 Key Features
 
@@ -13,6 +13,13 @@ A comprehensive AI-powered traffic management system with **real-time data integ
 - **Traffic Matrix**: Calculate travel times between multiple locations
 - **Isochrones**: Determine reachable areas within time limits
 
+### 🖥️ **Modern React Dashboard**
+- **Real-time Updates**: Live traffic data via Socket.io WebSocket connections
+- **Interactive Maps**: Traffic visualization with Leaflet integration
+- **Responsive Design**: Mobile-optimized with Tailwind CSS
+- **Real-time Charts**: Live traffic flow and incident data
+- **WebSocket Integration**: Seamless real-time data streaming
+
 ### 🤖 **AI-Powered Analytics**
 - **Traffic Flow Prediction**: LSTM-based time series forecasting
 - **Route Optimization**: Multi-objective pathfinding algorithms
@@ -20,7 +27,8 @@ A comprehensive AI-powered traffic management system with **real-time data integ
 - **Performance Analytics**: Comprehensive traffic pattern analysis
 
 ### 🔄 **Real-Time Capabilities**
-- **WebSocket Streaming**: Live traffic updates and predictions
+- **Socket.io Streaming**: Live traffic updates and predictions
+- **WebSocket Support**: Native FastAPI WebSocket + Socket.io
 - **Background Processing**: Continuous data collection and analysis
 - **Health Monitoring**: Real-time API status and performance metrics
 - **Caching Layer**: Redis-ready with in-memory fallback
@@ -36,7 +44,11 @@ A comprehensive AI-powered traffic management system with **real-time data integ
 ```
 urbanclear/
 ├── src/
-│   ├── api/                 # FastAPI REST endpoints + WebSocket
+│   ├── api/                 # FastAPI REST endpoints + WebSocket + Socket.io
+│   │   ├── main.py                 # Main API with Socket.io integration
+│   │   ├── websocket_handler.py    # Native WebSocket handler
+│   │   ├── socketio_handler.py     # Socket.io handler for React dashboard
+│   │   └── models.py               # API data models
 │   ├── data/                # Real data integration + mock fallbacks
 │   │   ├── geoapify_client.py      # Geoapify API integration
 │   │   ├── openrouteservice_client.py  # OpenRouteService client
@@ -48,6 +60,14 @@ urbanclear/
 │   │   ├── optimization.py         # Route optimization
 │   │   └── incident_detection.py   # Incident detection
 │   └── monitoring/          # Health monitoring and metrics
+├── dashboard/               # React TypeScript Dashboard
+│   ├── src/                 # React components and logic
+│   │   ├── components/      # UI components
+│   │   ├── stores/          # Zustand state management
+│   │   ├── types/           # TypeScript type definitions
+│   │   └── utils/           # Utility functions
+│   ├── package.json         # Node.js dependencies
+│   └── vite.config.ts       # Vite configuration with API proxy
 ├── infrastructure/          # Big data processing
 │   ├── kafka/               # Real-time streaming
 │   └── spark/               # Distributed processing
@@ -69,6 +89,7 @@ urbanclear/
 ### Prerequisites
 
 - **Python 3.9+** (tested with 3.12)
+- **Node.js 16+** (for React dashboard)
 - **Docker & Docker Compose** (optional)
 - **API Keys** (optional - system works with mock data)
 
@@ -86,12 +107,19 @@ python -m venv urbanclear-env
 source urbanclear-env/bin/activate  # On Windows: urbanclear-env\Scripts\activate
 ```
 
-3. **Install dependencies:**
+3. **Install Python dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Configure APIs (Optional):**
+4. **Install Node.js dependencies:**
+```bash
+cd dashboard
+npm install
+cd ..
+```
+
+5. **Configure APIs (Optional):**
 ```bash
 cp config/config.example.yaml config/config.yaml
 # Edit config.yaml with your API keys:
@@ -100,15 +128,42 @@ cp config/config.example.yaml config/config.yaml
 # - OpenStreetMap: Free (no key required)
 ```
 
-5. **Start the API server:**
+6. **Start the backend API:**
 ```bash
 python start_api.py
 ```
 
-6. **Access the system:**
+7. **Start the React dashboard (in a new terminal):**
+```bash
+cd dashboard
+npm run dev
+```
+
+8. **Access the system:**
+- **React Dashboard**: http://localhost:3000
 - **API Documentation**: http://localhost:8000/api/docs
 - **Health Check**: http://localhost:8000/health
-- **WebSocket Test**: http://localhost:8000/api/docs (try WebSocket endpoints)
+- **WebSocket Status**: http://localhost:8000/api/v1/websocket/status
+
+## 🖥️ React Dashboard Features
+
+### **Real-time Dashboard**
+- **Live Traffic Map**: Interactive map with real-time traffic conditions
+- **Incident Alerts**: Real-time incident notifications and updates
+- **Traffic Analytics**: Live charts and performance metrics
+- **System Status**: Real-time system health and connection status
+
+### **WebSocket Integration**
+- **Socket.io Client**: Seamless real-time data streaming
+- **Auto-reconnection**: Automatic reconnection on connection loss
+- **Topic Subscriptions**: Subscribe to specific data streams
+- **Error Handling**: Graceful error handling and user feedback
+
+### **Modern UI/UX**
+- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Dark Mode Ready**: Modern design with Tailwind CSS
+- **Interactive Components**: Smooth animations with Framer Motion
+- **TypeScript**: Full type safety and better developer experience
 
 ## 🎮 Demo & Testing
 
@@ -152,15 +207,18 @@ pytest tests/api/
 - `GET /api/v1/traffic/predictions` - AI-powered traffic forecasts
 - `POST /api/v1/routes/optimize` - Route optimization
 - `GET /api/v1/incidents/active` - Active traffic incidents
+- `GET /api/v1/dashboard/stats` - Dashboard statistics
 
 ### **Real-Time Streaming**
-- `WebSocket /ws/traffic` - Live traffic updates
+- `WebSocket /ws/traffic` - Live traffic updates (FastAPI native)
+- `Socket.io /socket.io` - Real-time updates (React dashboard)
 - `WebSocket /ws/incidents` - Real-time incident notifications
 - `WebSocket /ws/predictions` - Streaming traffic predictions
 
 ### **System Health**
 - `GET /health` - System health check
 - `GET /metrics` - Prometheus metrics
+- `GET /api/v1/websocket/status` - WebSocket connection status
 - `GET /api/v1/real-data/health` - Data source status
 
 ## 🔧 Configuration
@@ -272,6 +330,13 @@ docker run -p 8000:8000 \
 
 ## 🔄 Recent Updates
 
+### **v1.3.0 - React Dashboard & Socket.io Integration**
+- ✅ **Modern React Dashboard**: TypeScript-based dashboard with real-time updates
+- ✅ **Socket.io Integration**: Seamless WebSocket connections for React frontend
+- ✅ **Real-time Maps**: Interactive traffic visualization with Leaflet
+- ✅ **Responsive Design**: Mobile-optimized with Tailwind CSS
+- ✅ **Auto-reconnection**: Robust WebSocket connection handling
+
 ### **v1.2.0 - Real Data Integration**
 - ✅ **Multi-API Support**: Geoapify, OpenRouteService, OpenStreetMap
 - ✅ **Smart Fallbacks**: Intelligent mock data when APIs unavailable
@@ -312,8 +377,10 @@ pre-commit run --all-files
 
 ## 📚 Documentation
 
+- **React Dashboard**: http://localhost:3000 (Real-time traffic visualization)
 - **API Docs**: http://localhost:8000/api/docs (Interactive Swagger UI)
 - **Health Check**: http://localhost:8000/health
+- **WebSocket Status**: http://localhost:8000/api/v1/websocket/status
 - **Grafana**: http://localhost:3000 (admin/admin)
 - **Prometheus**: http://localhost:9090
 
@@ -332,17 +399,18 @@ pre-commit run --all-files
 ## 🛠️ System Requirements
 
 - **Python**: 3.9+ (tested with 3.12)
+- **Node.js**: 16+ (for React dashboard)
 - **Memory**: 2GB+ RAM
 - **Storage**: 1GB+ free space
 - **Network**: Internet connection for real APIs (optional)
 
 ## 🎯 Next Steps
 
-1. **Add API Keys**: Configure Geoapify/OpenRouteService for enhanced data
-2. **Redis Setup**: Enable Redis for better caching performance
-3. **Frontend Integration**: Connect to web dashboard
-4. **Monitoring**: Set up Grafana dashboards
-5. **Scaling**: Deploy with Docker Swarm or Kubernetes
+1. **Test Dashboard**: Open http://localhost:3000 to see real-time traffic data
+2. **Add API Keys**: Configure Geoapify/OpenRouteService for enhanced data
+3. **Redis Setup**: Enable Redis for better caching performance
+4. **Production Deployment**: Deploy with Docker Compose or Kubernetes
+5. **Mobile App**: Develop React Native mobile application
 
 ---
 
