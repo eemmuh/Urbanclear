@@ -186,13 +186,18 @@ async def get_current_traffic(
             
             # Log traffic data analytics
             for condition in conditions:
+                # Location is a Pydantic model with latitude/longitude attributes
+                lat = condition.location.latitude
+                lng = condition.location.longitude
+                sensor_id = condition.id  # Use the condition ID as sensor ID
+                
                 await logging_service.log_traffic_data(
-                    sensor_id=condition.location.get("sensor_id", "unknown"),
+                    sensor_id=sensor_id,
                     speed=condition.speed_mph,
                     volume=condition.volume,
                     density=condition.density,
                     congestion_level=condition.congestion_level,
-                    location={"lat": condition.location.get("latitude"), "lng": condition.location.get("longitude")}
+                    location={"lat": lat, "lng": lng}
                 )
             
             return conditions

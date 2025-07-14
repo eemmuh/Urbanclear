@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 
 try:
-    from api.models import (
+    from src.api.models import (
         TrafficCondition,
         IncidentReport,
         TrafficSeverity,
@@ -22,7 +22,7 @@ try:
 except ImportError:
     # Fallback for when running from different contexts
     try:
-        from src.api.models import (
+        from api.models import (
             TrafficCondition,
             IncidentReport,
             TrafficSeverity,

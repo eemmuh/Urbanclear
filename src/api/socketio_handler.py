@@ -167,18 +167,24 @@ class SocketIOHandler:
 
     async def _generate_system_status(self) -> Dict[str, Any]:
         """Generate system status update"""
+        # Get active connections count safely
+        try:
+            active_connections = len(self.sio.rooms) if hasattr(self.sio, 'rooms') else 0
+        except:
+            active_connections = 0
+            
         return {
             "type": "system_status",
             "data": {
                 "status": "healthy",
-                "active_connections": len(self.sio.rooms),
+                "active_connections": active_connections,
                 "uptime": "00:15:30",
                 "last_update": datetime.now().isoformat(),
                 "system_metrics": {
                     "cpu_usage": 45.2,
                     "memory_usage": 67.8,
                     "api_requests_per_minute": 120,
-                    "websocket_connections": len(self.sio.rooms),
+                    "websocket_connections": active_connections,
                 }
             },
             "timestamp": datetime.now().isoformat(),
