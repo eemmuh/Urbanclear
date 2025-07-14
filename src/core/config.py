@@ -32,8 +32,8 @@ class MongoConfig(BaseSettings):
     host: str = "localhost"
     port: int = 27017
     database: str = "traffic_logs"
-    username: str = "mongo_user"
-    password: str = "password"
+    username: str = "admin"
+    password: str = "mongo_password"
 
     model_config = ConfigDict(env_prefix="DATABASE__MONGODB__")
 

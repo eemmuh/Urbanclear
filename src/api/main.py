@@ -42,6 +42,8 @@ from src.api.websocket_handler import (
     manager,
 )
 from src.api.socketio_handler import socketio_handler
+from src.api.mongodb_endpoints import router as mongodb_router
+from src.data.logging_service import logging_service
 
 
 @asynccontextmanager
@@ -49,6 +51,12 @@ async def lifespan(app: FastAPI):
     """Lifespan event handler for startup and shutdown"""
     # Startup
     logger.info("Starting up Urbanclear API...")
+    
+    # Start logging service
+    await logging_service.start()
+    logger.info("Logging service started")
+    
+    # Start background tasks
     asyncio.create_task(start_background_streaming())
     asyncio.create_task(socketio_handler.start_data_streaming())
     logger.info("Background streaming started")
@@ -57,6 +65,8 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     logger.info("Shutting down Urbanclear API...")
+    await logging_service.stop()
+    logger.info("Logging service stopped")
 
 
 # Initialize FastAPI app
@@ -84,6 +94,9 @@ instrumentator.instrument(app).expose(app)
 
 # Mount Socket.io app
 # app = socketio.ASGIApp(socketio_handler.sio, app) # This line is moved to the end
+
+# Include MongoDB endpoints
+app.include_router(mongodb_router)
 
 # Custom metrics
 TRAFFIC_REQUESTS_TOTAL = Counter(
@@ -162,9 +175,38 @@ async def get_current_traffic(
                 location=location, radius=radius
             )
             logger.info(f"Retrieved {len(conditions)} traffic conditions")
+            
+            # Log API request to MongoDB
+            await logging_service.log_api_request(
+                endpoint="/api/v1/traffic/current",
+                method="GET",
+                response_code=200,
+                response_time=0.0
+            )
+            
+            # Log traffic data analytics
+            for condition in conditions:
+                await logging_service.log_traffic_data(
+                    sensor_id=condition.location.get("sensor_id", "unknown"),
+                    speed=condition.speed_mph,
+                    volume=condition.volume,
+                    density=condition.density,
+                    congestion_level=condition.congestion_level,
+                    location={"lat": condition.location.get("latitude"), "lng": condition.location.get("longitude")}
+                )
+            
             return conditions
     except Exception as e:
         logger.error(f"Error getting current traffic: {e}")
+        
+        # Log error to MongoDB
+        await logging_service.log_api_request(
+            endpoint="/api/v1/traffic/current",
+            method="GET",
+            response_code=500,
+            response_time=0.0
+        )
+        
         raise HTTPException(
             status_code=500, detail=f"Failed to retrieve traffic data: {str(e)}"
         )
@@ -288,6 +330,23 @@ async def optimize_route(
             ),
         }
 
+        # Log route optimization to MongoDB
+        await logging_service.log_route_optimization(
+            origin={"lat": request.origin.lat, "lng": request.origin.lng},
+            destination={"lat": request.destination.lat, "lng": request.destination.lng},
+            optimization_time=optimized_route_dict["optimization_time"],
+            route_length=optimized_route_dict["primary_route"].get("distance", 0),
+            preferences=request.preferences
+        )
+
+        # Log API request to MongoDB
+        await logging_service.log_api_request(
+            endpoint="/api/v1/routes/optimize",
+            method="POST",
+            response_code=200,
+            response_time=optimized_route_dict["optimization_time"]
+        )
+
         return RouteOptimizationResponse(
             route_id=optimized_route_dict["route_id"],
             optimized_route=optimized_route_dict,
@@ -296,6 +355,15 @@ async def optimize_route(
         )
     except Exception as e:
         logger.error(f"Error optimizing route: {e}")
+        
+        # Log error to MongoDB
+        await logging_service.log_api_request(
+            endpoint="/api/v1/routes/optimize",
+            method="POST",
+            response_code=500,
+            response_time=0.0
+        )
+        
         raise HTTPException(
             status_code=500, detail=f"Failed to optimize route: {str(e)}"
         )
@@ -344,8 +412,34 @@ async def report_incident(incident: IncidentReport, db=Depends(get_db)):
     """Report a new traffic incident"""
     try:
         result = await incident_detector.report_incident(incident)
+        
+        # Log incident to MongoDB
+        await logging_service.log_incident(
+            incident_id=result.id,
+            incident_type=incident.incident_type,
+            severity=incident.severity,
+            location={"lat": incident.location.lat, "lng": incident.location.lng},
+            description=incident.description
+        )
+        
+        # Log API request to MongoDB
+        await logging_service.log_api_request(
+            endpoint="/api/v1/incidents/report",
+            method="POST",
+            response_code=200,
+            response_time=0.0
+        )
+        
         return {"status": "success", "incident_id": result.id}
     except Exception as e:
+        # Log error to MongoDB
+        await logging_service.log_api_request(
+            endpoint="/api/v1/incidents/report",
+            method="POST",
+            response_code=500,
+            response_time=0.0
+        )
+        
         raise HTTPException(status_code=500, detail=str(e))
 
 
