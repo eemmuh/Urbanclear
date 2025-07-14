@@ -42,46 +42,49 @@ A comprehensive AI-powered traffic management system with **real-time data integ
 ## 🏗️ Architecture
 
 ```
-urbanclear/
-├── src/
-│   ├── api/                 # FastAPI REST endpoints + WebSocket + Socket.io
-│   │   ├── main.py                 # Main API with Socket.io integration
-│   │   ├── websocket_handler.py    # Native WebSocket handler
-│   │   ├── socketio_handler.py     # Socket.io handler for React dashboard
-│   │   └── models.py               # API data models
-│   ├── data/                # Real data integration + mock fallbacks
-│   │   ├── geoapify_client.py      # Geoapify API integration
-│   │   ├── openrouteservice_client.py  # OpenRouteService client
-│   │   ├── osm_client.py           # OpenStreetMap client
-│   │   ├── real_data_service.py    # Unified data service
-│   │   └── real_data_config.py     # Configuration management
-│   ├── models/              # ML models and algorithms
-│   │   ├── prediction.py           # Traffic prediction models
-│   │   ├── optimization.py         # Route optimization
-│   │   └── incident_detection.py   # Incident detection
-│   └── monitoring/          # Health monitoring and metrics
-├── dashboard/               # React TypeScript Dashboard
-│   ├── src/                 # React components and logic
-│   │   ├── components/      # UI components
-│   │   ├── stores/          # Zustand state management
-│   │   ├── types/           # TypeScript type definitions
-│   │   └── utils/           # Utility functions
-│   ├── package.json         # Node.js dependencies
-│   └── vite.config.ts       # Vite configuration with API proxy
-├── infrastructure/          # Big data processing
-│   ├── kafka/               # Real-time streaming
-│   └── spark/               # Distributed processing
-├── docker/                  # Docker configurations
-│   ├── grafana/             # Monitoring dashboards
-│   ├── prometheus/          # Metrics collection
-│   └── postgres/            # Database setup
-├── tests/                   # Comprehensive test suite
-│   ├── unit/                # Unit tests
-│   ├── integration/         # Integration tests
-│   └── api/                 # API endpoint tests
-├── scripts/                 # Automation scripts
-├── demo_real_data.py        # Interactive demo script
-└── start_api.py            # API server launcher
+traffic-system/
+├── 📁 src/                       # Main application code
+│   ├── api/                     # FastAPI REST endpoints + WebSocket + Socket.io
+│   │   ├── main.py             # Main API with Socket.io integration
+│   │   ├── websocket_handler.py # Native WebSocket handler
+│   │   ├── socketio_handler.py  # Socket.io handler for React dashboard
+│   │   └── models.py           # API data models
+│   ├── data/                    # Real data integration + mock fallbacks
+│   │   ├── geoapify_client.py   # Geoapify API integration
+│   │   ├── openrouteservice_client.py # OpenRouteService client
+│   │   ├── osm_client.py        # OpenStreetMap client
+│   │   ├── real_data_service.py # Unified data service
+│   │   └── real_data_config.py  # Configuration management
+│   ├── models/                  # ML models and algorithms
+│   │   ├── prediction.py        # Traffic prediction models
+│   │   ├── optimization.py      # Route optimization
+│   │   └── incident_detection.py # Incident detection
+│   └── monitoring/              # Health monitoring and metrics
+├── 📁 dashboard/                # React TypeScript Dashboard
+│   ├── src/                     # React components and logic
+│   │   ├── components/          # UI components
+│   │   ├── stores/              # Zustand state management
+│   │   ├── types/               # TypeScript type definitions
+│   │   └── utils/               # Utility functions
+│   ├── package.json             # Node.js dependencies
+│   └── vite.config.ts           # Vite configuration with API proxy
+├── 📁 infrastructure/           # Big data processing
+│   ├── kafka/                   # Real-time streaming
+│   │   └── enhanced_kafka_producer.py
+│   └── spark/                   # Distributed processing
+│       └── enhanced_traffic_processor.py
+├── 📁 docker/                   # Docker configurations
+│   ├── grafana/                 # Monitoring dashboards
+│   ├── prometheus/              # Metrics collection
+│   └── postgres/                # Database setup
+├── 📁 tests/                    # Comprehensive test suite
+│   ├── unit/                    # Unit tests
+│   ├── integration/             # Integration tests
+│   └── api/                     # API endpoint tests
+├── 📁 scripts/                  # Automation scripts
+├── 📁 examples/                 # Example scripts
+│   └── demo_real_data.py        # Interactive demo script
+└── start_api.py                 # API server launcher
 ```
 
 ## 🚀 Quick Start
@@ -170,12 +173,12 @@ npm run dev
 ### Interactive Demo
 ```bash
 # Full demo of all features
-python demo_real_data.py
+python examples/demo_real_data.py
 
 # Test specific features
-python demo_real_data.py --test geocoding
-python demo_real_data.py --test routing
-python demo_real_data.py --test places
+python examples/demo_real_data.py --test geocoding
+python examples/demo_real_data.py --test routing
+python examples/demo_real_data.py --test places
 ```
 
 ### Run Tests
