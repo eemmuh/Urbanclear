@@ -53,7 +53,7 @@ cover/
 # pyenv
 .python-version
 
-# Virtual Environments
+# Virtual Environments (legacy)
 env/
 venv/
 ENV/
@@ -62,6 +62,10 @@ venv.bak/
 urbanclear-env/
 .venv/
 *.venv
+
+# UV Package Manager
+.uv/
+uv.lock
 
 # ==============================================
 # React Dashboard (Node.js/React)

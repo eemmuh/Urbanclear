@@ -1,18 +1,17 @@
-.PHONY: help venv-create venv-activate venv-install venv-status venv-deactivate venv-clean venv-recreate install install-full install-core install-conda dev-install quick-start quick-start-minimal start stop restart down logs clean test-api test-endpoints demo check-services logs-api logs-docker clean-logs reset-all dev-all dev-api-only api init-db setup-dashboards
+.PHONY: help uv-sync uv-install uv-install-dev uv-install-ci uv-status uv-clean install install-full install-core install-conda dev-install quick-start quick-start-minimal start stop restart down logs clean test-api test-endpoints demo check-services logs-api logs-docker clean-logs reset-all dev-all dev-api-only api init-db setup-dashboards
 
 help: ## Show this help message
 	@echo "🚀 Urbanclear - Smart City Traffic Optimization System"
 	@echo ""
 	@echo "📋 Available commands:"
 	@echo ""
-	@echo "🐍 Virtual Environment:"
-	@echo "  venv-create      Create virtual environment"
-	@echo "  venv-activate    Show activation command"
-	@echo "  venv-install     Install packages in venv"
-	@echo "  venv-status      Check venv status"
-	@echo "  venv-deactivate  Show deactivation command"
-	@echo "  venv-clean       Remove virtual environment"
-	@echo "  venv-recreate    Recreate virtual environment"
+	@echo "🚀 UV Package Management:"
+	@echo "  uv-sync          Sync dependencies with uv.lock"
+	@echo "  uv-install       Install all dependencies"
+	@echo "  uv-install-dev   Install with development dependencies"
+	@echo "  uv-install-ci    Install with CI dependencies"
+	@echo "  uv-status        Check uv environment status"
+	@echo "  uv-clean         Clean uv cache and lock file"
 	@echo ""
 	@echo "📦 Installation:"
 	@echo "  install          Install minimal dependencies"
@@ -58,33 +57,53 @@ help: ## Show this help message
 	@echo "  clean-logs      Clean log files"
 	@echo "  reset-all       Reset entire system"
 	@echo ""
-	@echo "💡 Tip: Always activate virtual environment first!"
-	@echo "   source urbanclear-env/bin/activate"
+	@echo "💡 Tip: Use uv for fast dependency management!"
+	@echo "   uv sync  # Install dependencies"
+	@echo "   uv run python script.py  # Run scripts"
 
-# Installation commands
-install:
-	@echo "🔧 Installing Urbanclear dependencies..."
-	@if [ -z "$$VIRTUAL_ENV" ]; then \
-		echo "⚠️  Warning: Virtual environment not activated!"; \
-		echo "📝 Consider running: source urbanclear-env/bin/activate"; \
-		sleep 2; \
-	fi
-	pip install --upgrade pip setuptools wheel
-	pip install -r requirements-minimal.txt
+# UV Package Management commands
+uv-sync:
+	@echo "🔄 Syncing dependencies with uv..."
+	uv sync
 
-install-full:
-	@echo "🔧 Installing all Urbanclear dependencies (this may take a while)..."
-	pip install --upgrade pip setuptools wheel
-	pip install -r requirements.txt
+uv-install:
+	@echo "🔧 Installing all Urbanclear dependencies with uv..."
+	uv sync
+
+uv-install-dev:
+	@echo "🔧 Installing with development dependencies..."
+	uv sync --extra dev
+
+uv-install-ci:
+	@echo "🔧 Installing with CI dependencies..."
+	uv sync --extra ci
+
+uv-status:
+	@echo "🔍 UV Environment Status:"
+	@echo "Current Python: $$(which python)"
+	@echo "Python version: $$(python --version)"
+	@echo "UV version: $$(uv --version)"
+	@echo "Lock file: $$(if [ -f uv.lock ]; then echo "✅ Present"; else echo "❌ Missing"; fi)"
+
+uv-clean:
+	@echo "🧹 Cleaning uv cache and lock file..."
+	rm -f uv.lock
+	uv cache clean
+	@echo "✅ UV cache cleaned"
+
+# Installation commands (legacy - now use uv commands above)
+install: uv-install
+	@echo "✅ Dependencies installed with uv"
+
+install-full: uv-install
+	@echo "✅ All dependencies installed with uv"
 
 install-core:
 	@echo "🔧 Installing core dependencies only..."
-	pip install --upgrade pip setuptools wheel
-	pip install fastapi uvicorn pydantic pydantic-settings pandas numpy loguru requests python-dotenv pyyaml psycopg2-binary
+	uv add fastapi uvicorn pydantic pydantic-settings pandas numpy loguru requests python-dotenv pyyaml psycopg2-binary
 
-dev-install: install
-	@echo "🔧 Installing development dependencies..."
-	pip install pytest pytest-asyncio black flake8 mypy
+dev-install: uv-install-dev
+	@echo "✅ Development dependencies installed with uv"
 
 start: ## Start all services with Docker Compose
 	docker-compose up -d
@@ -100,35 +119,35 @@ logs: ## Show logs from all services
 
 run-system: ## Start the complete Urbanclear system (Docker + API + ML + Dashboard)
 	@echo "🚀 Starting complete Urbanclear system..."
-	python scripts/start_urbanclear.py
+	uv run python scripts/start_urbanclear.py
 
 quick-demo: ## Quick demo setup with sample data
 	@echo "🎭 Setting up quick demo..."
 	make start
 	sleep 10
 	make init-db
-	python scripts/start_urbanclear.py
+	uv run python scripts/start_urbanclear.py
 
 run-simple: ## Start simplified Urbanclear system (API + Dashboard only)
 	@echo "🚀 Starting simplified Urbanclear system..."
-	python scripts/start_simple.py
+	uv run python scripts/start_simple.py
 
 init-db: ## Initialize the database
-	python scripts/init_database.py
+	uv run python scripts/init_database.py
 
 api: ## Start the API server in development mode
-	uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+	uv run uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 
 test: ## Run tests
-	pytest tests/ -v
+	uv run pytest tests/ -v
 
 lint: ## Run linting
-	flake8 src/ tests/
-	black --check src/ tests/
+	uv run flake8 src/ tests/
+	uv run black --check src/ tests/
 
 format: ## Format code
-	black src/ tests/
-	isort src/ tests/
+	uv run black src/ tests/
+	uv run isort src/ tests/
 
 clean: ## Clean temporary files
 	find . -type f -name "*.pyc" -delete
@@ -137,7 +156,7 @@ clean: ## Clean temporary files
 	rm -rf build/ dist/ .coverage htmlcov/ .pytest_cache/
 
 setup-env: ## Set up development environment
-	python scripts/setup.py
+	uv run python scripts/setup.py
 
 health: ## Check system health
 	curl -s http://localhost:8000/health | python -m json.tool
@@ -169,12 +188,12 @@ monitoring-status: ## Check status of monitoring services
 	@docker-compose ps prometheus grafana postgres-exporter redis-exporter
 
 setup-dashboards: ## Setup and verify dashboard system
-	python scripts/setup_dashboards.py
+	uv run python scripts/setup_dashboards.py
 
 # Testing commands
 test-api:
 	@echo "🧪 Testing API functionality..."
-	python scripts/test_api.py
+	uv run python scripts/test_api.py
 
 test-endpoints:
 	@echo "🌐 Testing API endpoints with curl..."
@@ -231,7 +250,7 @@ dev-all: start init-db api
 
 dev-api-only:
 	@echo "🔧 Starting API in development mode..."
-	cd src && python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+	cd src && uv run uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 
 # Cleanup commands
 clean-logs:
@@ -244,49 +263,16 @@ reset-all: down clean clean-logs
 	docker system prune -f
 	@make quick-start
 
-# Virtual Environment commands
-venv-create:
-	@echo "🐍 Creating virtual environment..."
-	python -m venv urbanclear-env
-	@echo "✅ Virtual environment created in urbanclear-env/"
-	@echo "📝 Activate with: source urbanclear-env/bin/activate"
+# UV Environment commands (replacing old venv commands)
+uv-create:
+	@echo "🚀 Creating uv environment..."
+	uv init
+	@echo "✅ UV environment created"
+	@echo "📝 Run: uv sync  # to install dependencies"
 
-venv-activate:
-	@echo "📝 To activate virtual environment, run:"
-	@echo "   source urbanclear-env/bin/activate"
-	@echo "🔍 Check if activated by looking for (urbanclear-env) in your prompt"
-
-venv-install: 
-	@echo "🔧 Installing packages in virtual environment..."
-	@echo "⚠️  Make sure virtual environment is activated first!"
-	pip install --upgrade pip setuptools wheel
-	pip install -r requirements-minimal.txt
-
-venv-status:
-	@echo "🔍 Virtual Environment Status:"
-	@echo "Current Python: $$(which python)"
-	@echo "Python version: $$(python --version)"
-	@echo "Virtual env: $$VIRTUAL_ENV"
-	@if [ -n "$$VIRTUAL_ENV" ]; then \
-		echo "✅ Virtual environment is ACTIVATED"; \
-	else \
-		echo "❌ Virtual environment is NOT activated"; \
-		echo "📝 Run: source urbanclear-env/bin/activate"; \
-	fi
-
-venv-deactivate:
-	@echo "📝 To deactivate virtual environment, run:"
-	@echo "   deactivate"
-
-venv-clean:
-	@echo "🧹 Removing virtual environment..."
-	rm -rf urbanclear-env
-	@echo "✅ Virtual environment removed"
-
-venv-recreate: venv-clean venv-create
-	@echo "🔄 Recreating virtual environment..."
-	@echo "📝 Don't forget to activate: source urbanclear-env/bin/activate"
-	@echo "📦 Then install packages: make venv-install"
+uv-recreate: uv-clean uv-sync
+	@echo "🔄 Recreating uv environment..."
+	@echo "✅ UV environment recreated with fresh dependencies"
 
 # ==========================================
 # System Health & Fixes
@@ -294,17 +280,17 @@ venv-recreate: venv-clean venv-create
 
 health-check: ## Run comprehensive system health check
 	@echo "🔍 Running comprehensive system health check..."
-	@python scripts/health_check.py
+	@uv run python scripts/health_check.py
 
 quick-fix: ## Automatically fix common issues
 	@echo "🔧 Running quick fixes..."
 	@pkill -f "uvicorn\|streamlit" 2>/dev/null || true
 	@sleep 2
 	@echo "Starting API server..."
-	@python run_api.py &
+	@uv run python run_api.py &
 	@sleep 5
 	@echo "Starting Streamlit dashboard..."
-	@nohup streamlit run src/visualization/web_dashboard.py --server.port 8501 --server.address 0.0.0.0 --browser.gatherUsageStats false > /dev/null 2>&1 &
+	@uv run streamlit run src/visualization/web_dashboard.py --server.port 8501 --server.address 0.0.0.0 --browser.gatherUsageStats false > /dev/null 2>&1 &
 	@echo "✅ Services restarted!"
 
 system-status: ## Check status of all services quickly
