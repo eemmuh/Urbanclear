@@ -104,15 +104,11 @@ git clone <repository-url>
 cd traffic-system
 ```
 
-2. **Create virtual environment:**
+2. **Install dependencies with uv:**
 ```bash
-python -m venv urbanclear-env
-source urbanclear-env/bin/activate  # On Windows: urbanclear-env\Scripts\activate
-```
-
-3. **Install Python dependencies:**
-```bash
-pip install -r requirements.txt
+uv sync  # Install all dependencies
+# Or install with development dependencies:
+uv sync --extra dev
 ```
 
 4. **Install Node.js dependencies:**
@@ -133,7 +129,9 @@ cp config/config.example.yaml config/config.yaml
 
 6. **Start the backend API:**
 ```bash
-python start_api.py
+uv run python start_api.py
+# Or use the Makefile:
+make api
 ```
 
 7. **Start the React dashboard (in a new terminal):**
