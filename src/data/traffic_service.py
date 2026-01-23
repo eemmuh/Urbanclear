@@ -6,7 +6,7 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 from loguru import logger
 
-from src.api.models import TrafficCondition, AnalyticsSummary
+from src.api.models import TrafficCondition, AnalyticsSummary, SignalOptimizationRequest
 from src.core.config import get_settings
 from src.data.mock_data_generator import MockDataGenerator
 
@@ -41,12 +41,29 @@ class TrafficService:
     async def get_historical_data(
         self, location: str, start_date: datetime, end_date: datetime
     ) -> Dict[str, Any]:
-        """Get historical traffic data"""
+        """
+        Get historical traffic data
+        
+        Note: Currently returns mock data. To implement:
+        1. Query database for historical records
+        2. Aggregate data by time intervals
+        3. Calculate statistics (average speed, peak times, etc.)
+        4. Return time series data
+        
+        Args:
+            location: Location identifier
+            start_date: Start of time range
+            end_date: End of time range
+            
+        Returns:
+            Dictionary with historical traffic data
+        """
         logger.info(
             f"Getting historical data for {location} from {start_date} to {end_date}"
         )
 
-        # TODO: Implement actual historical data retrieval
+        # TODO: Implement actual historical data retrieval from database
+        # This is a placeholder that returns mock data structure
         return {
             "location": location,
             "start_date": start_date.isoformat(),
@@ -57,11 +74,27 @@ class TrafficService:
             "data": [],  # Would contain actual time series data
         }
 
-    async def optimize_signals(self, request) -> Dict[str, Any]:
-        """Optimize traffic signal timing"""
+    async def optimize_signals(self, request: "SignalOptimizationRequest") -> Dict[str, Any]:
+        """
+        Optimize traffic signal timing
+        
+        Note: Currently returns mock optimization results. To implement:
+        1. Analyze current traffic patterns at intersection
+        2. Calculate optimal timing based on traffic flow
+        3. Consider pedestrian crossing times
+        4. Apply optimization algorithm (genetic, simulated annealing, etc.)
+        5. Return recommended timing changes
+        
+        Args:
+            request: SignalOptimizationRequest with intersection details
+            
+        Returns:
+            Dictionary with optimization results and recommended timing
+        """
         logger.info(f"Optimizing signals for intersection: {request.intersection_id}")
 
         # TODO: Implement actual signal optimization algorithm
+        # This is a placeholder that returns mock optimization results
         return {
             "intersection_id": request.intersection_id,
             "optimization_score": 0.82,
@@ -77,10 +110,25 @@ class TrafficService:
     async def get_signal_status(
         self, intersection_id: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Get traffic signal status"""
+        """
+        Get traffic signal status
+        
+        Note: Currently returns mock status. To implement:
+        1. Query signal control system for real-time status
+        2. Get current phase and timing
+        3. Check for maintenance issues
+        4. Return operational status
+        
+        Args:
+            intersection_id: Optional specific intersection ID, or None for all
+            
+        Returns:
+            Dictionary with signal status information
+        """
         logger.info(f"Getting signal status for intersection: {intersection_id}")
 
-        # TODO: Implement actual signal status retrieval
+        # TODO: Implement actual signal status retrieval from signal control system
+        # This is a placeholder that returns mock status data
         if intersection_id:
             return {
                 "intersection_id": intersection_id,
@@ -98,7 +146,7 @@ class TrafficService:
                 "last_updated": datetime.now(),
             }
 
-    async def get_incidents(self) -> list:
+    async def get_incidents(self) -> List[Dict[str, Any]]:
         """Get current traffic incidents (mock)"""
         logger.info("Getting current incidents (mock)")
         try:
@@ -121,12 +169,29 @@ class TrafficService:
     async def get_performance_metrics(
         self, metric_type: str, location: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Get system performance metrics"""
+        """
+        Get system performance metrics
+        
+        Note: Currently returns mock metrics. To implement:
+        1. Query database for performance data
+        2. Calculate congestion levels from traffic data
+        3. Compute throughput from volume measurements
+        4. Estimate emissions from traffic patterns
+        5. Return calculated metrics with trends
+        
+        Args:
+            metric_type: Type of metric (congestion, throughput, emissions, efficiency)
+            location: Optional location filter
+            
+        Returns:
+            Dictionary with performance metrics
+        """
         logger.info(
             f"Getting performance metrics: {metric_type} for location: {location}"
         )
 
-        # TODO: Implement actual metrics calculation
+        # TODO: Implement actual metrics calculation from real data
+        # This is a placeholder that returns mock metrics
         metrics = {
             "congestion": {
                 "current_level": 0.65,
@@ -149,10 +214,23 @@ class TrafficService:
         return metrics.get(metric_type, {"error": "Unknown metric type"})
 
     async def get_system_stats(self) -> Dict[str, Any]:
-        """Get system statistics"""
+        """
+        Get system statistics
+        
+        Note: Currently returns mock statistics. To implement:
+        1. Query database for uptime and request counts
+        2. Get sensor status from monitoring system
+        3. Calculate data processing statistics
+        4. Query cache hit rates from Redis
+        5. Return comprehensive system statistics
+        
+        Returns:
+            Dictionary with system statistics
+        """
         logger.info("Getting system statistics")
 
-        # TODO: Implement actual system stats collection
+        # TODO: Implement actual system stats collection from monitoring systems
+        # This is a placeholder that returns mock statistics
         return {
             "uptime": 86400,  # 24 hours in seconds
             "active_sensors": 147,

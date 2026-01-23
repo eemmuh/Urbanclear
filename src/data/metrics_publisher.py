@@ -313,9 +313,9 @@ if __name__ == "__main__":
 
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8001
 
-    print(f"Starting Urbanclear Metrics Publisher on port {port}")
-    print("Metrics available at: http://localhost:{}/metrics".format(port))
-    print("Press Ctrl+C to stop")
+    logger.info(f"Starting Urbanclear Metrics Publisher on port {port}")
+    logger.info(f"Metrics available at: http://localhost:{port}/metrics")
+    logger.info("Press Ctrl+C to stop")
 
     server = start_metrics_server(port)
 
@@ -323,6 +323,6 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\nStopping metrics server...")
+        logger.info("\nStopping metrics server...")
         server.stop()
-        print("Stopped.")
+        logger.info("Stopped.")

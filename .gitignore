@@ -9,73 +9,39 @@ __pycache__/
 *.so
 .Python
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
 *.egg
 MANIFEST
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Type checking cache
-.mypy_cache/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pyenv
-.python-version
-
-# Virtual Environments (legacy)
-env/
+# Virtual Environments
 venv/
+env/
 ENV/
-env.bak/
-venv.bak/
-urbanclear-env/
 .venv/
-*.venv
-
-# UV Package Manager
 .uv/
 uv.lock
+urbanclear-env/
+
+# ==============================================
+# Testing & Coverage
+# ==============================================
+.pytest_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+coverage.xml
+nosetests.xml
+.hypothesis/
 
 # ==============================================
 # React Dashboard (Node.js/React)
 # ==============================================
-# Dashboard dependencies
-dashboard/node_modules/*
+dashboard/node_modules/
 dashboard/.npm
 dashboard/.eslintcache
-
-# Dashboard build outputs
 dashboard/dist/
 dashboard/build/
 dashboard/.vite/
@@ -83,33 +49,19 @@ dashboard/.vite/
 # Dashboard environment files
 dashboard/.env
 dashboard/.env.local
-dashboard/.env.development.local
-dashboard/.env.test.local
-dashboard/.env.production.local
+dashboard/.env.*.local
 
 # Dashboard logs
 dashboard/npm-debug.log*
 dashboard/yarn-debug.log*
 dashboard/yarn-error.log*
-dashboard/lerna-debug.log*
-
-# Dashboard IDE
-dashboard/.vscode/
-dashboard/.idea/
-
-# Dashboard OS files
-dashboard/.DS_Store
-dashboard/Thumbs.db
 
 # ==============================================
-# Environment Variables & Configuration
+# Environment Variables & Secrets
 # ==============================================
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.*
+.env.*.local
 !.env.example
 
 # Configuration files with secrets
@@ -118,29 +70,29 @@ config/config.yml
 config/*.secret.*
 config/production.*
 config/staging.*
+config/secrets.yaml
+config/api_keys.yaml
 
 # ==============================================
-# Machine Learning & Data
+# Machine Learning Models
 # ==============================================
-# Model files
 models/trained/
 models/simple_trained/
 *.pkl
 *.joblib
 *.h5
-*.pb
-*.onnx
-*.tflite
 *.pt
 *.pth
 *.model
 *.weights
 
-# MLflow
+# MLflow (if used)
 mlruns/
 mlartifacts/
 
-# Data files
+# ==============================================
+# Data Files
+# ==============================================
 data/raw/*.csv
 data/raw/*.json
 data/raw/*.parquet
@@ -149,51 +101,36 @@ data/interim/
 data/external/
 !data/sample/
 
-# Experiment tracking
-experiments/
-wandb/
-
 # ==============================================
 # Database Files
 # ==============================================
 *.db
 *.sqlite
 *.sqlite3
-*.db-journal
-*.db-wal
-*.db-shm
-
-# PostgreSQL
 *.backup
 *.sql.gz
 *.dump
-
-# MongoDB
 *.bson
-
-# Redis dumps
 dump.rdb
 appendonly.aof
 
 # ==============================================
-# Logs & Monitoring
+# Logs
 # ==============================================
 logs/
 *.log
 *.log.*
 log/
-
-# Application logs
 urbanclear.log
 traffic.log
 api.log
 ml.log
 security.log
 
-# Prometheus data
+# ==============================================
+# Monitoring Data
+# ==============================================
 prometheus_data/
-
-# Grafana data
 grafana_data/
 
 # ==============================================
@@ -201,34 +138,20 @@ grafana_data/
 # ==============================================
 docker-compose.override.yml
 docker-compose.local.yml
-.docker/
 
 # ==============================================
 # Security & Secrets
 # ==============================================
-# Private keys
 *.pem
 *.key
 *.crt
 *.csr
 *.p12
 *.pfx
-
-# SSH keys
-id_rsa
-id_rsa.pub
-id_ed25519
-id_ed25519.pub
-
-# JWT secrets
 jwt_secret.txt
 *.secret
-
-# API keys
 api_keys.txt
 .api_key
-
-# Certificates
 ssl/
 certs/
 certificates/
@@ -248,10 +171,8 @@ certificates/
 .DS_Store
 .DS_Store?
 ._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
+ehthumbs.db
 
 # ==============================================
 # Temporary & Cache Files
@@ -261,8 +182,6 @@ temp/
 *.tmp
 *.temp
 *.cache
-
-# Cache directories
 .cache/
 .ruff_cache/
 
@@ -273,23 +192,8 @@ temp/
 *.orig
 
 # ==============================================
-# Testing
-# ==============================================
-# Test databases
-test.db
-test_*.db
-*_test.db
-
-# ==============================================
 # Project Specific
 # ==============================================
-# Urbanclear specific ignores
-traffic_data_large/
-sensor_backups/
-incident_archives/
-route_cache/
-prediction_cache/
-
 # Scripts output
 scripts/output/
 scripts/logs/
@@ -302,9 +206,9 @@ status_*.json
 benchmarks/
 performance/
 
-# Real Data Service - API Keys and Sensitive Data
-config/secrets.yaml
-config/api_keys.yaml
-
-
-
+# Project-specific caches
+traffic_data_large/
+sensor_backups/
+incident_archives/
+route_cache/
+prediction_cache/

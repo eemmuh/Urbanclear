@@ -577,35 +577,35 @@ class SimpleMLTrainer:
 
 def main():
     """Main function to train all models"""
-    print("🤖 Starting Simple ML Training System")
+    logger.info("🤖 Starting Simple ML Training System")
 
     trainer = SimpleMLTrainer()
 
     # Train all models
     results = trainer.train_all_models(samples=2000)
 
-    print("\n📊 Training Results:")
+    logger.info("\n📊 Training Results:")
     for model_type, result in results.items():
         if "error" in result:
-            print(f"❌ {model_type}: {result['error']}")
+            logger.error(f"❌ {model_type}: {result['error']}")
         else:
-            print(
+            logger.info(
                 f"✅ {model_type}: {result.get('algorithm', 'unknown')} - Trained successfully"
             )
 
     # Show model status
-    print("\n📋 Model Status:")
+    logger.info("\n📋 Model Status:")
     status = trainer.get_model_status()
     for model_type, info in status.items():
         if info["trained"]:
             metadata = info["metadata"]
-            print(
+            logger.info(
                 f"✅ {model_type}: {metadata['algorithm']} - {metadata['trained_at']}"
             )
         else:
-            print(f"❌ {model_type}: {info['error']}")
+            logger.error(f"❌ {model_type}: {info['error']}")
 
-    print("\n🎯 All models trained successfully!")
+    logger.info("\n🎯 All models trained successfully!")
 
 
 if __name__ == "__main__":

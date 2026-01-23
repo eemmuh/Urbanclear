@@ -5,6 +5,7 @@ Compatible with React dashboard Socket.io client
 
 import asyncio
 import json
+import os
 from datetime import datetime
 from typing import Dict, Any
 import socketio
@@ -17,8 +18,13 @@ class SocketIOHandler:
     """Socket.io handler for real-time updates"""
 
     def __init__(self):
+        # Security: Restrict CORS origins
+        allowed_origins = os.getenv(
+            "ALLOWED_ORIGINS",
+            "http://localhost:3000,http://127.0.0.1:3000"
+        ).split(",")
         self.sio = socketio.AsyncServer(
-            cors_allowed_origins="*",
+            cors_allowed_origins=allowed_origins,  # Restricted origins
             async_mode='asgi'
         )
         self.data_generator = MockDataGenerator()

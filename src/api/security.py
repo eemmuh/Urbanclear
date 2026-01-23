@@ -28,7 +28,20 @@ class UserRole(str, Enum):
 class SecurityConfig:
     """Security configuration"""
 
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+    # Security: Require JWT_SECRET_KEY environment variable in production
+    _jwt_secret = os.getenv("JWT_SECRET_KEY")
+    if not _jwt_secret:
+        if os.getenv("ENVIRONMENT") == "production":
+            raise ValueError(
+                "JWT_SECRET_KEY environment variable is required in production. "
+                "Generate a strong secret key (minimum 32 characters)."
+            )
+        # Only allow default in development
+        _jwt_secret = "dev-secret-key-change-in-production"
+        logger.warning(
+            "⚠️  Using default JWT secret key. Set JWT_SECRET_KEY environment variable for production!"
+        )
+    JWT_SECRET_KEY = _jwt_secret
     JWT_ALGORITHM = "HS256"
     JWT_EXPIRATION_HOURS = 24
     API_KEY_PREFIX = "uk_"

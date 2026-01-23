@@ -7,7 +7,7 @@ from typing import List, Dict, Any
 from functools import lru_cache
 
 import yaml
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings
 from loguru import logger
 
@@ -19,11 +19,24 @@ class DatabaseConfig(BaseSettings):
     port: int = 5432
     database: str = "traffic_db"
     username: str = "traffic_user"
-    password: str = "password"
+    password: str = Field(
+        default="",
+        description="PostgreSQL password (set via DATABASE__POSTGRES__PASSWORD env var)"
+    )
     pool_size: int = 10
     max_overflow: int = 20
 
     model_config = ConfigDict(env_prefix="DATABASE__POSTGRES__")
+    
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        """Warn if password is empty in production"""
+        if not v and os.getenv("ENVIRONMENT") == "production":
+            logger.warning(
+                "⚠️  PostgreSQL password not set! Set DATABASE__POSTGRES__PASSWORD environment variable."
+            )
+        return v
 
 
 class MongoConfig(BaseSettings):
@@ -33,9 +46,22 @@ class MongoConfig(BaseSettings):
     port: int = 27017
     database: str = "traffic_logs"
     username: str = "admin"
-    password: str = "mongo_password"
+    password: str = Field(
+        default="",
+        description="MongoDB password (set via DATABASE__MONGODB__PASSWORD env var)"
+    )
 
     model_config = ConfigDict(env_prefix="DATABASE__MONGODB__")
+    
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        """Warn if password is empty in production"""
+        if not v and os.getenv("ENVIRONMENT") == "production":
+            logger.warning(
+                "⚠️  MongoDB password not set! Set DATABASE__MONGODB__PASSWORD environment variable."
+            )
+        return v
 
 
 class RedisConfig(BaseSettings):
@@ -44,9 +70,22 @@ class RedisConfig(BaseSettings):
     host: str = "localhost"
     port: int = 6379
     database: int = 0
-    password: str = "password"
+    password: str = Field(
+        default="",
+        description="Redis password (set via DATABASE__REDIS__PASSWORD env var)"
+    )
 
     model_config = ConfigDict(env_prefix="DATABASE__REDIS__")
+    
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        """Warn if password is empty in production"""
+        if not v and os.getenv("ENVIRONMENT") == "production":
+            logger.warning(
+                "⚠️  Redis password not set! Set DATABASE__REDIS__PASSWORD environment variable."
+            )
+        return v
 
 
 class DatabaseSettings(BaseSettings):
@@ -170,7 +209,13 @@ class APIConfig(BaseSettings):
         "jwt_secret": "your_jwt_secret_key",
         "token_expiry": 3600,
     }
-    cors: Dict[str, Any] = {"enabled": True, "allowed_origins": ["*"]}
+    cors: Dict[str, Any] = {
+        "enabled": True,
+        "allowed_origins": os.getenv(
+            "ALLOWED_ORIGINS",
+            "http://localhost:3000,http://127.0.0.1:3000"
+        ).split(",")
+    }
 
 
 class GeographyConfig(BaseSettings):
@@ -372,8 +417,9 @@ def setup_logging(settings: Settings = None):
     logger.remove()  # Remove default handler
 
     # Add console handler
+    import sys
     logger.add(
-        sink=lambda message: print(message, end=""),
+        sink=sys.stderr,  # Use stderr for console output (standard practice)
         level=settings.app.log_level,
         format=(
             "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "

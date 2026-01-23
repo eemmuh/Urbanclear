@@ -6,9 +6,9 @@ services:
     image: postgres:15
     container_name: urbanclear_postgres
     environment:
-      POSTGRES_DB: traffic_db
-      POSTGRES_USER: traffic_user
-      POSTGRES_PASSWORD: traffic_password
+      POSTGRES_DB: ${POSTGRES_DB:-traffic_db}
+      POSTGRES_USER: ${POSTGRES_USER:-traffic_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-traffic_password}
     ports:
       - "5432:5432"
     volumes:
@@ -25,9 +25,9 @@ services:
     image: mongo:7.0
     container_name: urbanclear_mongo
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: mongo_password
-      MONGO_INITDB_DATABASE: traffic_logs
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-mongo_password}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-traffic_logs}
     ports:
       - "27017:27017"
     volumes:
@@ -47,7 +47,7 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes --requirepass redis_password
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 30s

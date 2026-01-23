@@ -2,6 +2,7 @@
 FastAPI dependencies for the traffic system
 """
 
+import os
 from typing import Optional
 import redis
 from fastapi import Depends, HTTPException, status
@@ -190,15 +191,31 @@ def get_current_user(
 ) -> Optional[dict]:
     """
     Extract and validate user from JWT token
+    Security: Authentication bypass only allowed in development mode
     """
-    # For development, allow requests without authentication
+    # Security: Only allow unauthenticated access in development
+    environment = os.getenv("ENVIRONMENT", "development").lower()
+    allow_dev_bypass = environment == "development" and os.getenv(
+        "ALLOW_DEV_AUTH_BYPASS", "false"
+    ).lower() == "true"
+    
     if credentials is None:
-        # Return a mock user for development
+        if not allow_dev_bypass:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        # Only allow in development with explicit flag
+        logger.warning(
+            "⚠️  Development authentication bypass enabled. "
+            "Set ALLOW_DEV_AUTH_BYPASS=false in production!"
+        )
         return {
             "id": "dev_user",
             "username": "developer",
-            "role": "admin",
-            "permissions": ["read", "write", "admin"],
+            "role": "viewer",  # Reduced permissions for dev bypass
+            "permissions": ["read"],
         }
     
     try:
@@ -214,21 +231,21 @@ def get_current_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        # For demo purposes, return a mock user
+        # Return authenticated user
         return {
             "id": user_id,
-            "username": f"user_{user_id}",
-            "role": "admin",
-            "permissions": ["read", "write", "admin"],
+            "username": payload.get("username", f"user_{user_id}"),
+            "role": payload.get("role", "viewer"),
+            "permissions": payload.get("permissions", ["read"]),
         }
-    except JWTError:
-        # For development, return a mock user instead of raising an error
-        return {
-            "id": "dev_user",
-            "username": "developer",
-            "role": "admin",
-            "permissions": ["read", "write", "admin"],
-        }
+    except JWTError as e:
+        # Security: Don't allow bypass on invalid tokens
+        logger.warning(f"Invalid JWT token: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 def require_permission(permission: str):

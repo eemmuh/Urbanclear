@@ -78,12 +78,16 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# CORS middleware - Security: Restrict origins in production
+allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000"  # Default: React dashboard
+).split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this properly in production
+    allow_origins=allowed_origins,  # Restricted to specific origins
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -200,8 +204,24 @@ async def get_current_traffic(
                 )
             
             return conditions
+    except ValueError as e:
+        logger.warning(f"Invalid input for traffic query: {e}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid request parameters: {str(e)}"
+        )
+    except ConnectionError as e:
+        logger.error(f"Database connection error: {e}")
+        await logging_service.log_api_request(
+            endpoint="/api/v1/traffic/current",
+            method="GET",
+            response_code=503,
+            response_time=0.0
+        )
+        raise HTTPException(
+            status_code=503, detail="Service temporarily unavailable"
+        )
     except Exception as e:
-        logger.error(f"Error getting current traffic: {e}")
+        logger.exception(f"Unexpected error getting current traffic: {e}")
         
         # Log error to MongoDB
         await logging_service.log_api_request(
@@ -212,7 +232,7 @@ async def get_current_traffic(
         )
         
         raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve traffic data: {str(e)}"
+            status_code=500, detail="Internal server error"
         )
 
 
@@ -266,10 +286,15 @@ async def predict_traffic(
             }
             return PredictionResponse(**response_data)
 
-    except Exception as e:
-        logger.error(f"Error predicting traffic: {e}")
+    except ValueError as e:
+        logger.warning(f"Invalid prediction parameters: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to generate predictions: {e}"
+            status_code=400, detail=f"Invalid request: {str(e)}"
+        )
+    except Exception as e:
+        logger.exception(f"Error predicting traffic: {e}")
+        raise HTTPException(
+            status_code=500, detail="Failed to generate predictions"
         )
 
 
@@ -292,10 +317,15 @@ async def get_historical_traffic(
         return data
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Error getting historical data: {e}")
+    except ValueError as e:
+        logger.warning(f"Invalid date range: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve historical data: {str(e)}"
+            status_code=400, detail=f"Invalid date parameters: {str(e)}"
+        )
+    except Exception as e:
+        logger.exception(f"Error getting historical data: {e}")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve historical data"
         )
 
 
@@ -357,8 +387,13 @@ async def optimize_route(
             alternatives=optimized_route_dict["alternatives"],
             optimization_metrics={"time_saved": 5.0, "distance_saved": 0.8},
         )
+    except ValueError as e:
+        logger.warning(f"Invalid route optimization request: {e}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid request: {str(e)}"
+        )
     except Exception as e:
-        logger.error(f"Error optimizing route: {e}")
+        logger.exception(f"Error optimizing route: {e}")
         
         # Log error to MongoDB
         await logging_service.log_api_request(
@@ -369,7 +404,7 @@ async def optimize_route(
         )
         
         raise HTTPException(
-            status_code=500, detail=f"Failed to optimize route: {str(e)}"
+            status_code=500, detail="Failed to optimize route"
         )
 
 
@@ -387,10 +422,15 @@ async def get_route_alternatives(
             max_alternatives=max_alternatives,
         )
         return alternatives
-    except Exception as e:
-        logger.error(f"Error getting route alternatives: {e}")
+    except ValueError as e:
+        logger.warning(f"Invalid route parameters: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to get alternatives: {str(e)}"
+            status_code=400, detail=f"Invalid route parameters: {str(e)}"
+        )
+    except Exception as e:
+        logger.exception(f"Error getting route alternatives: {e}")
+        raise HTTPException(
+            status_code=500, detail="Failed to get route alternatives"
         )
 
 
@@ -407,8 +447,12 @@ async def get_active_incidents(
             location=location, severity=severity
         )
         return incidents
+    except ValueError as e:
+        logger.warning(f"Invalid filter parameters: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid filter parameters: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Error getting active incidents: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve active incidents")
 
 
 @app.post("/api/v1/incidents/report")
@@ -435,7 +479,13 @@ async def report_incident(incident: IncidentReport, db=Depends(get_db)):
         )
         
         return {"status": "success", "incident_id": result.id}
+    except ValueError as e:
+        logger.warning(f"Invalid incident report: {e}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid incident data: {str(e)}"
+        )
     except Exception as e:
+        logger.exception(f"Error reporting incident: {e}")
         # Log error to MongoDB
         await logging_service.log_api_request(
             endpoint="/api/v1/incidents/report",
@@ -444,7 +494,7 @@ async def report_incident(incident: IncidentReport, db=Depends(get_db)):
             response_time=0.0
         )
         
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to report incident")
 
 
 @app.put("/api/v1/incidents/{incident_id}/resolve")
@@ -453,8 +503,12 @@ async def resolve_incident(incident_id: str, db=Depends(get_db)):
     try:
         await incident_detector.resolve_incident(incident_id)
         return {"status": "resolved", "incident_id": incident_id}
+    except ValueError as e:
+        logger.warning(f"Invalid incident ID: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid incident ID: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Error resolving incident: {e}")
+        raise HTTPException(status_code=500, detail="Failed to resolve incident")
 
 
 # Signal Optimization Endpoints
@@ -464,8 +518,12 @@ async def optimize_signals(request: SignalOptimizationRequest, db=Depends(get_db
     try:
         optimization = await traffic_service.optimize_signals(request)
         return optimization
+    except ValueError as e:
+        logger.warning(f"Invalid signal optimization request: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid request: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Error optimizing signals: {e}")
+        raise HTTPException(status_code=500, detail="Failed to optimize signals")
 
 
 @app.get("/api/v1/signals/status")
@@ -477,8 +535,12 @@ async def get_signal_status(
     try:
         status = await traffic_service.get_signal_status(intersection_id)
         return status
+    except ValueError as e:
+        logger.warning(f"Invalid intersection ID: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid intersection ID: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Error getting signal status: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve signal status")
 
 
 # Analytics Endpoints
@@ -502,10 +564,15 @@ async def get_analytics_summary(
             return summary
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Error getting analytics summary: {e}")
+    except ValueError as e:
+        logger.warning(f"Invalid analytics period: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to generate analytics: {str(e)}"
+            status_code=400, detail=f"Invalid period parameter: {str(e)}"
+        )
+    except Exception as e:
+        logger.exception(f"Error getting analytics summary: {e}")
+        raise HTTPException(
+            status_code=500, detail="Failed to generate analytics"
         )
 
 
@@ -530,10 +597,15 @@ async def get_performance_analytics(
         return AnalyticsResponse(metrics=metrics)
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Error getting performance metrics: {e}")
+    except ValueError as e:
+        logger.warning(f"Invalid metric type: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve metrics: {str(e)}"
+            status_code=400, detail=f"Invalid metric type: {str(e)}"
+        )
+    except Exception as e:
+        logger.exception(f"Error getting performance metrics: {e}")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve metrics"
         )
 
 
@@ -557,8 +629,14 @@ async def retrain_models(
             "message": f"{model_type} model retrained",
             "result": result,
         }
+    except HTTPException:
+        raise
+    except ValueError as e:
+        logger.warning(f"Invalid model type: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid model type: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Error retraining model: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrain model")
 
 
 @app.get("/api/v1/admin/system/stats")
@@ -568,7 +646,8 @@ async def get_system_stats():
         stats = await traffic_service.get_system_stats()
         return stats
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Error getting system stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve system statistics")
 
 
 @app.get("/api/v1/dashboard/stats")
@@ -604,8 +683,8 @@ async def get_dashboard_stats():
             "last_updated": datetime.now().isoformat()
         }
     except Exception as e:
-        logger.error(f"Error getting dashboard stats: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Error getting dashboard stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve dashboard statistics")
 
 
 # WebSocket endpoint for real-time updates
@@ -657,9 +736,14 @@ async def geocode_address_endpoint(
                 raise HTTPException(
                     status_code=404, detail=f"Could not geocode address: {address}"
                 )
+    except HTTPException:
+        raise
+    except ValueError as e:
+        logger.warning(f"Invalid address format: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid address: {str(e)}")
     except Exception as e:
-        logger.error(f"Error geocoding address {address}: {e}")
-        raise HTTPException(status_code=500, detail=f"Geocoding failed: {str(e)}")
+        logger.exception(f"Error geocoding address {address}: {e}")
+        raise HTTPException(status_code=500, detail="Geocoding service error")
 
 
 @app.post("/api/v1/real-data/route")
@@ -694,10 +778,15 @@ async def get_real_route(
                 }
             else:
                 raise HTTPException(status_code=404, detail="Could not calculate route")
+    except HTTPException:
+        raise
+    except ValueError as e:
+        logger.warning(f"Invalid route coordinates: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid coordinates: {str(e)}")
     except Exception as e:
-        logger.error(f"Error calculating route: {e}")
+        logger.exception(f"Error calculating route: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Route calculation failed: {str(e)}"
+            status_code=500, detail="Route calculation service error"
         )
 
 
@@ -737,9 +826,12 @@ async def search_real_places(
                 "center": {"latitude": latitude, "longitude": longitude},
                 "radius_km": radius_km,
             }
+    except ValueError as e:
+        logger.warning(f"Invalid place search parameters: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid search parameters: {str(e)}")
     except Exception as e:
-        logger.error(f"Error searching places: {e}")
-        raise HTTPException(status_code=500, detail=f"Place search failed: {str(e)}")
+        logger.exception(f"Error searching places: {e}")
+        raise HTTPException(status_code=500, detail="Place search service error")
 
 
 @app.get("/api/v1/real-data/matrix")
@@ -777,14 +869,17 @@ async def get_real_matrix(
                 raise HTTPException(
                     status_code=404, detail="Could not calculate matrix"
                 )
+    except HTTPException:
+        raise
     except ValueError as e:
+        logger.warning(f"Invalid location format: {e}")
         raise HTTPException(
             status_code=400, detail=f"Invalid location format: {str(e)}"
         )
     except Exception as e:
-        logger.error(f"Error calculating matrix: {e}")
+        logger.exception(f"Error calculating matrix: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Matrix calculation failed: {str(e)}"
+            status_code=500, detail="Matrix calculation service error"
         )
 
 
@@ -824,12 +919,15 @@ async def get_real_isochrones(
                 raise HTTPException(
                     status_code=404, detail="Could not calculate isochrones"
                 )
+    except HTTPException:
+        raise
     except ValueError as e:
+        logger.warning(f"Invalid time format: {e}")
         raise HTTPException(status_code=400, detail=f"Invalid time format: {str(e)}")
     except Exception as e:
-        logger.error(f"Error calculating isochrones: {e}")
+        logger.exception(f"Error calculating isochrones: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Isochrone calculation failed: {str(e)}"
+            status_code=500, detail="Isochrone calculation service error"
         )
 
 
@@ -841,11 +939,11 @@ async def get_real_data_health():
             health_status = await service.get_health_status()
             return health_status
     except Exception as e:
-        logger.error(f"Error getting real data health: {e}")
+        logger.exception(f"Error getting real data health: {e}")
         return {
             "timestamp": datetime.now().isoformat(),
             "overall_health": "error",
-            "error": str(e),
+            "error": "Service health check failed",
             "sources": {},
         }
 
@@ -921,9 +1019,9 @@ async def simulate_rush_hour():
         return rush_hour_data
 
     except Exception as e:
-        logger.error(f"Error generating rush hour simulation: {e}")
+        logger.exception(f"Error generating rush hour simulation: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to generate simulation: {str(e)}"
+            status_code=500, detail="Failed to generate rush hour simulation"
         )
 
 
@@ -955,9 +1053,9 @@ async def get_real_time_dashboard():
         return dashboard_data
 
     except Exception as e:
-        logger.error(f"Error generating dashboard data: {e}")
+        logger.exception(f"Error generating dashboard data: {e}")
         return {
-            "error": str(e),
+            "error": "Dashboard data generation failed",
             "fallback_data": {
                 "timestamp": datetime.now().isoformat(),
                 "status": "degraded",
@@ -1070,9 +1168,9 @@ async def ml_showcase():
         return ml_demo
 
     except Exception as e:
-        logger.error(f"Error generating ML showcase: {e}")
+        logger.exception(f"Error generating ML showcase: {e}")
         return {
-            "error": str(e),
+            "error": "ML showcase generation failed",
             "message": "ML showcase generation failed",
             "fallback": {
                 "status": "ML models available",
@@ -1144,9 +1242,9 @@ async def get_performance_metrics_demo():
         }
 
     except Exception as e:
-        logger.error(f"Error generating performance metrics: {e}")
+        logger.exception(f"Error generating performance metrics: {e}")
         return {
-            "error": str(e),
+            "error": "Performance metrics generation failed",
             "basic_metrics": {
                 "status": "operational",
                 "uptime": "99.7%",
@@ -1201,9 +1299,9 @@ async def get_geographic_heatmap():
         return heatmap_data
 
     except Exception as e:
-        logger.error(f"Error generating geographic heatmap: {e}")
+        logger.exception(f"Error generating geographic heatmap: {e}")
         return {
-            "error": str(e),
+            "error": "Heatmap data generation failed",
             "fallback_zones": ["Manhattan", "Brooklyn", "Queens", "Bronx"],
             "message": "Heatmap data generation failed",
         }
@@ -1264,9 +1362,9 @@ async def get_incident_timeline():
         return timeline_data
 
     except Exception as e:
-        logger.error(f"Error generating incident timeline: {e}")
+        logger.exception(f"Error generating incident timeline: {e}")
         return {
-            "error": str(e),
+            "error": "Timeline generation failed",
             "period": "24 hours",
             "message": "Timeline generation failed",
         }
