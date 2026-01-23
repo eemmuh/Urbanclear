@@ -120,12 +120,15 @@ class SimpleDecisionTree:
     def _build_tree(self, X: List[List[float]], y: List[float], depth: int) -> Dict:
         """Build decision tree recursively"""
         if depth >= self.max_depth or len(set(y)) == 1 or len(X) < 2:
-            return {"type": "leaf", "value": sum(y) / len(y)}
+            return {"type": "leaf", "value": sum(y) / len(y) if len(y) > 0 else 0.0}
 
         best_feature = 0
         best_threshold = 0
         best_score = float("inf")
 
+        # Safety check: ensure X is not empty (though len(X) < 2 check above should prevent this)
+        if not X or len(X) == 0 or len(X[0]) == 0:
+            return {"type": "leaf", "value": sum(y) / len(y) if len(y) > 0 else 0.0}
         n_features = len(X[0])
 
         # Find best split

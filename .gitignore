@@ -212,3 +212,8 @@ sensor_backups/
 incident_archives/
 route_cache/
 prediction_cache/
+
+
+
+#docs
+docs/

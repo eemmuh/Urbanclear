@@ -290,14 +290,16 @@ class GeoapifyClient:
 
             # Extract route steps
             steps = []
-            for step in properties.get("legs", [{}])[0].get("steps", []):
-                steps.append(
-                    {
-                        "instruction": step.get("instruction", {}).get("text", ""),
-                        "distance": step.get("distance", 0),
-                        "duration": step.get("time", 0),
-                    }
-                )
+            legs = properties.get("legs", [])
+            if legs and len(legs) > 0:
+                for step in legs[0].get("steps", []):
+                    steps.append(
+                        {
+                            "instruction": step.get("instruction", {}).get("text", ""),
+                            "distance": step.get("distance", 0),
+                            "duration": step.get("time", 0),
+                        }
+                    )
 
             return GeoapifyRoute(
                 distance_meters=properties.get("distance", 0),
