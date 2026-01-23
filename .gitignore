@@ -213,7 +213,16 @@ incident_archives/
 route_cache/
 prediction_cache/
 
+# ==============================================
+# Documentation (Selective - see docs/.gitignore for details)
+# ==============================================
+# Ignore internal reports and assessments
+docs/security/SECURITY_AUDIT.md
+docs/security/SECURITY_FIXES_APPLIED.md
+docs/CODE_QUALITY_REPORT.md
+docs/IMPROVEMENTS.md
+docs/ISSUES_FOUND.md
+docs/FIXES_APPLIED.md
 
 
-#docs
-docs/
+

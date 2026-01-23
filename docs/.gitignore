@@ -1,0 +1,17 @@
+# Ignore internal assessment and report files
+# These are temporary/internal and don't need to be in version control
+
+# Security reports (may expose vulnerabilities)
+security/SECURITY_AUDIT.md
+security/SECURITY_FIXES_APPLIED.md
+
+# Code quality assessments (internal reports)
+CODE_QUALITY_REPORT.md
+IMPROVEMENTS.md
+ISSUES_FOUND.md
+FIXES_APPLIED.md
+
+# Keep useful documentation:
+# - guides/QUICKSTART.md (helpful for onboarding)
+# - PROJECT_ROADMAP.md (useful for planning)
+# - development/ guides (helpful for setup)
