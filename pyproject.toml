@@ -7,7 +7,7 @@ name = "urbanclear-traffic-system"
 version = "1.0.0"
 description = "Comprehensive traffic management system with ML-powered analytics"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.13"
 license = {text = "MIT"}
 authors = [
     {name = "Traffic System Team", email = "team@urbanclear.com"},
@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
@@ -97,6 +98,9 @@ dependencies = [
     "aiohttp>=3.9.0",
     "requests>=2.31.0",
     "websockets>=12.0",
+    "python-socketio>=5.0.0",
+    "streamlit>=1.28.0",
+    "psutil>=5.9.0",
     
     # Security & Authentication
     "cryptography>=41.0.0",
@@ -146,6 +150,7 @@ dev = [
     "flake8>=6.1.0",
     "mypy>=1.6.0",
     "isort>=5.12.0",
+    "ruff>=0.3.0",
     
     # Security & Code Quality (for CI/CD)
     "bandit>=1.7.5",
@@ -204,6 +209,10 @@ ci = [
     "colorama>=0.4.6,<1.0.0",
     "locust>=2.17.0,<3.0.0",
 ]
+
+[project.scripts]
+urbanclear-api = "src.api.main:main"
+urbanclear-demo = "examples.demo_real_data:main"
 
 [project.urls]
 Homepage = "https://github.com/urbanclear/traffic-system"
@@ -326,6 +335,27 @@ skips = ["B101", "B601"]
 # Safety configuration for dependency vulnerability scanning
 full_report = true
 ignore = []
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "B", "C4", "UP", "ARG", "SIM", "TCH", "Q", "RUF"]
+ignore = ["E501", "B008", "C901"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    ".eggs",
+    "*.egg",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/**/*" = ["B011"]
 
 [tool.isort]
 profile = "black"

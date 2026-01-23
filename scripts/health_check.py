@@ -19,8 +19,8 @@ class UrbanclearHealthChecker:
         self.issues = []
         self.services = {
             'api': 'http://localhost:8000/health',
-            'streamlit': 'http://localhost:8501',
-            'grafana': 'http://localhost:3000',
+            'react_dashboard': 'http://localhost:3000',
+            'grafana': 'http://localhost:3001',
             'prometheus': 'http://localhost:9090',
             'kafka_ui': 'http://localhost:8080'
         }
@@ -67,7 +67,7 @@ class UrbanclearHealthChecker:
             return False
             
     def check_python_processes(self):
-        """Check Python processes for API and Streamlit"""
+        """Check Python processes for API"""
         processes = []
         for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
             try:
@@ -75,8 +75,8 @@ class UrbanclearHealthChecker:
                     cmdline = ' '.join(proc.info['cmdline'])
                     if 'uvicorn' in cmdline:
                         processes.append(f"API Server (PID: {proc.info['pid']})")
-                    elif 'streamlit' in cmdline:
-                        processes.append(f"Streamlit (PID: {proc.info['pid']})")
+                    elif 'npm' in cmdline and 'dashboard' in cmdline:
+                        processes.append(f"React Dashboard (PID: {proc.info['pid']})")
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
                 
@@ -85,7 +85,7 @@ class UrbanclearHealthChecker:
             return True
         else:
             print("⚠️  Python Processes: None found")
-            self.issues.append("No API/Streamlit processes running")
+            self.issues.append("No API processes running")
             return False
             
     def check_virtual_env(self):
@@ -137,8 +137,8 @@ class UrbanclearHealthChecker:
         if any('Virtual environment' in issue for issue in self.issues):
             fixes.append("🐍 Activate venv: source urbanclear-env/bin/activate")
             
-        if any('Streamlit' in issue for issue in self.issues):
-            fixes.append("📊 Restart dashboard: streamlit run src/visualization/web_dashboard.py")
+        if any('Dashboard' in issue for issue in self.issues):
+            fixes.append("📊 Start React dashboard: cd dashboard && npm run dev")
             
         return fixes
         

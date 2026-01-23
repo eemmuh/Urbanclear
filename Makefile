@@ -117,20 +117,22 @@ restart: ## Restart all services
 logs: ## Show logs from all services
 	docker-compose logs -f
 
-run-system: ## Start the complete Urbanclear system (Docker + API + ML + Dashboard)
+run-system: ## Start the complete Urbanclear system (Docker + API)
 	@echo "🚀 Starting complete Urbanclear system..."
-	uv run python scripts/start_urbanclear.py
+	make start
+	sleep 5
+	make api
 
 quick-demo: ## Quick demo setup with sample data
 	@echo "🎭 Setting up quick demo..."
 	make start
 	sleep 10
 	make init-db
-	uv run python scripts/start_urbanclear.py
+	make api
 
-run-simple: ## Start simplified Urbanclear system (API + Dashboard only)
+run-simple: ## Start simplified Urbanclear system (API only)
 	@echo "🚀 Starting simplified Urbanclear system..."
-	uv run python scripts/start_simple.py
+	make api
 
 init-db: ## Initialize the database
 	uv run python scripts/init_database.py
@@ -141,11 +143,15 @@ api: ## Start the API server in development mode
 test: ## Run tests
 	uv run pytest tests/ -v
 
+test-quick: ## Run quick tests only
+	uv run pytest tests/unit/ -v --tb=short
+
 lint: ## Run linting
-	uv run flake8 src/ tests/
+	uv run ruff check src/ tests/
 	uv run black --check src/ tests/
 
 format: ## Format code
+	uv run ruff check --fix src/ tests/
 	uv run black src/ tests/
 	uv run isort src/ tests/
 
@@ -154,9 +160,13 @@ clean: ## Clean temporary files
 	find . -type d -name "__pycache__" -delete
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 	rm -rf build/ dist/ .coverage htmlcov/ .pytest_cache/
+	rm -rf .mypy_cache/ .ruff_cache/
+
+clean-all: clean uv-clean ## Clean everything including uv cache
+	rm -rf .venv/
 
 setup-env: ## Set up development environment
-	uv run python scripts/setup.py
+	uv run python scripts/dev_setup.py
 
 health: ## Check system health
 	curl -s http://localhost:8000/health | python -m json.tool
@@ -284,20 +294,18 @@ health-check: ## Run comprehensive system health check
 
 quick-fix: ## Automatically fix common issues
 	@echo "🔧 Running quick fixes..."
-	@pkill -f "uvicorn\|streamlit" 2>/dev/null || true
+	@pkill -f "uvicorn" 2>/dev/null || true
 	@sleep 2
 	@echo "Starting API server..."
-	@uv run python run_api.py &
+	@uv run python start_api.py &
 	@sleep 5
-	@echo "Starting Streamlit dashboard..."
-	@uv run streamlit run src/visualization/web_dashboard.py --server.port 8501 --server.address 0.0.0.0 --browser.gatherUsageStats false > /dev/null 2>&1 &
 	@echo "✅ Services restarted!"
 
 system-status: ## Check status of all services quickly
 	@echo "📊 System Status:"
 	@echo "=================="
 	@curl -s http://localhost:8000/health 2>/dev/null | python -c "import sys,json; print('API: ' + json.load(sys.stdin)['status'])" || echo "API: Not running"
-	@curl -s http://localhost:8501 > /dev/null 2>&1 && echo "Streamlit: Running" || echo "Streamlit: Not running"
+	@curl -s http://localhost:3000 > /dev/null 2>&1 && echo "React Dashboard: Running" || echo "React Dashboard: Not running"
 	@docker ps --format "Docker: {{.Names}}" | head -3 2>/dev/null || echo "Docker: Not running"
 
 restart-api: ## Restart API server only
@@ -307,12 +315,10 @@ restart-api: ## Restart API server only
 	@python run_api.py &
 	@echo "✅ API server restarted"
 
-restart-dashboard: ## Restart Streamlit dashboard only
-	@echo "🔄 Restarting Streamlit dashboard..."
-	@pkill -f streamlit 2>/dev/null || true
-	@sleep 2
-	@nohup streamlit run src/visualization/web_dashboard.py --server.port 8501 --server.address 0.0.0.0 --browser.gatherUsageStats false > /dev/null 2>&1 &
-	@echo "✅ Dashboard restarted"
+restart-dashboard: ## Restart React dashboard only
+	@echo "🔄 Restarting React dashboard..."
+	@cd dashboard && npm run dev &
+	@echo "✅ Dashboard restarted (run 'cd dashboard && npm run dev' manually)"
 
 fix-all: stop clean quick-fix ## Nuclear option: reset and restart everything
 	@echo "💥 Complete system reset and restart..."

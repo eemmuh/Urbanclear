@@ -5,9 +5,8 @@ This directory contains utility scripts for development, testing, and deployment
 ## 📋 Available Scripts
 
 ### 🚀 **Deployment & Startup**
-- **`start_simple.py`** - Simplified startup script for basic API functionality
-- **`start_urbanclear.py`** - Comprehensive startup script with all system components
 - **`fast-docker-build.sh`** - Fast Docker build script for development
+- **Note**: Use `python start_api.py` from project root to start the API server
 
 ### 🧪 **Testing & Quality**
 - **`test-ci-cd-locally.sh`** - Comprehensive local CI/CD pipeline test (recommended)

@@ -68,10 +68,10 @@ traffic-system/
 │   │   └── utils/               # Utility functions
 │   ├── package.json             # Node.js dependencies
 │   └── vite.config.ts           # Vite configuration with API proxy
-├── 📁 infrastructure/           # Big data processing
-│   ├── kafka/                   # Real-time streaming
+├── 📁 infrastructure/           # Infrastructure components (optional)
+│   ├── kafka/                   # Kafka producer (mock/simulation)
 │   │   └── enhanced_kafka_producer.py
-│   └── spark/                   # Distributed processing
+│   └── spark/                   # Spark processor (standalone script)
 │       └── enhanced_traffic_processor.py
 ├── 📁 docker/                   # Docker configurations
 │   ├── grafana/                 # Monitoring dashboards
@@ -410,6 +410,6 @@ pre-commit run --all-files
 1. **Test Dashboard**: Open http://localhost:3000 to see real-time traffic data
 2. **Add API Keys**: Configure Geoapify/OpenRouteService for enhanced data
 3. **Redis Setup**: Enable Redis for better caching performance
-4. **Production Deployment**: Deploy with Docker Compose or Kubernetes
+4. **Production Deployment**: Deploy with Docker Compose
 5. **Mobile App**: Develop React Native mobile application
 

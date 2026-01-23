@@ -15,7 +15,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from prometheus_fastapi_instrumentator import Instrumentator
 from prometheus_client import Counter, Histogram, Gauge, generate_latest
-import uvicorn
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 import socketio
@@ -1276,6 +1275,7 @@ async def get_incident_timeline():
 if __name__ == "__main__":
     # Security: Use environment variable for host, default to localhost
     # For production, set HOST=0.0.0.0 only when needed
+    import uvicorn  # Only import when running directly
     host = os.getenv("HOST", "127.0.0.1")  # Secure default
     uvicorn.run(
         "src.api.main:app",
