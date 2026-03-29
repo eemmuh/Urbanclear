@@ -20,7 +20,7 @@ env/
 ENV/
 .venv/
 .uv/
-uv.lock
+# Keep uv.lock committed for reproducible installs (CI, Docker --frozen)
 urbanclear-env/
 
 # ==============================================
@@ -117,7 +117,9 @@ appendonly.aof
 # ==============================================
 # Logs
 # ==============================================
-logs/
+logs/*
+!logs/README.md
+!logs/.gitkeep
 *.log
 *.log.*
 log/
@@ -159,7 +161,11 @@ certificates/
 # ==============================================
 # IDEs and Editors
 # ==============================================
-.vscode/
+.vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
 .idea/
 *.swp
 *.swo

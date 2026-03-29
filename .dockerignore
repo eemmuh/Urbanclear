@@ -74,10 +74,10 @@ notebooks/
 *.ipynb
 .ipynb_checkpoints
 
-# Documentation
+# Documentation (keep README.md for pip/setuptools metadata in Docker builds)
 docs/
 *.md
-README.md
+!README.md
 
 # Development
 tests/

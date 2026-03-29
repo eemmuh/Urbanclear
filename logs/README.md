@@ -1,0 +1,3 @@
+# Logs
+
+This directory contains application log files.
