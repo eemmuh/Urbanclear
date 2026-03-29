@@ -2,7 +2,7 @@
 
 This guide shows you how to test your CI/CD pipeline locally before pushing to GitHub.
 
-## 🚀 **Method 1: Using GitHub Actions Locally with `act`**
+##  **Method 1: Using GitHub Actions Locally with `act`**
 
 ### Install `act`
 ```bash
@@ -55,34 +55,33 @@ act workflow_dispatch --input key=value
 
 ---
 
-## 🛠️ **Method 2: Manual Component Testing**
+##  **Method 2: Manual Component Testing**
 
 ### 1. **Code Quality Tests**
 ```bash
-# Install development dependencies
-pip install black flake8 mypy bandit safety
+# Install tooling (matches CI when using --extra ci; dev adds more)
+uv sync --extra dev
 
 # Format checking
-black --check --diff src/ tests/
+uv run black --check --diff src/ tests/
 
 # Linting
-flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+uv run flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
 
 # Type checking
-mypy src/ --ignore-missing-imports
+uv run mypy src/ --ignore-missing-imports
 
 # Security scanning
-bandit -r src/ -f json -o bandit-report.json
-safety check --json --output safety-report.json
+uv run bandit -r src/ -f json -o bandit-report.json
+uv run safety check --json --output safety-report.json
 ```
 
 ### 2. **Unit Tests**
 ```bash
-# Install test dependencies
-pip install pytest pytest-cov pytest-asyncio
+# Dependencies already installed via uv sync (above)
 
 # Run tests with coverage
-pytest tests/unit/ -v --cov=src --cov-report=xml --cov-report=html
+uv run pytest tests/unit/ -v --cov=src --cov-report=xml --cov-report=html
 
 # Test with multiple Python versions (using pyenv)
 pyenv install 3.9 3.10 3.11
@@ -121,7 +120,7 @@ API_PID=$!
 sleep 10
 
 # Run API tests
-pytest tests/api/ -v
+uv run pytest tests/api/ -v
 
 # Health check
 curl -f http://localhost:8000/health || exit 1
@@ -132,15 +131,15 @@ kill $API_PID
 
 ### 5. **Performance Tests**
 ```bash
-# Install Locust
-pip install locust
+# Locust is in optional dev deps — install with:
+uv sync --extra dev
 
 # Start API server
-uvicorn src.api.main:app --host 0.0.0.0 --port 8000 &
+uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8000 &
 sleep 10
 
 # Run performance tests
-locust -f tests/performance/locustfile.py --headless \
+uv run locust -f tests/performance/locustfile.py --headless \
   --users 50 --spawn-rate 10 --run-time 60s \
   --host http://localhost:8000 \
   --html performance-report.html
@@ -184,7 +183,7 @@ docker rm urbanclear-test
 
 ---
 
-## 🎯 **Method 3: Automated Local Testing Script**
+##  **Method 3: Automated Local Testing Script**
 
 Create a comprehensive test script that mimics your CI/CD pipeline:
 
@@ -201,68 +200,68 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 Local CI/CD Pipeline Test${NC}"
+echo -e "${BLUE} Local CI/CD Pipeline Test${NC}"
 echo "================================="
 
 # 1. Code Quality
-echo -e "${YELLOW}📋 Running Code Quality Checks...${NC}"
-black --check src/ tests/ || { echo -e "${RED}❌ Code formatting failed${NC}"; exit 1; }
-flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503 || { echo -e "${RED}❌ Linting failed${NC}"; exit 1; }
-mypy src/ --ignore-missing-imports || { echo -e "${RED}❌ Type checking failed${NC}"; exit 1; }
-echo -e "${GREEN}✅ Code quality checks passed${NC}"
+echo -e "${YELLOW} Running Code Quality Checks...${NC}"
+black --check src/ tests/ || { echo -e "${RED} Code formatting failed${NC}"; exit 1; }
+flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503 || { echo -e "${RED} Linting failed${NC}"; exit 1; }
+mypy src/ --ignore-missing-imports || { echo -e "${RED} Type checking failed${NC}"; exit 1; }
+echo -e "${GREEN} Code quality checks passed${NC}"
 
 # 2. Unit Tests
-echo -e "${YELLOW}🧪 Running Unit Tests...${NC}"
-pytest tests/unit/ -v --cov=src --cov-report=xml || { echo -e "${RED}❌ Unit tests failed${NC}"; exit 1; }
-echo -e "${GREEN}✅ Unit tests passed${NC}"
+echo -e "${YELLOW} Running Unit Tests...${NC}"
+pytest tests/unit/ -v --cov=src --cov-report=xml || { echo -e "${RED} Unit tests failed${NC}"; exit 1; }
+echo -e "${GREEN} Unit tests passed${NC}"
 
 # 3. Security Scanning
-echo -e "${YELLOW}🔒 Running Security Scans...${NC}"
+echo -e "${YELLOW} Running Security Scans...${NC}"
 bandit -r src/ -f json -o bandit-report.json
 safety check --json --output safety-report.json
-echo -e "${GREEN}✅ Security scans completed${NC}"
+echo -e "${GREEN} Security scans completed${NC}"
 
 # 4. Docker Build
-echo -e "${YELLOW}🐳 Building Docker Image...${NC}"
-docker build -t urbanclear:test . || { echo -e "${RED}❌ Docker build failed${NC}"; exit 1; }
-echo -e "${GREEN}✅ Docker build successful${NC}"
+echo -e "${YELLOW} Building Docker Image...${NC}"
+docker build -t urbanclear:test . || { echo -e "${RED} Docker build failed${NC}"; exit 1; }
+echo -e "${GREEN} Docker build successful${NC}"
 
 # 5. API Tests
-echo -e "${YELLOW}🌐 Running API Tests...${NC}"
+echo -e "${YELLOW} Running API Tests...${NC}"
 uvicorn src.api.main:app --host 0.0.0.0 --port 8000 &
 API_PID=$!
 sleep 10
-pytest tests/api/ -v || { echo -e "${RED}❌ API tests failed${NC}"; kill $API_PID; exit 1; }
-curl -f http://localhost:8000/health || { echo -e "${RED}❌ Health check failed${NC}"; kill $API_PID; exit 1; }
+pytest tests/api/ -v || { echo -e "${RED} API tests failed${NC}"; kill $API_PID; exit 1; }
+curl -f http://localhost:8000/health || { echo -e "${RED} Health check failed${NC}"; kill $API_PID; exit 1; }
 kill $API_PID
-echo -e "${GREEN}✅ API tests passed${NC}"
+echo -e "${GREEN} API tests passed${NC}"
 
 # 6. Performance Tests
-echo -e "${YELLOW}⚡ Running Performance Tests...${NC}"
+echo -e "${YELLOW} Running Performance Tests...${NC}"
 uvicorn src.api.main:app --host 0.0.0.0 --port 8000 &
 API_PID=$!
 sleep 10
 locust -f tests/performance/locustfile.py --headless \
   --users 10 --spawn-rate 2 --run-time 30s \
   --host http://localhost:8000 \
-  --html performance-report.html || { echo -e "${RED}❌ Performance tests failed${NC}"; kill $API_PID; exit 1; }
+  --html performance-report.html || { echo -e "${RED} Performance tests failed${NC}"; kill $API_PID; exit 1; }
 kill $API_PID
-echo -e "${GREEN}✅ Performance tests passed${NC}"
+echo -e "${GREEN} Performance tests passed${NC}"
 
 # 7. Integration Tests (optional - requires services)
 if command -v docker-compose &> /dev/null; then
-    echo -e "${YELLOW}🔗 Running Integration Tests...${NC}"
+    echo -e "${YELLOW} Running Integration Tests...${NC}"
     docker-compose up -d postgres redis mongodb
     sleep 30
     export DATABASE_URL="postgresql://test_user:test_password@localhost:5432/test_traffic_db"
     export REDIS_URL="redis://localhost:6379/0"
     export MONGODB_URL="mongodb://test_user:test_password@localhost:27017/test_traffic_logs"
-    pytest tests/integration/ -v --maxfail=3 || { echo -e "${RED}❌ Integration tests failed${NC}"; docker-compose down; exit 1; }
+    pytest tests/integration/ -v --maxfail=3 || { echo -e "${RED} Integration tests failed${NC}"; docker-compose down; exit 1; }
     docker-compose down
-    echo -e "${GREEN}✅ Integration tests passed${NC}"
+    echo -e "${GREEN} Integration tests passed${NC}"
 fi
 
-echo -e "${GREEN}🎉 All CI/CD tests passed locally!${NC}"
+echo -e "${GREEN} All CI/CD tests passed locally!${NC}"
 echo "Reports generated:"
 echo "- Coverage: htmlcov/index.html"
 echo "- Performance: performance-report.html"
@@ -271,30 +270,25 @@ echo "- Security: bandit-report.json, safety-report.json"
 
 ---
 
-## 🔧 **Method 4: Docker-based CI Environment**
+##  **Method 4: Docker-based CI Environment**
 
 Create a Docker setup that mimics your CI environment:
 
 ```dockerfile
-# File: Dockerfile.ci
-FROM python:3.9-slim
+# File: Dockerfile.ci (example — align Python version with CI)
+FROM python:3.12-slim-bookworm
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    git \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-RUN pip install pytest pytest-cov pytest-asyncio black flake8 mypy bandit safety locust
-
-# Copy source code
-COPY . /app
 WORKDIR /app
+COPY pyproject.toml uv.lock README.md ./
+COPY src ./src
+RUN uv sync --frozen --extra ci
 
-# Run CI pipeline
+COPY . .
 CMD ["bash", "scripts/test-ci-cd-locally.sh"]
 ```
 
@@ -306,7 +300,7 @@ docker run --rm -v $(pwd):/app urbanclear-ci
 
 ---
 
-## 📊 **Method 5: Individual Job Testing**
+##  **Method 5: Individual Job Testing**
 
 Test each CI/CD job separately:
 
@@ -335,7 +329,7 @@ Test each CI/CD job separately:
 
 ---
 
-## 🎪 **Method 6: Using VS Code with GitHub Actions Extension**
+##  **Method 6: Using VS Code with GitHub Actions Extension**
 
 1. Install the GitHub Actions extension in VS Code
 2. Open the workflow file
@@ -343,7 +337,7 @@ Test each CI/CD job separately:
 
 ---
 
-## 🌟 **Best Practices for Local CI/CD Testing**
+##  **Best Practices for Local CI/CD Testing**
 
 ### 1. **Environment Consistency**
 - Use the same Python version as CI
@@ -372,7 +366,7 @@ Test each CI/CD job separately:
 
 ---
 
-## 📋 **Quick Reference Commands**
+##  **Quick Reference Commands**
 
 ```bash
 # Full pipeline test
@@ -402,7 +396,7 @@ docker build -t urbanclear:test . && docker run --rm urbanclear:test python -c "
 
 ---
 
-## 🚨 **Troubleshooting Common Issues**
+##  **Troubleshooting Common Issues**
 
 ### Act Issues
 - **Permission denied**: Run with `sudo` or fix Docker permissions
@@ -419,4 +413,4 @@ docker build -t urbanclear:test . && docker run --rm urbanclear:test python -c "
 - **Path issues**: Run tests from project root
 - **Environment variables**: Set required environment variables
 
-Ready to test your CI/CD pipeline locally! 🚀 
+Ready to test your CI/CD pipeline locally!  

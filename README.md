@@ -1,10 +1,10 @@
-# 🚦 Urbanclear Traffic Management System
+#  Urbanclear Traffic Management System
 
 A comprehensive AI-powered traffic management system with **real-time data integration**, **intelligent fallback systems**, **modern React dashboard**, and **production-ready APIs** for smart city traffic optimization.
 
-## 🎯 Key Features
+##  Key Features
 
-### 🌐 **Real Data Integration**
+###  **Real Data Integration**
 - **Multiple Data Sources**: Geoapify, OpenRouteService, OpenStreetMap integration
 - **Smart Fallback System**: Intelligent mock data when APIs are unavailable
 - **Geocoding**: Convert addresses to coordinates with high accuracy
@@ -13,37 +13,37 @@ A comprehensive AI-powered traffic management system with **real-time data integ
 - **Traffic Matrix**: Calculate travel times between multiple locations
 - **Isochrones**: Determine reachable areas within time limits
 
-### 🖥️ **Modern React Dashboard**
+###  **Modern React Dashboard**
 - **Real-time Updates**: Live traffic data via Socket.io WebSocket connections
 - **Interactive Maps**: Traffic visualization with Leaflet integration
 - **Responsive Design**: Mobile-optimized with Tailwind CSS
 - **Real-time Charts**: Live traffic flow and incident data
 - **WebSocket Integration**: Seamless real-time data streaming
 
-### 🤖 **AI-Powered Analytics**
+###  **AI-Powered Analytics**
 - **Traffic Flow Prediction**: LSTM-based time series forecasting
 - **Route Optimization**: Multi-objective pathfinding algorithms
 - **Incident Detection**: Real-time anomaly detection
 - **Performance Analytics**: Comprehensive traffic pattern analysis
 
-### 🔄 **Real-Time Capabilities**
+###  **Real-Time Capabilities**
 - **Socket.io Streaming**: Live traffic updates and predictions
 - **WebSocket Support**: Native FastAPI WebSocket + Socket.io
 - **Background Processing**: Continuous data collection and analysis
 - **Health Monitoring**: Real-time API status and performance metrics
 - **Caching Layer**: Redis-ready with in-memory fallback
 
-### 🛡️ **Production Ready**
+###  **Production Ready**
 - **CI/CD Pipeline**: Automated testing and deployment
 - **Comprehensive Testing**: 49 passing tests across unit and integration
 - **API Documentation**: OpenAPI/Swagger auto-generated docs
 - **Docker Support**: Containerized deployment with monitoring stack
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 traffic-system/
-├── 📁 src/                       # Main application code
+├──  src/                       # Main application code
 │   ├── api/                     # FastAPI REST endpoints + WebSocket + Socket.io
 │   │   ├── main.py             # Main API with Socket.io integration
 │   │   ├── websocket_handler.py # Native WebSocket handler
@@ -60,7 +60,7 @@ traffic-system/
 │   │   ├── optimization.py      # Route optimization
 │   │   └── incident_detection.py # Incident detection
 │   └── monitoring/              # Health monitoring and metrics
-├── 📁 dashboard/                # React TypeScript Dashboard
+├──  dashboard/                # React TypeScript Dashboard
 │   ├── src/                     # React components and logic
 │   │   ├── components/          # UI components
 │   │   ├── stores/              # Zustand state management
@@ -68,30 +68,31 @@ traffic-system/
 │   │   └── utils/               # Utility functions
 │   ├── package.json             # Node.js dependencies
 │   └── vite.config.ts           # Vite configuration with API proxy
-├── 📁 infrastructure/           # Infrastructure components (optional)
+├──  infrastructure/           # Infrastructure components (optional)
 │   ├── kafka/                   # Kafka producer (mock/simulation)
 │   │   └── enhanced_kafka_producer.py
 │   └── spark/                   # Spark processor (standalone script)
 │       └── enhanced_traffic_processor.py
-├── 📁 docker/                   # Docker configurations
+├──  docker/                   # Docker configurations
 │   ├── grafana/                 # Monitoring dashboards
 │   ├── prometheus/              # Metrics collection
 │   └── postgres/                # Database setup
-├── 📁 tests/                    # Comprehensive test suite
+├──  tests/                    # Comprehensive test suite
 │   ├── unit/                    # Unit tests
 │   ├── integration/             # Integration tests
 │   └── api/                     # API endpoint tests
-├── 📁 scripts/                  # Automation scripts
-├── 📁 examples/                 # Example scripts
+├──  scripts/                  # Automation scripts
+├──  examples/                 # Example scripts
 │   └── demo_real_data.py        # Interactive demo script
 └── start_api.py                 # API server launcher
 ```
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
-- **Python 3.9+** (tested with 3.12)
+- **[uv](https://docs.astral.sh/uv/getting-started/installation/)** (Python package manager; install: `curl -LsSf https://astral.sh/uv/install.sh | sh`)
+- **Python 3.9+** (tested with 3.12; uv will use a project `.venv` via `uv sync`)
 - **Node.js 16+** (for React dashboard)
 - **Docker & Docker Compose** (optional)
 - **API Keys** (optional - system works with mock data)
@@ -104,11 +105,13 @@ git clone <repository-url>
 cd traffic-system
 ```
 
-2. **Install dependencies with uv:**
+2. **Install dependencies with uv** (uses committed `uv.lock` for reproducible installs):
 ```bash
 uv sync  # Install all dependencies
 # Or install with development dependencies:
 uv sync --extra dev
+# CI-style minimal set (matches GitHub Actions):
+uv sync --frozen --extra ci
 ```
 
 4. **Install Node.js dependencies:**
@@ -146,7 +149,7 @@ npm run dev
 - **Health Check**: http://localhost:8000/health
 - **WebSocket Status**: http://localhost:8000/api/v1/websocket/status
 
-## 🖥️ React Dashboard Features
+##  React Dashboard Features
 
 ### **Real-time Dashboard**
 - **Live Traffic Map**: Interactive map with real-time traffic conditions
@@ -166,34 +169,34 @@ npm run dev
 - **Interactive Components**: Smooth animations with Framer Motion
 - **TypeScript**: Full type safety and better developer experience
 
-## 🎮 Demo & Testing
+##  Demo & Testing
 
 ### Interactive Demo
 ```bash
 # Full demo of all features
-python examples/demo_real_data.py
+uv run python examples/demo_real_data.py
 
 # Test specific features
-python examples/demo_real_data.py --test geocoding
-python examples/demo_real_data.py --test routing
-python examples/demo_real_data.py --test places
+uv run python examples/demo_real_data.py --test geocoding
+uv run python examples/demo_real_data.py --test routing
+uv run python examples/demo_real_data.py --test places
 ```
 
 ### Run Tests
 ```bash
 # Run full test suite (49 tests)
-pytest
+uv run pytest tests/
 
 # Run with coverage
-pytest --cov=src tests/
+uv run pytest --cov=src tests/
 
 # Run specific test categories
-pytest tests/unit/
-pytest tests/integration/
-pytest tests/api/
+uv run pytest tests/unit/
+uv run pytest tests/integration/
+uv run pytest tests/api/
 ```
 
-## 📊 API Endpoints
+##  API Endpoints
 
 ### **Real Data Integration**
 - `GET /api/v1/real-data/health` - Data source health status
@@ -222,7 +225,7 @@ pytest tests/api/
 - `GET /api/v1/websocket/status` - WebSocket connection status
 - `GET /api/v1/real-data/health` - Data source status
 
-## 🔧 Configuration
+##  Configuration
 
 ### Data Sources Configuration
 ```yaml
@@ -248,15 +251,15 @@ The system automatically uses mock data when real APIs are unavailable:
 - **Matrix**: Multi-point travel time calculations
 - **Isochrones**: Speed-based reachable area polygons
 
-## 🎯 Data Sources
+##  Data Sources
 
 ### **Supported APIs**
 | Provider | Free Tier | Features | Status |
 |----------|-----------|----------|---------|
-| **Geoapify** | 3,000 requests/day | Geocoding, Routing, Places, Isochrones | ✅ Integrated |
-| **OpenRouteService** | 2,000 requests/day | Routing, Matrix, Isochrones | ✅ Integrated |
-| **OpenStreetMap** | Unlimited (rate limited) | Places, Roads, Geographic data | ✅ Integrated |
-| **Mock Fallback** | Unlimited | All features with simulated data | ✅ Always Available |
+| **Geoapify** | 3,000 requests/day | Geocoding, Routing, Places, Isochrones |  Integrated |
+| **OpenRouteService** | 2,000 requests/day | Routing, Matrix, Isochrones |  Integrated |
+| **OpenStreetMap** | Unlimited (rate limited) | Places, Roads, Geographic data |  Integrated |
+| **Mock Fallback** | Unlimited | All features with simulated data |  Always Available |
 
 ### **Mock Data Features**
 - **Realistic Geocoding**: Famous landmarks with accurate coordinates
@@ -264,7 +267,7 @@ The system automatically uses mock data when real APIs are unavailable:
 - **Traffic Simulation**: Distance-based travel times with traffic factors
 - **Geographic Accuracy**: Proper coordinate calculations and realistic distances
 
-## 🚦 Traffic Models
+##  Traffic Models
 
 ### **Prediction Models**
 - **LSTM Networks**: Time-series traffic volume prediction
@@ -276,7 +279,7 @@ The system automatically uses mock data when real APIs are unavailable:
 - **Dynamic Rerouting**: Real-time path adjustment
 - **Signal Timing**: Adaptive traffic light optimization
 
-## 📈 Monitoring & Analytics
+##  Monitoring & Analytics
 
 ### **Grafana Dashboards**
 - **Traffic Flow Dashboard**: Real-time traffic visualization
@@ -290,7 +293,7 @@ The system automatically uses mock data when real APIs are unavailable:
 - **Performance Metrics**: Response times and error rates
 - **Cache Performance**: Hit rates and efficiency
 
-## 🧪 Testing & Quality
+##  Testing & Quality
 
 ### **Test Coverage**
 - **49 Passing Tests**: Unit, integration, and API tests
@@ -303,7 +306,7 @@ The system automatically uses mock data when real APIs are unavailable:
 - **Linting**: Flake8 compliance
 - **Security**: Bandit security scanning
 
-## 🐳 Docker Deployment
+##  Docker Deployment
 
 ### **Start Full Stack**
 ```bash
@@ -319,7 +322,7 @@ docker-compose down
 
 ### **Production Deployment**
 ```bash
-# Build production image
+# Build production image (deps installed with uv from uv.lock)
 docker build -t urbanclear-api .
 
 # Run with environment variables
@@ -329,33 +332,33 @@ docker run -p 8000:8000 \
   urbanclear-api
 ```
 
-## 🔄 Recent Updates
+##  Recent Updates
 
 ### **v1.3.0 - React Dashboard & Socket.io Integration**
-- ✅ **Modern React Dashboard**: TypeScript-based dashboard with real-time updates
-- ✅ **Socket.io Integration**: Seamless WebSocket connections for React frontend
-- ✅ **Real-time Maps**: Interactive traffic visualization with Leaflet
-- ✅ **Responsive Design**: Mobile-optimized with Tailwind CSS
-- ✅ **Auto-reconnection**: Robust WebSocket connection handling
+-  **Modern React Dashboard**: TypeScript-based dashboard with real-time updates
+-  **Socket.io Integration**: Seamless WebSocket connections for React frontend
+-  **Real-time Maps**: Interactive traffic visualization with Leaflet
+-  **Responsive Design**: Mobile-optimized with Tailwind CSS
+-  **Auto-reconnection**: Robust WebSocket connection handling
 
 ### **v1.2.0 - Real Data Integration**
-- ✅ **Multi-API Support**: Geoapify, OpenRouteService, OpenStreetMap
-- ✅ **Smart Fallbacks**: Intelligent mock data when APIs unavailable
-- ✅ **Health Monitoring**: Real-time API status and rate limiting
-- ✅ **Caching Layer**: Redis-ready with in-memory fallback
+-  **Multi-API Support**: Geoapify, OpenRouteService, OpenStreetMap
+-  **Smart Fallbacks**: Intelligent mock data when APIs unavailable
+-  **Health Monitoring**: Real-time API status and rate limiting
+-  **Caching Layer**: Redis-ready with in-memory fallback
 
 ### **v1.1.0 - Production Ready**
-- ✅ **CI/CD Pipeline**: Fixed all test failures (49 tests passing)
-- ✅ **FastAPI Migration**: Modern async API with lifespan handlers
-- ✅ **WebSocket Streaming**: Real-time traffic updates
-- ✅ **Comprehensive Testing**: Unit, integration, and API tests
+-  **CI/CD Pipeline**: Fixed all test failures (49 tests passing)
+-  **FastAPI Migration**: Modern async API with lifespan handlers
+-  **WebSocket Streaming**: Real-time traffic updates
+-  **Comprehensive Testing**: Unit, integration, and API tests
 
-## 🤝 Contributing
+##  Contributing
 
 ### **Development Setup**
 ```bash
-# Install development dependencies
-pip install -r requirements-ci.txt
+# Install development dependencies (from pyproject.toml + uv.lock)
+uv sync --extra dev
 
 # Run tests
 make test
@@ -363,8 +366,11 @@ make test
 # Format code
 make format
 
-# Run CI checks locally
+# Run CI-style checks locally (uv + unit tests)
 make ci
+
+# Or run the full local CI script
+./scripts/test-ci-cd-locally.sh
 ```
 
 ### **Pre-commit Hooks**
@@ -376,7 +382,7 @@ pre-commit install
 pre-commit run --all-files
 ```
 
-## 📚 Documentation
+##  Documentation
 
 - **React Dashboard**: http://localhost:3000 (Real-time traffic visualization)
 - **API Docs**: http://localhost:8000/api/docs (Interactive Swagger UI)
@@ -385,19 +391,19 @@ pre-commit run --all-files
 - **Grafana**: http://localhost:3000 (admin/admin)
 - **Prometheus**: http://localhost:9090
 
-## 🎊 Demo Results
+##  Demo Results
 
 ```bash
-📊 Recent Demo Results:
-✅ Geocoding: 3/3 addresses successfully converted
-✅ Routing: 2/2 routes calculated with traffic data
-✅ Places: 10 coffee shops + 5 gas stations found
-✅ Matrix: 4x4 NYC location matrix calculated
-✅ Isochrones: 15 & 30-minute reachable areas generated
-✅ Health: All endpoints responding with proper fallbacks
+ Recent Demo Results:
+ Geocoding: 3/3 addresses successfully converted
+ Routing: 2/2 routes calculated with traffic data
+ Places: 10 coffee shops + 5 gas stations found
+ Matrix: 4x4 NYC location matrix calculated
+ Isochrones: 15 & 30-minute reachable areas generated
+ Health: All endpoints responding with proper fallbacks
 ```
 
-## 🛠️ System Requirements
+##  System Requirements
 
 - **Python**: 3.9+ (tested with 3.12)
 - **Node.js**: 16+ (for React dashboard)
@@ -405,7 +411,13 @@ pre-commit run --all-files
 - **Storage**: 1GB+ free space
 - **Network**: Internet connection for real APIs (optional)
 
-## 🎯 Next Steps
+##  Free to build and security
+
+- **No paid license for the stack**: MIT project; Python and Node dependencies are open source; Docker images are public. Optional Geoapify/OpenRouteService keys use **free tiers**; the app falls back to mock data without keys.
+- **Security**: Use `.env` from [`.env.example`](.env.example); never commit secrets. In production set `ENVIRONMENT=production`, a strong `JWT_SECRET_KEY`, `ALLOW_DEV_AUTH_BYPASS=false`, and tight `ALLOWED_ORIGINS`.
+- **Docs**: [docs/guides/FREE_BUILD_AND_SECURITY.md](docs/guides/FREE_BUILD_AND_SECURITY.md) | [SECURITY.md](SECURITY.md) (how to report issues) | [docs/security/SECURITY_AUDIT.md](docs/security/SECURITY_AUDIT.md)
+
+##  Next Steps
 
 1. **Test Dashboard**: Open http://localhost:3000 to see real-time traffic data
 2. **Add API Keys**: Configure Geoapify/OpenRouteService for enhanced data

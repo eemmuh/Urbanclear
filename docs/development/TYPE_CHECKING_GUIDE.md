@@ -1,6 +1,6 @@
-# 🔍 Type Checking Improvements Guide
+#  Type Checking Improvements Guide
 
-## ✅ **What We Fixed**
+##  **What We Fixed**
 
 ### **Immediate Improvements (73% Error Reduction)**
 - **Before**: 290 mypy errors across 18 files
@@ -11,10 +11,10 @@
 
 1. **Installed Type Stubs**:
    ```bash
-   pip install types-requests types-PyYAML
+   uv sync --extra ci
    ```
-   - Fixed missing type information for external libraries
-   - Added to `requirements-ci.txt` for CI/CD
+   - `types-requests` and `types-PyYAML` are listed under `optional-dependencies.ci` in `pyproject.toml`
+   - For local mypy: `uv run mypy src/`
 
 2. **Created Lenient mypy Configuration** (`mypy.ini`):
    - **Gradual typing approach**: Start lenient, gradually make stricter
@@ -27,7 +27,7 @@
    - **Proper configuration**: Uses `mypy.ini` file
    - **Faster execution**: With caching and minimal requirements
 
-## 📊 **Current Type Error Status**
+##  **Current Type Error Status**
 
 ### **Remaining Issues by Category:**
 
@@ -83,7 +83,7 @@ from jose import JWTError as JoseJWTError
 from jwt import JWTError as JwtJWTError
 ```
 
-## 🚀 **Gradual Improvement Plan**
+##  **Gradual Improvement Plan**
 
 ### **Phase 1: Quick Wins (1-2 hours)**
 Priority: Fix the easiest issues first
@@ -136,7 +136,7 @@ Priority: Fix the easiest issues first
    - Fix SQLAlchemy query typing
    - Fix complex object attribute access
 
-## 🔧 **How to Contribute**
+##  **How to Contribute**
 
 ### **For Developers:**
 
@@ -162,7 +162,7 @@ Priority: Fix the easiest issues first
 - Errors are reported but don't stop deployment
 - Gradual improvement over time
 
-## 📈 **Progress Tracking**
+##  **Progress Tracking**
 
 ### **Milestone Targets:**
 
@@ -176,7 +176,7 @@ Priority: Fix the easiest issues first
 - **Month 2**: Complete Phase 2 (moderate fixes)
 - **Month 3**: Complete Phase 3 (complex fixes)
 
-## 🛠️ **mypy Configuration Evolution**
+##  **mypy Configuration Evolution**
 
 ### **Current Settings (Lenient)**:
 ```ini
@@ -192,7 +192,7 @@ no_implicit_optional = True
 strict_optional = True
 ```
 
-## 📝 **Best Practices**
+##  **Best Practices**
 
 ### **Writing Type-Safe Code:**
 
@@ -226,7 +226,7 @@ strict_optional = True
        return str(user_id)
    ```
 
-## 🎯 **Benefits of Type Checking**
+##  **Benefits of Type Checking**
 
 ### **Developer Experience:**
 - **Better IDE support**: Autocomplete, error detection
@@ -243,7 +243,7 @@ strict_optional = True
 - **Regression prevention**: Type changes detected
 - **Onboarding**: New developers understand code faster
 
-## 🚀 **Next Steps**
+##  **Next Steps**
 
 1. **Review this guide** with the team
 2. **Start with Phase 1** quick wins

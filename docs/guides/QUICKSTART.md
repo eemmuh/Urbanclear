@@ -1,35 +1,35 @@
-# Urbanclear Quick Start Guide 🚀
+# Urbanclear Quick Start Guide 
 
 Welcome to **Urbanclear** - your AI-powered smart city traffic optimization system! This guide will get you up and running quickly with all the enhanced features.
 
-## 🎯 What We've Fixed & Enhanced
+##  What We've Fixed & Enhanced
 
-### ✅ API Endpoints Fixed
+###  API Endpoints Fixed
 - **Traffic Data**: `/api/v1/traffic/current` now returns realistic traffic conditions
 - **Analytics**: `/api/v1/analytics/summary` provides comprehensive traffic analytics
 - **Predictions**: `/api/v1/traffic/predict` generates realistic traffic forecasts
 - **Route Optimization**: `/api/v1/routes/optimize` provides intelligent routing
 - **Incident Management**: Full incident detection and reporting system
 
-### ✅ Enhanced Mock Data Generator
+###  Enhanced Mock Data Generator
 - **Realistic Traffic Patterns**: Rush hour simulation, time-based variations
 - **Geographic Accuracy**: NYC-based sensors with real coordinates
 - **Weather Impact**: Dynamic weather-based traffic modifications
 - **Incident Simulation**: Realistic traffic incidents with proper impact zones
 
-### ✅ Working ML Models
+###  Working ML Models
 - **Traffic Prediction**: LSTM-based forecasting with confidence scores
 - **Route Optimization**: Multi-factor route planning with alternatives
 - **Incident Detection**: Anomaly detection with real-time alerts
 - **Performance Analytics**: System-wide efficiency monitoring
 
-### ✅ **Python 3.12 Compatibility**
+###  **Python 3.12 Compatibility**
 - **Updated numpy**: From 1.24.3 to >=1.25.0 (fixes build errors)
 - **Updated all packages**: Compatible versions for Python 3.12
 - **Multiple install options**: Core, minimal, and full installations
 - **Better error handling**: Graceful fallbacks for missing packages
 
-## 🚀 Quick Start Commands
+##  Quick Start Commands
 
 ### 1. Complete System Setup (Recommended)
 ```bash
@@ -63,7 +63,7 @@ make install-full
 # Core packages only (fastest)
 make install-core
 
-# Using conda instead of pip
+# Legacy: conda (project standard is uv; see README)
 make install-conda
 ```
 
@@ -74,9 +74,9 @@ make dev-install
 make dev-all
 ```
 
-## 🛠️ Python Compatibility
+##  Python Compatibility
 
-### Python 3.12 Support ✅
+### Python 3.12 Support 
 This project is fully compatible with Python 3.12! We've updated all dependencies to work with the latest Python version.
 
 ### Installation Troubleshooting
@@ -86,14 +86,16 @@ This project is fully compatible with Python 3.12! We've updated all dependencie
 # Use the minimal installation first
 make install-core
 
-# Then gradually add more packages
-pip install scikit-learn matplotlib plotly
+# Then add packages via uv (updates pyproject / lock as needed)
+uv add scikit-learn matplotlib plotly
 ```
 
-**If pip installation fails:**
+**If uv sync fails:**
 ```bash
-# Update pip and setuptools first
-pip install --upgrade pip setuptools wheel
+# Ensure uv is current: https://docs.astral.sh/uv/getting-started/installation/
+
+# Try a clean sync from the lockfile
+uv sync
 
 # Try minimal installation
 make install
@@ -109,7 +111,7 @@ conda install -c conda-forge numpy pandas scikit-learn
 make install-core
 ```
 
-## 🌐 API Usage Examples
+##  API Usage Examples
 
 ### Traffic Data
 ```bash
@@ -155,7 +157,7 @@ curl "http://localhost:8000/api/v1/demo/location-filter"
 curl "http://localhost:8000/api/v1/demo/analytics-comparison"
 ```
 
-## 📊 Interactive API Documentation
+##  Interactive API Documentation
 
 Visit these URLs after starting the API:
 
@@ -164,7 +166,7 @@ Visit these URLs after starting the API:
 - **Health Check**: http://localhost:8000/health
 - **Metrics**: http://localhost:8000/metrics
 
-## 🎭 Demo Features
+##  Demo Features
 
 ### 1. Rush Hour Simulation
 Shows realistic traffic conditions during peak hours:
@@ -184,7 +186,7 @@ Compares traffic patterns across different timeframes:
 - Weekly efficiency trends
 - Environmental impact analysis
 
-## 🔧 Development Commands
+##  Development Commands
 
 ### API Development
 ```bash
@@ -222,44 +224,44 @@ from src.data.traffic_service import TrafficService
 async def test():
     service = TrafficService()
     conditions = await service.get_current_conditions()
-    print(f'✅ Generated {len(conditions)} traffic conditions')
+    print(f' Generated {len(conditions)} traffic conditions')
 asyncio.run(test())
 "
 ```
 
-## 🌟 Key Features Working
+##  Key Features Working
 
 ### Real-Time Traffic Data
-- ✅ 8 realistic NYC sensor locations
-- ✅ Time-based traffic patterns (rush hour, off-peak)
-- ✅ Weather impact simulation
-- ✅ Dynamic congestion levels
+-  8 realistic NYC sensor locations
+-  Time-based traffic patterns (rush hour, off-peak)
+-  Weather impact simulation
+-  Dynamic congestion levels
 
 ### Predictive Analytics
-- ✅ Multi-hour traffic forecasting
-- ✅ Confidence scoring
-- ✅ Factor-based predictions (weather, events, time)
-- ✅ Location-specific models
+-  Multi-hour traffic forecasting
+-  Confidence scoring
+-  Factor-based predictions (weather, events, time)
+-  Location-specific models
 
 ### Route Optimization
-- ✅ Multi-point route generation
-- ✅ Traffic-aware timing
-- ✅ Alternative route suggestions
-- ✅ Fuel cost and emissions calculation
+-  Multi-point route generation
+-  Traffic-aware timing
+-  Alternative route suggestions
+-  Fuel cost and emissions calculation
 
 ### Incident Management
-- ✅ Realistic incident generation
-- ✅ Severity-based impact modeling
-- ✅ Real-time incident reporting
-- ✅ Resolution tracking
+-  Realistic incident generation
+-  Severity-based impact modeling
+-  Real-time incident reporting
+-  Resolution tracking
 
 ### System Analytics
-- ✅ Multi-period comparisons
-- ✅ Performance metrics
-- ✅ Environmental impact tracking
-- ✅ Efficiency scoring
+-  Multi-period comparisons
+-  Performance metrics
+-  Environmental impact tracking
+-  Efficiency scoring
 
-## 🎯 Next Steps
+##  Next Steps
 
 1. **Explore the API**: Visit http://localhost:8000/docs
 2. **Run Demos**: Use `make demo` to see working examples
@@ -267,7 +269,7 @@ asyncio.run(test())
 4. **Monitor System**: Check Grafana at http://localhost:3000 (when available)
 5. **Customize Data**: Modify `src/data/mock_data_generator.py` for your city
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### API Errors
 ```bash
@@ -299,7 +301,7 @@ make init-db
 make reset-all
 ```
 
-## 📈 Performance
+##  Performance
 
 The enhanced system now provides:
 - **Response Times**: < 200ms for most endpoints
@@ -308,7 +310,7 @@ The enhanced system now provides:
 - **Route Optimization**: < 1 second for typical routes
 - **Incident Detection**: Real-time anomaly detection
 
-## 🎉 You're Ready!
+##  You're Ready!
 
 Your Urbanclear system is now fully functional with realistic traffic simulation, working ML models, and comprehensive API endpoints. Start exploring and building your smart city traffic solution!
 

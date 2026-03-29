@@ -1,8 +1,8 @@
-# Urbanclear Grafana Dashboards 📊
+# Urbanclear Grafana Dashboards 
 
 This directory contains comprehensive monitoring dashboards for the Urbanclear traffic optimization system. The dashboards provide real-time insights into traffic flow, incidents, system performance, and predictive analytics.
 
-## 🗂️ Dashboard Overview
+##  Dashboard Overview
 
 ### 1. System Overview (`overview-dashboard.json`)
 **Main landing dashboard with system-wide metrics**
@@ -72,7 +72,7 @@ This directory contains comprehensive monitoring dashboards for the Urbanclear t
 
 **Best for**: Data scientists, ML engineers, strategic planning
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 1. Docker and Docker Compose installed
@@ -100,7 +100,7 @@ This directory contains comprehensive monitoring dashboards for the Urbanclear t
 - **Refresh intervals**: Set from 30s to 5m depending on dashboard purpose
 - **Time ranges**: Default to 1-24 hours with option to customize
 
-## 📈 Key Metrics Explained
+##  Key Metrics Explained
 
 ### Traffic Metrics
 - **Traffic Flow Rate**: Percentage of road capacity being used (0-100%)
@@ -125,7 +125,7 @@ This directory contains comprehensive monitoring dashboards for the Urbanclear t
 - **Feature Importance**: Which factors most influence predictions
 - **Optimization Impact**: Improvements from route/signal optimization
 
-## 🔧 Customization
+##  Customization
 
 ### Adding New Panels
 1. Edit dashboard JSON files or use Grafana UI
@@ -147,7 +147,7 @@ CUSTOM_METRIC = Gauge('urbanclear_custom_metric', 'Description', ['label'])
 CUSTOM_METRIC.labels('value').set(123)
 ```
 
-## 🎨 Visual Features
+##  Visual Features
 
 ### Color Coding
 - **Green**: Normal/Healthy (0-50%)
@@ -164,7 +164,7 @@ CUSTOM_METRIC.labels('value').set(123)
 - **Geographic Maps**: Spatial visualization
 - **Tables**: Detailed data views
 
-## 🔍 Troubleshooting
+##  Troubleshooting
 
 ### Common Issues
 
@@ -188,7 +188,7 @@ CUSTOM_METRIC.labels('value').set(123)
 - Prometheus logs: Check Docker container logs
 - API metrics: `/metrics` endpoint
 
-## 📊 Dashboard Usage Tips
+##  Dashboard Usage Tips
 
 ### For Traffic Operations
 1. Start with System Overview
@@ -208,7 +208,7 @@ CUSTOM_METRIC.labels('value').set(123)
 3. Monitor model accuracy trends
 4. Review optimization effectiveness
 
-## 🔐 Security Considerations
+##  Security Considerations
 
 - Change default Grafana admin password
 - Configure authentication (LDAP, OAuth, etc.)
@@ -216,7 +216,7 @@ CUSTOM_METRIC.labels('value').set(123)
 - Use HTTPS in production
 - Regular backup of dashboard configurations
 
-## 📝 Contributing
+##  Contributing
 
 When adding new dashboards:
 1. Follow naming convention: `urbanclear-[purpose]-dashboard.json`
@@ -225,7 +225,7 @@ When adding new dashboards:
 4. Test with sample data
 5. Update this README
 
-## 📞 Support
+##  Support
 
 For issues or questions:
 - Check logs first

@@ -1,24 +1,25 @@
-# 🔧 Dependency Installation Guide
+#  Dependency Installation Guide
 
-## 🚨 **Problem: psycopg2-binary Build Failure**
+**Canonical workflow for this repo:** use **[uv](https://docs.astral.sh/uv/)** with **`pyproject.toml`** and **`uv.lock`**: `uv sync`, `uv sync --extra dev`, or `uv sync --extra ci`. The `uv pip install -r requirements-*.txt` examples below are legacy compatibility patterns; prefer `uv sync` when possible.
+
+##  **Problem: psycopg2-binary Build Failure**
 
 **Error**: `pg_config executable not found` when installing `psycopg2-binary`
 
 **Cause**: PostgreSQL development headers missing on macOS (common on Apple Silicon)
 
-## ✅ **Solutions (Choose One)**
+##  **Solutions (Choose One)**
 
-### **🎯 Option 1: Quick Start (Recommended)**
+### ** Option 1: Quick Start (Recommended)**
 ```bash
-# Install minimal dependencies to get started
-source .venv/bin/activate
-uv pip install -r requirements-minimal.txt
+# Install from lockfile (creates/uses .venv)
+uv sync
 
 # Test your setup
-python src/api/main.py
+uv run python -c "import src.api.main"
 ```
 
-### **🔧 Option 2: Install PostgreSQL Headers**
+### ** Option 2: Install PostgreSQL Headers**
 ```bash
 # Install PostgreSQL client libraries
 brew install libpq
@@ -34,14 +35,14 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
 
-### **🚀 Option 3: Use Compatible Requirements**
+### ** Option 3: Use Compatible Requirements**
 ```bash
 # Install with PostgreSQL issues resolved
 source .venv/bin/activate
 uv pip install -r requirements-compatible.txt
 ```
 
-### **⚡ Option 4: Force Binary Installation**
+### ** Option 4: Force Binary Installation**
 ```bash
 source .venv/bin/activate
 
@@ -52,7 +53,7 @@ uv pip install -r requirements.txt --exclude psycopg2-binary
 uv pip install psycopg2-binary --only-binary=psycopg2-binary
 ```
 
-### **🎛️ Option 5: Step-by-Step Installation**
+### ** Option 5: Step-by-Step Installation**
 ```bash
 source .venv/bin/activate
 
@@ -69,7 +70,7 @@ uv pip install pytest black flake8 mypy
 uv pip install python-dotenv pyyaml loguru
 ```
 
-## 🔄 **Database Configuration**
+##  **Database Configuration**
 
 ### **Using asyncpg (Recommended)**
 Your project already uses `asyncpg` which is better for async applications:
@@ -86,7 +87,7 @@ DATABASE_URL = "postgresql+asyncpg://user:pass@host/db"
 DATABASE_URL = "postgresql://user:pass@host/db"
 ```
 
-## 🧪 **Testing Your Installation**
+##  **Testing Your Installation**
 
 ### **1. Verify Environment**
 ```bash
@@ -97,10 +98,10 @@ python --version  # Should show Python 3.9.23
 ### **2. Test Database Connection**
 ```bash
 # Test asyncpg (no psycopg2 needed)
-python -c "import asyncpg; print('✅ asyncpg works!')"
+python -c "import asyncpg; print(' asyncpg works!')"
 
 # Test SQLAlchemy
-python -c "import sqlalchemy; print('✅ SQLAlchemy works!')"
+python -c "import sqlalchemy; print(' SQLAlchemy works!')"
 ```
 
 ### **3. Test API Server**
@@ -112,7 +113,7 @@ python src/api/main.py
 curl http://localhost:8000/health
 ```
 
-## 📦 **Package Breakdown**
+##  **Package Breakdown**
 
 ### **Essential (always install)**
 - `fastapi` - Web framework
@@ -138,7 +139,7 @@ curl http://localhost:8000/health
 - `torch` - PyTorch
 - `pyspark` - Big data processing
 
-## 🛠️ **Troubleshooting**
+##  **Troubleshooting**
 
 ### **Still Getting Build Errors?**
 ```bash
@@ -168,15 +169,15 @@ uv pip install asyncpg          # For async applications
 uv pip install psycopg2-binary --only-binary=all  # Force binary
 ```
 
-## 🎯 **Performance Comparison**
+##  **Performance Comparison**
 
 | Package | Install Time | Performance | Use Case |
 |---------|--------------|-------------|----------|
-| `asyncpg` | ⚡ Fast | 🚀 Excellent | Async apps (recommended) |
-| `psycopg2-binary` | 🐌 Slow | ✅ Good | Sync apps |
-| `psycopg2` | 💀 Fails | ✅ Good | Build from source |
+| `asyncpg` |  Fast |  Excellent | Async apps (recommended) |
+| `psycopg2-binary` |  Slow |  Good | Sync apps |
+| `psycopg2` |  Fails |  Good | Build from source |
 
-## 📋 **Recommended Workflow**
+##  **Recommended Workflow**
 
 ### **For Development**
 ```bash
@@ -200,22 +201,22 @@ uv pip freeze > requirements-dev.txt
 uv pip install -r requirements-compatible.txt
 ```
 
-## ✅ **Success Checklist**
+##  **Success Checklist**
 
 After installation, verify:
 
 - [ ] **Environment Active**: `(.venv)` shows in terminal
 - [ ] **Python Version**: `python --version` shows 3.9.23
-- [ ] **Core Packages**: `python -c "import fastapi; print('✅')"`
-- [ ] **Database**: `python -c "import asyncpg; print('✅')"`
+- [ ] **Core Packages**: `python -c "import fastapi; print('')"`
+- [ ] **Database**: `python -c "import asyncpg; print('')"`
 - [ ] **API Server**: `python src/api/main.py` starts successfully
 - [ ] **Tests**: `pytest tests/` runs without errors
 
-## 🚀 **Next Steps**
+##  **Next Steps**
 
 1. **Choose your solution** from the options above
 2. **Test the installation** with the checklist
 3. **Start your development** with `python src/api/main.py`
 4. **Add more packages** as needed for your specific features
 
-**Your environment is ready for development!** 🎉 
+**Your environment is ready for development!**  
