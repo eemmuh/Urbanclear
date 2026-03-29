@@ -2,6 +2,13 @@
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+# Python environments and installs are managed with Astral uv (https://docs.astral.sh/uv/).
+# Install: curl -LsSf https://astral.sh/uv/install.sh | sh
+# Sync deps: uv sync | uv sync --extra dev | uv sync --extra ci
+# Run tools: uv run pytest | uv run ruff check .
+# CI / Docker: uv sync --frozen --extra ci (requires committed uv.lock)
+[tool.uv]
+
 [project]
 name = "urbanclear-traffic-system"
 version = "1.0.0"

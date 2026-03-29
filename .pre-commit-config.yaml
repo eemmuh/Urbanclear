@@ -12,7 +12,6 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
       - id: check-docstring-first
-      - id: requirements-txt-fixer
       - id: mixed-line-ending
         args: ['--fix=lf']
 
@@ -78,17 +77,17 @@ repos:
     hooks:
       - id: pytest-check
         name: pytest-check
-        entry: pytest
+        entry: uv
         language: system
         pass_filenames: false
         always_run: true
-        args: [tests/unit/, -v, --tb=short]
+        args: [run, pytest, tests/unit/, -v, --tb=short]
 
       - id: safety-check
         name: safety-check
-        entry: safety
+        entry: uv
         language: system
-        args: [check, --json, --output, safety-report.json]
+        args: [run, safety, check, --json, --output, safety-report.json]
         pass_filenames: false
 
 ci:
