@@ -30,22 +30,22 @@ class UrbanclearHealthChecker:
         try:
             response = requests.get(url, timeout=timeout)
             if response.status_code == 200:
-                print(f"✅ {name}: Running")
+                print(f" {name}: Running")
                 return True
             else:
-                print(f"⚠️  {name}: Status {response.status_code}")
+                print(f"  {name}: Status {response.status_code}")
                 self.issues.append(f"{name} returned status {response.status_code}")
                 return False
         except requests.exceptions.ConnectionError:
-            print(f"❌ {name}: Not accessible")
+            print(f" {name}: Not accessible")
             self.issues.append(f"{name} not accessible at {url}")
             return False
         except requests.exceptions.Timeout:
-            print(f"⏳ {name}: Timeout")
+            print(f" {name}: Timeout")
             self.issues.append(f"{name} timed out")
             return False
         except Exception as e:
-            print(f"❌ {name}: Error - {e}")
+            print(f" {name}: Error - {e}")
             self.issues.append(f"{name} error: {e}")
             return False
             
@@ -55,14 +55,14 @@ class UrbanclearHealthChecker:
             result = subprocess.run(['docker', 'ps'], capture_output=True, text=True)
             if result.returncode == 0:
                 containers = result.stdout.count('urbanclear_')
-                print(f"✅ Docker: {containers} containers running")
+                print(f" Docker: {containers} containers running")
                 return True
             else:
-                print("❌ Docker: Not running")
+                print(" Docker: Not running")
                 self.issues.append("Docker services not running")
                 return False
         except FileNotFoundError:
-            print("❌ Docker: Not installed")
+            print(" Docker: Not installed")
             self.issues.append("Docker not found")
             return False
             
@@ -81,10 +81,10 @@ class UrbanclearHealthChecker:
                 continue
                 
         if processes:
-            print(f"✅ Python Processes: {', '.join(processes)}")
+            print(f" Python Processes: {', '.join(processes)}")
             return True
         else:
-            print("⚠️  Python Processes: None found")
+            print("  Python Processes: None found")
             self.issues.append("No API processes running")
             return False
             
@@ -92,10 +92,10 @@ class UrbanclearHealthChecker:
         """Check virtual environment status"""
         venv_path = sys.prefix
         if 'urbanclear-env' in venv_path:
-            print(f"✅ Virtual Env: Active ({venv_path})")
+            print(f" Virtual Env: Active ({venv_path})")
             return True
         else:
-            print("⚠️  Virtual Env: Not activated")
+            print("  Virtual Env: Not activated")
             self.issues.append("Virtual environment not activated")
             return False
             
@@ -113,15 +113,15 @@ class UrbanclearHealthChecker:
                 response = requests.get(f'http://localhost:8000{endpoint}', timeout=3)
                 if response.status_code == 200:
                     working_endpoints += 1
-                    print(f"  ✅ {endpoint}")
+                    print(f"   {endpoint}")
                 else:
-                    print(f"  ❌ {endpoint}: {response.status_code}")
+                    print(f"   {endpoint}: {response.status_code}")
                     self.issues.append(f"API endpoint {endpoint} not working")
             except Exception as e:
-                print(f"  ❌ {endpoint}: {e}")
+                print(f"   {endpoint}: {e}")
                 self.issues.append(f"API endpoint {endpoint} error: {e}")
                 
-        print(f"📊 API Endpoints: {working_endpoints}/{len(endpoints)} working")
+        print(f" API Endpoints: {working_endpoints}/{len(endpoints)} working")
         return working_endpoints == len(endpoints)
         
     def generate_fixes(self):
@@ -129,24 +129,24 @@ class UrbanclearHealthChecker:
         fixes = []
         
         if any('not accessible' in issue for issue in self.issues):
-            fixes.append("🔧 Restart services: python run_api.py &")
+            fixes.append(" Restart services: python run_api.py &")
             
         if any('Docker' in issue for issue in self.issues):
-            fixes.append("🐳 Start Docker: make start")
+            fixes.append(" Start Docker: make start")
             
         if any('Virtual environment' in issue for issue in self.issues):
-            fixes.append("🐍 Activate venv: source urbanclear-env/bin/activate")
+            fixes.append(" Activate venv: source urbanclear-env/bin/activate")
             
         if any('Dashboard' in issue for issue in self.issues):
-            fixes.append("📊 Start React dashboard: cd dashboard && npm run dev")
+            fixes.append(" Start React dashboard: cd dashboard && npm run dev")
             
         return fixes
         
     def run_full_check(self):
         """Run comprehensive health check"""
-        print("🔍 URBANCLEAR SYSTEM HEALTH CHECK")
+        print(" URBANCLEAR SYSTEM HEALTH CHECK")
         print("=" * 40)
-        print(f"📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f" Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print()
         
         # Check virtual environment
@@ -162,29 +162,29 @@ class UrbanclearHealthChecker:
         print()
         
         # Check web services
-        print("🌐 WEB SERVICES:")
+        print(" WEB SERVICES:")
         for name, url in self.services.items():
             self.check_service(name, url)
         print()
         
         # Check API endpoints
-        print("🔗 API ENDPOINTS:")
+        print(" API ENDPOINTS:")
         self.check_api_endpoints()
         print()
         
         # Summary
         if self.issues:
-            print("⚠️  ISSUES FOUND:")
+            print("  ISSUES FOUND:")
             for i, issue in enumerate(self.issues, 1):
                 print(f"  {i}. {issue}")
             print()
             
-            print("🛠️  RECOMMENDED FIXES:")
+            print("  RECOMMENDED FIXES:")
             fixes = self.generate_fixes()
             for i, fix in enumerate(fixes, 1):
                 print(f"  {i}. {fix}")
         else:
-            print("🎉 ALL SYSTEMS OPERATIONAL!")
+            print(" ALL SYSTEMS OPERATIONAL!")
             
         print()
         print("=" * 40)

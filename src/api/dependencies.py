@@ -208,7 +208,7 @@ def get_current_user(
             )
         # Only allow in development with explicit flag
         logger.warning(
-            "⚠️  Development authentication bypass enabled. "
+            "  Development authentication bypass enabled. "
             "Set ALLOW_DEV_AUTH_BYPASS=false in production!"
         )
         return {

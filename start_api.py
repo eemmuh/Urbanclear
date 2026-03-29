@@ -24,11 +24,11 @@ if __name__ == "__main__":
     host = os.getenv("HOST", "127.0.0.1")
     port = int(os.getenv("PORT", 8000))
     
-    print(f"🚀 Starting Urbanclear API on {host}:{port}")
-    print(f"📚 API Documentation: http://{host}:{port}/api/docs")
-    print(f"❤️ Health Check: http://{host}:{port}/health")
-    print(f"📊 Metrics: http://{host}:{port}/metrics")
-    print("\n🛑 Press Ctrl+C to stop the server\n")
+    print(f" Starting Urbanclear API on {host}:{port}")
+    print(f" API Documentation: http://{host}:{port}/api/docs")
+    print(f" Health Check: http://{host}:{port}/health")
+    print(f" Metrics: http://{host}:{port}/metrics")
+    print("\n Press Ctrl+C to stop the server\n")
     
     # Start the server without reload to avoid Prometheus conflicts
     uvicorn.run(

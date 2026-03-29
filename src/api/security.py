@@ -39,7 +39,7 @@ class SecurityConfig:
         # Only allow default in development
         _jwt_secret = "dev-secret-key-change-in-production"
         logger.warning(
-            "⚠️  Using default JWT secret key. Set JWT_SECRET_KEY environment variable for production!"
+            "  Using default JWT secret key. Set JWT_SECRET_KEY environment variable for production!"
         )
     JWT_SECRET_KEY = _jwt_secret
     JWT_ALGORITHM = "HS256"

@@ -2,7 +2,7 @@
 
 A modern React dashboard for the Urbanclear Traffic Management System featuring real-time traffic visualization, WebSocket integration, and interactive maps.
 
-## 🚀 Features
+##  Features
 
 - **Real-time Data**: Live traffic updates via WebSocket connection
 - **Interactive Maps**: Traffic visualization with Leaflet integration
@@ -11,7 +11,7 @@ A modern React dashboard for the Urbanclear Traffic Management System featuring 
 - **Mobile Responsive**: Optimized for desktop, tablet, and mobile devices
 - **TypeScript**: Full type safety and better developer experience
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 - **React 18** - Modern React with hooks and context
 - **TypeScript** - Type-safe development
@@ -24,7 +24,7 @@ A modern React dashboard for the Urbanclear Traffic Management System featuring 
 - **Framer Motion** - Smooth animations
 - **React Router** - Client-side routing
 
-## 📋 Prerequisites
+##  Prerequisites
 
 Before running the dashboard, ensure you have:
 
@@ -57,7 +57,7 @@ nvm use node
 **Alternative (Download):**
 Visit [nodejs.org](https://nodejs.org/) and download the installer.
 
-## 🚀 Getting Started
+##  Getting Started
 
 1. **Install Dependencies:**
    ```bash
@@ -73,7 +73,7 @@ Visit [nodejs.org](https://nodejs.org/) and download the installer.
 3. **Access Dashboard:**
    Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 dashboard/
@@ -95,7 +95,7 @@ dashboard/
 └── tsconfig.json         # TypeScript configuration
 ```
 
-## 🔧 Available Scripts
+##  Available Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
@@ -103,7 +103,7 @@ dashboard/
 - `npm run lint` - Run ESLint
 - `npm run type-check` - Run TypeScript checks
 
-## 🎯 Key Components
+##  Key Components
 
 ### Dashboard Page
 - **Overview metrics** - Key traffic statistics
@@ -121,7 +121,7 @@ dashboard/
 - **Incident management** - Resolve and track incidents
 - **Historical data** - Recently resolved incidents
 
-## 🌐 API Integration
+##  API Integration
 
 The dashboard connects to the Urbanclear API at `http://localhost:8000`:
 
@@ -135,7 +135,7 @@ The dashboard connects to the Urbanclear API at `http://localhost:8000`:
 - Incident alerts
 - System status updates
 
-## 🎨 Styling
+##  Styling
 
 The dashboard uses **Tailwind CSS** for styling:
 
@@ -155,7 +155,7 @@ The dashboard uses **Tailwind CSS** for styling:
 .loading-spinner        /* Loading animation */
 ```
 
-## 🔌 WebSocket Integration
+##  WebSocket Integration
 
 Real-time features powered by Socket.io:
 
@@ -170,7 +170,7 @@ socket.on('incident_alert', (data) => {
 })
 ```
 
-## 📊 State Management
+##  State Management
 
 Using **Zustand** for simple, effective state management:
 
@@ -186,7 +186,7 @@ const useTrafficStore = create((set) => ({
 }))
 ```
 
-## 🗺️ Maps Integration
+##  Maps Integration
 
 Interactive maps using **React Leaflet**:
 
@@ -195,7 +195,7 @@ Interactive maps using **React Leaflet**:
 - **Popups** - Detailed information on click
 - **Auto-fitting bounds** - Automatically centers on data
 
-## 📱 Responsive Design
+##  Responsive Design
 
 Mobile-optimized with:
 
@@ -204,7 +204,7 @@ Mobile-optimized with:
 - **Responsive grid** layouts
 - **Optimized map** interactions
 
-## 🚀 Deployment
+##  Deployment
 
 ### Production Build
 
@@ -233,7 +233,7 @@ server {
 }
 ```
 
-## 🔧 Environment Variables
+##  Environment Variables
 
 Create `.env` file for configuration:
 
@@ -242,7 +242,7 @@ VITE_API_URL=http://localhost:8000
 VITE_WS_URL=ws://localhost:8000
 ```
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Common Issues
 
@@ -273,14 +273,14 @@ npm run type-check
 npm run lint
 ```
 
-## 🤝 Contributing
+##  Contributing
 
 1. Follow the existing code style
 2. Add TypeScript types for new features
 3. Test responsive design on multiple devices
 4. Update documentation for new components
 
-## 📄 License
+##  License
 
 This project is part of the Urbanclear Traffic Management System.
 

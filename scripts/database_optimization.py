@@ -595,10 +595,10 @@ class DatabaseOptimizer:
             stats = await self.get_performance_stats()
             logger.info(f"Optimization completed. Performance stats: {stats}")
             
-            logger.info("✅ Database optimization completed successfully!")
+            logger.info(" Database optimization completed successfully!")
             
         except Exception as e:
-            logger.error(f"❌ Database optimization failed: {e}")
+            logger.error(f" Database optimization failed: {e}")
             raise
         finally:
             await self.disconnect()

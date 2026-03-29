@@ -26,7 +26,7 @@ class UrbanClearAPITester:
         
     async def run_all_tests(self):
         """Run all API tests"""
-        print(f"{Fore.CYAN}🚦 URBANCLEAR API COMPREHENSIVE TEST SUITE{Style.RESET_ALL}")
+        print(f"{Fore.CYAN} URBANCLEAR API COMPREHENSIVE TEST SUITE{Style.RESET_ALL}")
         print(f"{Fore.CYAN}{'='*60}{Style.RESET_ALL}")
         print(f"Base URL: {self.base_url}")
         print(f"Test started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -90,7 +90,7 @@ class UrbanClearAPITester:
         
         success = result["status_code"] == expected_status
         status_color = Fore.GREEN if success else Fore.RED
-        status_symbol = "✅" if success else "❌"
+        status_symbol = "" if success else ""
         
         print(f"  {status_symbol} {name:<40} {status_color}{result['status_code']}{Style.RESET_ALL} "
               f"({result['response_time']:.3f}s)")
@@ -117,7 +117,7 @@ class UrbanClearAPITester:
     
     async def _test_health_endpoints(self, session: aiohttp.ClientSession):
         """Test health and system endpoints"""
-        print(f"\n{Fore.YELLOW}🏥 HEALTH & SYSTEM ENDPOINTS{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW} HEALTH & SYSTEM ENDPOINTS{Style.RESET_ALL}")
         
         await self._test_endpoint(session, "Root endpoint", "GET", "/")
         await self._test_endpoint(session, "Health check", "GET", "/health")
@@ -126,7 +126,7 @@ class UrbanClearAPITester:
     
     async def _test_traffic_endpoints(self, session: aiohttp.ClientSession):
         """Test traffic data endpoints"""
-        print(f"\n{Fore.YELLOW}🚗 TRAFFIC DATA ENDPOINTS{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW} TRAFFIC DATA ENDPOINTS{Style.RESET_ALL}")
         
         await self._test_endpoint(session, "Current traffic", "GET", "/api/v1/traffic/current")
         await self._test_endpoint(session, "Traffic with location filter", "GET", 
@@ -146,7 +146,7 @@ class UrbanClearAPITester:
     
     async def _test_prediction_endpoints(self, session: aiohttp.ClientSession):
         """Test prediction endpoints"""
-        print(f"\n{Fore.YELLOW}🔮 PREDICTION ENDPOINTS{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW} PREDICTION ENDPOINTS{Style.RESET_ALL}")
         
         await self._test_endpoint(session, "Traffic prediction default", "GET", 
                                 "/api/v1/traffic/predict?location=Central Park")
@@ -155,7 +155,7 @@ class UrbanClearAPITester:
     
     async def _test_route_endpoints(self, session: aiohttp.ClientSession):
         """Test route optimization endpoints"""
-        print(f"\n{Fore.YELLOW}🛣️  ROUTE OPTIMIZATION ENDPOINTS{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW}  ROUTE OPTIMIZATION ENDPOINTS{Style.RESET_ALL}")
         
         # Route optimization POST request
         route_data = {
@@ -186,7 +186,7 @@ class UrbanClearAPITester:
     
     async def _test_incident_endpoints(self, session: aiohttp.ClientSession):
         """Test incident management endpoints"""
-        print(f"\n{Fore.YELLOW}🚨 INCIDENT MANAGEMENT ENDPOINTS{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW} INCIDENT MANAGEMENT ENDPOINTS{Style.RESET_ALL}")
         
         await self._test_endpoint(session, "Active incidents", "GET", "/api/v1/incidents/active")
         await self._test_endpoint(session, "Incidents by location", "GET", 
@@ -213,7 +213,7 @@ class UrbanClearAPITester:
     
     async def _test_analytics_endpoints(self, session: aiohttp.ClientSession):
         """Test analytics endpoints"""
-        print(f"\n{Fore.YELLOW}📊 ANALYTICS ENDPOINTS{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW} ANALYTICS ENDPOINTS{Style.RESET_ALL}")
         
         periods = ["1h", "24h", "7d", "30d"]
         for period in periods:
@@ -227,7 +227,7 @@ class UrbanClearAPITester:
     
     async def _test_signal_endpoints(self, session: aiohttp.ClientSession):
         """Test signal optimization endpoints"""
-        print(f"\n{Fore.YELLOW}🚦 SIGNAL OPTIMIZATION ENDPOINTS{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW} SIGNAL OPTIMIZATION ENDPOINTS{Style.RESET_ALL}")
         
         await self._test_endpoint(session, "Signal status", "GET", "/api/v1/signals/status")
         await self._test_endpoint(session, "Specific signal status", "GET", 
@@ -246,7 +246,7 @@ class UrbanClearAPITester:
     
     async def _test_admin_endpoints(self, session: aiohttp.ClientSession):
         """Test admin endpoints"""
-        print(f"\n{Fore.YELLOW}⚙️  ADMIN ENDPOINTS{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW}  ADMIN ENDPOINTS{Style.RESET_ALL}")
         
         await self._test_endpoint(session, "System stats", "GET", "/api/v1/admin/system/stats")
         
@@ -256,7 +256,7 @@ class UrbanClearAPITester:
     
     async def _test_demo_endpoints(self, session: aiohttp.ClientSession):
         """Test demonstration endpoints"""
-        print(f"\n{Fore.YELLOW}🎯 DEMO ENDPOINTS{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW} DEMO ENDPOINTS{Style.RESET_ALL}")
         
         await self._test_endpoint(session, "Rush hour simulation", "GET", 
                                 "/api/v1/demo/rush-hour-simulation")
@@ -273,14 +273,14 @@ class UrbanClearAPITester:
     
     async def _test_websocket_status(self, session: aiohttp.ClientSession):
         """Test WebSocket status endpoint"""
-        print(f"\n{Fore.YELLOW}🔌 WEBSOCKET ENDPOINTS{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW} WEBSOCKET ENDPOINTS{Style.RESET_ALL}")
         
         await self._test_endpoint(session, "WebSocket status", "GET", 
                                 "/api/v1/websocket/status")
     
     def _print_test_summary(self):
         """Print comprehensive test summary"""
-        print(f"\n{Fore.CYAN}📋 TEST SUMMARY{Style.RESET_ALL}")
+        print(f"\n{Fore.CYAN} TEST SUMMARY{Style.RESET_ALL}")
         print(f"{Fore.CYAN}{'='*60}{Style.RESET_ALL}")
         
         total_tests = len(self.test_results)
@@ -298,14 +298,14 @@ class UrbanClearAPITester:
         print(f"Average response time: {avg_response_time:.3f}s")
         
         if self.failed_tests:
-            print(f"\n{Fore.RED}❌ FAILED TESTS:{Style.RESET_ALL}")
+            print(f"\n{Fore.RED} FAILED TESTS:{Style.RESET_ALL}")
             for test in self.failed_tests:
                 print(f"  • {test['name']}: Expected {test['expected']}, got {test['actual']}")
                 if "error" in test and test["error"]:
                     print(f"    Error: {test['error']}")
         
         # Performance analysis
-        print(f"\n{Fore.CYAN}⚡ PERFORMANCE ANALYSIS{Style.RESET_ALL}")
+        print(f"\n{Fore.CYAN} PERFORMANCE ANALYSIS{Style.RESET_ALL}")
         slow_tests = [result for result in self.test_results if result["response_time"] > 1.0]
         if slow_tests:
             print(f"{Fore.YELLOW}Slow endpoints (>1s):{Style.RESET_ALL}")
@@ -316,11 +316,11 @@ class UrbanClearAPITester:
         
         # Overall status
         if success_rate >= 95:
-            print(f"\n{Fore.GREEN}🎉 EXCELLENT: API is working perfectly!{Style.RESET_ALL}")
+            print(f"\n{Fore.GREEN} EXCELLENT: API is working perfectly!{Style.RESET_ALL}")
         elif success_rate >= 80:
-            print(f"\n{Fore.YELLOW}⚠️  GOOD: API is mostly functional with minor issues{Style.RESET_ALL}")
+            print(f"\n{Fore.YELLOW}  GOOD: API is mostly functional with minor issues{Style.RESET_ALL}")
         else:
-            print(f"\n{Fore.RED}🚨 ISSUES: API has significant problems that need attention{Style.RESET_ALL}")
+            print(f"\n{Fore.RED} ISSUES: API has significant problems that need attention{Style.RESET_ALL}")
         
         print(f"\nTest completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 

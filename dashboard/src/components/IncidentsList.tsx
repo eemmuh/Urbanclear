@@ -36,17 +36,17 @@ export default function IncidentsList({ incidents, showActions = true }: Inciden
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'accident':
-        return '🚗'
+        return ''
       case 'construction':
-        return '🚧'
+        return ''
       case 'weather':
-        return '🌧️'
+        return ''
       case 'road_closure':
-        return '🚫'
+        return ''
       case 'congestion':
-        return '🚦'
+        return ''
       default:
-        return '⚠️'
+        return ''
     }
   }
 

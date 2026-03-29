@@ -134,7 +134,7 @@ export default function TrafficChart({ data, height = 400 }: TrafficChartProps) 
     return (
       <div className="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
         <div className="text-center">
-          <div className="text-gray-400 mb-2">📈</div>
+          <div className="text-gray-400 mb-2"></div>
           <p className="text-gray-500">No traffic data available</p>
         </div>
       </div>

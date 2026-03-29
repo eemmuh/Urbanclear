@@ -45,13 +45,13 @@ class RealDataDemo:
         try:
             response = await self.client.get(f"{self.base_url}/health")
             if response.status_code == 200:
-                print("✅ API is healthy and running")
+                print(" API is healthy and running")
                 return True
             else:
-                print(f"❌ API health check failed: {response.status_code}")
+                print(f" API health check failed: {response.status_code}")
                 return False
         except Exception as e:
-            print(f"❌ Could not connect to API: {e}")
+            print(f" Could not connect to API: {e}")
             return False
     
     async def demo_geocoding(self):
@@ -66,7 +66,7 @@ class RealDataDemo:
         
         for address in test_addresses:
             try:
-                print(f"\n🔍 Geocoding: {address}")
+                print(f"\n Geocoding: {address}")
                 
                 response = await self.client.post(
                     f"{self.base_url}/api/v1/real-data/geocode",
@@ -77,17 +77,17 @@ class RealDataDemo:
                     data = response.json()
                     if data["success"]:
                         result = data["data"]
-                        print(f"✅ Found: {result.get('formatted_address', 'Unknown')}")
-                        print(f"   📍 Coordinates: {result.get('latitude', 0):.6f}, {result.get('longitude', 0):.6f}")
-                        print(f"   🏷️  Source: {data['source']} (Quality: {data['quality']})")
-                        print(f"   ⚡ Cache hit: {data['cache_hit']}")
+                        print(f" Found: {result.get('formatted_address', 'Unknown')}")
+                        print(f"    Coordinates: {result.get('latitude', 0):.6f}, {result.get('longitude', 0):.6f}")
+                        print(f"     Source: {data['source']} (Quality: {data['quality']})")
+                        print(f"    Cache hit: {data['cache_hit']}")
                     else:
-                        print("❌ Geocoding failed")
+                        print(" Geocoding failed")
                 else:
-                    print(f"❌ API error: {response.status_code}")
+                    print(f" API error: {response.status_code}")
                     
             except Exception as e:
-                print(f"❌ Error geocoding {address}: {e}")
+                print(f" Error geocoding {address}: {e}")
     
     async def demo_routing(self):
         """Demonstrate routing functionality"""
@@ -108,7 +108,7 @@ class RealDataDemo:
         
         for route in test_routes:
             try:
-                print(f"\n🗺️  Calculating route: {route['name']}")
+                print(f"\n  Calculating route: {route['name']}")
                 start_lat, start_lon = route["start"]
                 end_lat, end_lon = route["end"]
                 
@@ -127,22 +127,22 @@ class RealDataDemo:
                     data = response.json()
                     if data["success"]:
                         route_info = data["route"]
-                        print(f"✅ Route calculated successfully")
-                        print(f"   📏 Distance: {route_info['distance_meters']/1000:.2f} km")
-                        print(f"   ⏱️  Duration: {route_info['duration_seconds']/60:.1f} minutes")
-                        print(f"   🏷️  Source: {data['source']} (Quality: {data['quality']})")
-                        print(f"   📋 Summary: {route_info['summary']}")
-                        print(f"   🔢 Steps: {len(route_info['steps'])} navigation instructions")
+                        print(f" Route calculated successfully")
+                        print(f"    Distance: {route_info['distance_meters']/1000:.2f} km")
+                        print(f"     Duration: {route_info['duration_seconds']/60:.1f} minutes")
+                        print(f"     Source: {data['source']} (Quality: {data['quality']})")
+                        print(f"    Summary: {route_info['summary']}")
+                        print(f"    Steps: {len(route_info['steps'])} navigation instructions")
                         
                         if route_info.get('warnings'):
-                            print(f"   ⚠️  Warnings: {len(route_info['warnings'])}")
+                            print(f"     Warnings: {len(route_info['warnings'])}")
                     else:
-                        print("❌ Route calculation failed")
+                        print(" Route calculation failed")
                 else:
-                    print(f"❌ API error: {response.status_code}")
+                    print(f" API error: {response.status_code}")
                     
             except Exception as e:
-                print(f"❌ Error calculating route {route['name']}: {e}")
+                print(f" Error calculating route {route['name']}: {e}")
     
     async def demo_places_search(self):
         """Demonstrate places search functionality"""
@@ -163,7 +163,7 @@ class RealDataDemo:
         
         for search in test_searches:
             try:
-                print(f"\n🔍 Searching for '{search['query']}' near {search['city']}")
+                print(f"\n Searching for '{search['query']}' near {search['city']}")
                 lat, lon = search["location"]
                 
                 response = await self.client.get(
@@ -181,22 +181,22 @@ class RealDataDemo:
                     data = response.json()
                     if data["success"]:
                         places = data["places"]
-                        print(f"✅ Found {data['count']} places")
+                        print(f" Found {data['count']} places")
                         
                         for i, place in enumerate(places[:3]):  # Show first 3
                             print(f"   {i+1}. {place['name']}")
-                            print(f"      📍 {place['address'] or 'Address not available'}")
-                            print(f"      🏷️  Categories: {', '.join(place['categories'])}")
+                            print(f"       {place['address'] or 'Address not available'}")
+                            print(f"        Categories: {', '.join(place['categories'])}")
                             if place['distance']:
-                                print(f"      📏 Distance: {place['distance']:.0f}m")
-                            print(f"      🔗 Source: {place['source']}")
+                                print(f"       Distance: {place['distance']:.0f}m")
+                            print(f"       Source: {place['source']}")
                     else:
-                        print("❌ Places search failed")
+                        print(" Places search failed")
                 else:
-                    print(f"❌ API error: {response.status_code}")
+                    print(f" API error: {response.status_code}")
                     
             except Exception as e:
-                print(f"❌ Error searching places: {e}")
+                print(f" Error searching places: {e}")
     
     async def demo_matrix(self):
         """Demonstrate matrix calculation"""
@@ -213,7 +213,7 @@ class RealDataDemo:
         location_names = ["Times Square", "Central Park", "Grand Central", "Empire State"]
         
         try:
-            print("\n🗺️  Calculating traffic matrix for NYC locations:")
+            print("\n  Calculating traffic matrix for NYC locations:")
             for i, name in enumerate(location_names):
                 print(f"   {i}: {name}")
             
@@ -229,24 +229,24 @@ class RealDataDemo:
                 data = response.json()
                 if data["success"]:
                     matrix_data = data["matrix"]
-                    print(f"✅ Matrix calculated successfully")
-                    print(f"   🏷️  Source: {data['source']} (Quality: {data['quality']})")
-                    print(f"   ⚡ Cache hit: {data['cache_hit']}")
+                    print(f" Matrix calculated successfully")
+                    print(f"     Source: {data['source']} (Quality: {data['quality']})")
+                    print(f"    Cache hit: {data['cache_hit']}")
                     
                     # Show duration matrix (first few entries)
                     if "durations" in matrix_data and matrix_data["durations"]:
-                        print(f"\n   ⏱️  Duration Matrix (seconds):")
+                        print(f"\n     Duration Matrix (seconds):")
                         durations = matrix_data["durations"]
                         for i in range(min(3, len(durations))):
                             for j in range(min(3, len(durations[i]))):
                                 print(f"     {location_names[i]} → {location_names[j]}: {durations[i][j]:.0f}s")
                 else:
-                    print("❌ Matrix calculation failed")
+                    print(" Matrix calculation failed")
             else:
-                print(f"❌ API error: {response.status_code}")
+                print(f" API error: {response.status_code}")
                 
         except Exception as e:
-            print(f"❌ Error calculating matrix: {e}")
+            print(f" Error calculating matrix: {e}")
     
     async def demo_isochrones(self):
         """Demonstrate isochrone calculation"""
@@ -256,7 +256,7 @@ class RealDataDemo:
         time_values = [15, 30]  # 15 and 30 minutes
         
         try:
-            print(f"\n🕒 Calculating {time_values} minute isochrones from Times Square")
+            print(f"\n Calculating {time_values} minute isochrones from Times Square")
             
             response = await self.client.get(
                 f"{self.base_url}/api/v1/real-data/isochrones",
@@ -272,12 +272,12 @@ class RealDataDemo:
                 data = response.json()
                 if data["success"]:
                     isochrones = data["isochrones"]
-                    print(f"✅ Isochrones calculated successfully")
-                    print(f"   🏷️  Source: {data['source']} (Quality: {data['quality']})")
-                    print(f"   ⚡ Cache hit: {data['cache_hit']}")
-                    print(f"   🕒 Time values: {data['time_minutes']} minutes")
-                    print(f"   🚗 Mode: {data['mode']}")
-                    print(f"   📊 Generated {len(isochrones)} isochrone zones")
+                    print(f" Isochrones calculated successfully")
+                    print(f"     Source: {data['source']} (Quality: {data['quality']})")
+                    print(f"    Cache hit: {data['cache_hit']}")
+                    print(f"    Time values: {data['time_minutes']} minutes")
+                    print(f"    Mode: {data['mode']}")
+                    print(f"    Generated {len(isochrones)} isochrone zones")
                     
                     for i, iso in enumerate(isochrones):
                         if isinstance(iso, dict) and 'value' in iso:
@@ -285,12 +285,12 @@ class RealDataDemo:
                             if 'area_sqm' in iso:
                                 print(f"              Area: {iso['area_sqm']/1000000:.2f} km²")
                 else:
-                    print("❌ Isochrone calculation failed")
+                    print(" Isochrone calculation failed")
             else:
-                print(f"❌ API error: {response.status_code}")
+                print(f" API error: {response.status_code}")
                 
         except Exception as e:
-            print(f"❌ Error calculating isochrones: {e}")
+            print(f" Error calculating isochrones: {e}")
     
     async def demo_health_status(self):
         """Demonstrate health status check"""
@@ -301,14 +301,14 @@ class RealDataDemo:
             
             if response.status_code == 200:
                 data = response.json()
-                print(f"📊 Overall Health: {data['overall_health'].upper()}")
-                print(f"🕒 Timestamp: {data['timestamp']}")
+                print(f" Overall Health: {data['overall_health'].upper()}")
+                print(f" Timestamp: {data['timestamp']}")
                 
                 if "sources" in data:
-                    print(f"\n🔗 Data Sources Status:")
+                    print(f"\n Data Sources Status:")
                     for source, status in data["sources"].items():
-                        health_icon = "✅" if status.get("healthy", False) else "❌"
-                        available_icon = "🟢" if status.get("available", False) else "🔴"
+                        health_icon = "" if status.get("healthy", False) else ""
+                        available_icon = "" if status.get("available", False) else ""
                         print(f"   {health_icon} {source.title()}")
                         print(f"      Available: {available_icon}")
                         if "rate_limit_remaining" in status:
@@ -317,22 +317,22 @@ class RealDataDemo:
                             print(f"      Error: {status['error']}")
                 
                 if "error" in data:
-                    print(f"\n❌ Error: {data['error']}")
+                    print(f"\n Error: {data['error']}")
             else:
-                print(f"❌ API error: {response.status_code}")
+                print(f" API error: {response.status_code}")
                 
         except Exception as e:
-            print(f"❌ Error checking health status: {e}")
+            print(f" Error checking health status: {e}")
     
     async def run_full_demo(self):
         """Run the complete demonstration"""
-        print("🚀 Starting Real Data Integration Demo")
-        print(f"🌐 API Base URL: {self.base_url}")
-        print(f"🕒 Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(" Starting Real Data Integration Demo")
+        print(f" API Base URL: {self.base_url}")
+        print(f" Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
         # Check API health first
         if not await self.check_api_health():
-            print("\n❌ Cannot proceed - API is not available")
+            print("\n Cannot proceed - API is not available")
             print("Make sure the API server is running with: python start_api.py")
             return
         
@@ -345,15 +345,15 @@ class RealDataDemo:
         await self.demo_isochrones()
         
         self.print_section("DEMO COMPLETED")
-        print("✅ Real Data Integration Demo completed successfully!")
-        print("\n📝 Summary:")
+        print(" Real Data Integration Demo completed successfully!")
+        print("\n Summary:")
         print("   - Geocoding: Convert addresses to coordinates")
         print("   - Routing: Calculate real routes between points")
         print("   - Places: Search for businesses and points of interest")
         print("   - Matrix: Calculate travel times between multiple locations")
         print("   - Isochrones: Find reachable areas within time limits")
         print("   - Health: Monitor data source availability and performance")
-        print("\n🎯 Next Steps:")
+        print("\n Next Steps:")
         print("   1. Set up API keys for premium data sources (optional)")
         print("   2. Configure Redis for better caching performance")
         print("   3. Integrate real data into your frontend applications")

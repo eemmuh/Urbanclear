@@ -19,7 +19,7 @@ def test_basic_imports():
         import fastapi
         import pydantic
 
-        print("✅ All basic imports successful")
+        print(" All basic imports successful")
     except ImportError as e:
         pytest.fail(f"Failed to import required module: {e}")
 
@@ -33,7 +33,7 @@ def test_src_imports():
         import src.data
         import src.models
 
-        print("✅ All src imports successful")
+        print(" All src imports successful")
     except ImportError as e:
         pytest.fail(f"Failed to import src module: {e}")
 
@@ -43,7 +43,7 @@ def test_api_models():
     try:
         from src.api.models import TrafficDataRequest, TrafficDataResponse
 
-        print("✅ API models import successful")
+        print(" API models import successful")
     except ImportError as e:
         pytest.fail(f"Failed to import API models: {e}")
 
@@ -52,7 +52,7 @@ def test_simple_math():
     """Simple math test to ensure basic functionality."""
     assert 2 + 2 == 4
     assert 10 * 5 == 50
-    print("✅ Basic math operations work")
+    print(" Basic math operations work")
 
 
 if __name__ == "__main__":

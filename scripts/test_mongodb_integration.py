@@ -21,20 +21,20 @@ from loguru import logger
 
 async def test_mongodb_connection():
     """Test MongoDB connection"""
-    print("🔍 Testing MongoDB connection...")
+    print(" Testing MongoDB connection...")
     
     try:
         await logging_service.start()
-        print("✅ MongoDB connection successful")
+        print(" MongoDB connection successful")
         return True
     except Exception as e:
-        print(f"❌ MongoDB connection failed: {e}")
+        print(f" MongoDB connection failed: {e}")
         return False
 
 
 async def generate_sample_logs():
     """Generate sample log entries"""
-    print("📝 Generating sample logs...")
+    print(" Generating sample logs...")
     
     services = ["api", "traffic_service", "incident_service", "route_service", "system"]
     messages = [
@@ -62,12 +62,12 @@ async def generate_sample_logs():
             service=service
         )
     
-    print("✅ Sample logs generated")
+    print(" Sample logs generated")
 
 
 async def generate_sample_analytics():
     """Generate sample analytics events"""
-    print("📊 Generating sample analytics events...")
+    print(" Generating sample analytics events...")
     
     # Traffic data events
     for i in range(10):
@@ -133,35 +133,35 @@ async def generate_sample_analytics():
             }
         )
     
-    print("✅ Sample analytics events generated")
+    print(" Sample analytics events generated")
 
 
 async def test_data_retrieval():
     """Test retrieving data from MongoDB"""
-    print("🔍 Testing data retrieval...")
+    print(" Testing data retrieval...")
     
     try:
         # Get recent logs
         logs = await logging_service.get_logs(limit=10)
-        print(f"📝 Retrieved {len(logs)} recent logs")
+        print(f" Retrieved {len(logs)} recent logs")
         
         # Get analytics events
         events = await logging_service.get_analytics_events(limit=10)
-        print(f"📊 Retrieved {len(events)} analytics events")
+        print(f" Retrieved {len(events)} analytics events")
         
         # Get analytics summary
         summary = await logging_service.get_analytics_summary()
-        print(f"📈 Analytics summary: {summary}")
+        print(f" Analytics summary: {summary}")
         
         return True
     except Exception as e:
-        print(f"❌ Data retrieval failed: {e}")
+        print(f" Data retrieval failed: {e}")
         return False
 
 
 async def test_search_functionality():
     """Test search functionality"""
-    print("🔍 Testing search functionality...")
+    print(" Testing search functionality...")
     
     try:
         # Search for error logs
@@ -169,49 +169,49 @@ async def test_search_functionality():
             level=LogLevel.ERROR,
             limit=5
         )
-        print(f"🚨 Found {len(error_logs)} error logs")
+        print(f" Found {len(error_logs)} error logs")
         
         # Search for traffic data events
         traffic_events = await logging_service.get_analytics_events(
             event_type=AnalyticsEventType.TRAFFIC_DATA,
             limit=5
         )
-        print(f"🚗 Found {len(traffic_events)} traffic data events")
+        print(f" Found {len(traffic_events)} traffic data events")
         
         # Search for recent API requests
         api_events = await logging_service.get_analytics_events(
             event_type=AnalyticsEventType.API_REQUEST,
             limit=5
         )
-        print(f"🌐 Found {len(api_events)} API request events")
+        print(f" Found {len(api_events)} API request events")
         
         return True
     except Exception as e:
-        print(f"❌ Search functionality failed: {e}")
+        print(f" Search functionality failed: {e}")
         return False
 
 
 async def cleanup_test_data():
     """Clean up test data"""
-    print("🧹 Cleaning up test data...")
+    print(" Cleaning up test data...")
     
     try:
         await logging_service.cleanup_old_data(days_to_keep=1)
-        print("✅ Test data cleanup completed")
+        print(" Test data cleanup completed")
         return True
     except Exception as e:
-        print(f"❌ Data cleanup failed: {e}")
+        print(f" Data cleanup failed: {e}")
         return False
 
 
 async def main():
     """Main test function"""
-    print("🚀 Starting MongoDB Integration Test")
+    print(" Starting MongoDB Integration Test")
     print("=" * 50)
     
     # Test connection
     if not await test_mongodb_connection():
-        print("❌ Cannot proceed without MongoDB connection")
+        print(" Cannot proceed without MongoDB connection")
         return
     
     print()
@@ -238,15 +238,15 @@ async def main():
     # Stop logging service
     await logging_service.stop()
     
-    print("✅ MongoDB Integration Test Completed Successfully!")
+    print(" MongoDB Integration Test Completed Successfully!")
     print("=" * 50)
-    print("\n📋 Test Summary:")
-    print("• MongoDB connection: ✅")
-    print("• Sample data generation: ✅")
-    print("• Data retrieval: ✅")
-    print("• Search functionality: ✅")
-    print("• Data cleanup: ✅")
-    print("\n🎉 All tests passed! MongoDB integration is working correctly.")
+    print("\n Test Summary:")
+    print("• MongoDB connection: ")
+    print("• Sample data generation: ")
+    print("• Data retrieval: ")
+    print("• Search functionality: ")
+    print("• Data cleanup: ")
+    print("\n All tests passed! MongoDB integration is working correctly.")
 
 
 if __name__ == "__main__":

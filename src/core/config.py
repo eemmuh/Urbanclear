@@ -34,7 +34,7 @@ class DatabaseConfig(BaseSettings):
         """Warn if password is empty in production"""
         if not v and os.getenv("ENVIRONMENT") == "production":
             logger.warning(
-                "⚠️  PostgreSQL password not set! Set DATABASE__POSTGRES__PASSWORD environment variable."
+                "  PostgreSQL password not set! Set DATABASE__POSTGRES__PASSWORD environment variable."
             )
         return v
 
@@ -59,7 +59,7 @@ class MongoConfig(BaseSettings):
         """Warn if password is empty in production"""
         if not v and os.getenv("ENVIRONMENT") == "production":
             logger.warning(
-                "⚠️  MongoDB password not set! Set DATABASE__MONGODB__PASSWORD environment variable."
+                "  MongoDB password not set! Set DATABASE__MONGODB__PASSWORD environment variable."
             )
         return v
 
@@ -83,7 +83,7 @@ class RedisConfig(BaseSettings):
         """Warn if password is empty in production"""
         if not v and os.getenv("ENVIRONMENT") == "production":
             logger.warning(
-                "⚠️  Redis password not set! Set DATABASE__REDIS__PASSWORD environment variable."
+                "  Redis password not set! Set DATABASE__REDIS__PASSWORD environment variable."
             )
         return v
 

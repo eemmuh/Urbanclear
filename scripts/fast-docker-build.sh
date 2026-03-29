@@ -3,7 +3,7 @@
 
 set -e
 
-echo "🚀 Starting optimized Docker build..."
+echo " Starting optimized Docker build..."
 
 # Enable BuildKit for faster builds
 export DOCKER_BUILDKIT=1
@@ -18,14 +18,14 @@ echo "Building with dependency caching..."
 time docker build -f Dockerfile.fast -t traffic-system:fast . \
   --progress=plain
 
-echo "✅ Fast builds completed!"
+echo " Fast builds completed!"
 
 # Test the builds
-echo "🧪 Testing builds..."
-docker run --rm traffic-system:minimal python -c "import src.api.main; print('✅ Minimal build works!')"
-docker run --rm traffic-system:fast python -c "import src.api.main; print('✅ Fast build works!')"
+echo " Testing builds..."
+docker run --rm traffic-system:minimal python -c "import src.api.main; print(' Minimal build works!')"
+docker run --rm traffic-system:fast python -c "import src.api.main; print(' Fast build works!')"
 
-echo "🎉 All builds successful!"
+echo " All builds successful!"
 echo ""
 echo "Available images:"
 docker images | grep traffic-system 

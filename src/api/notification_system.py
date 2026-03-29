@@ -66,7 +66,7 @@ class NotificationService:
         """Load notification templates"""
         return {
             "traffic_incident": NotificationTemplate(
-                subject="🚨 Traffic Incident Alert - {location}",
+                subject=" Traffic Incident Alert - {location}",
                 body="""
 Traffic Incident Alert
 
@@ -86,7 +86,7 @@ Urbanclear Traffic Management System
                 html_body="""
 <html>
 <body>
-<h2>🚨 Traffic Incident Alert</h2>
+<h2> Traffic Incident Alert</h2>
 <p><strong>Location:</strong> {location}</p>
 <p><strong>Type:</strong> {incident_type}</p>
 <p><strong>Severity:</strong> <span style="color: {severity_color};">
@@ -104,7 +104,7 @@ Urbanclear Traffic Management System
                 priority=NotificationPriority.HIGH,
             ),
             "congestion_alert": NotificationTemplate(
-                subject="🚦 Heavy Traffic Alert - {location}",
+                subject=" Heavy Traffic Alert - {location}",
                 body="""
 Heavy Traffic Alert
 
@@ -122,7 +122,7 @@ Urbanclear Traffic Management System
                 priority=NotificationPriority.MEDIUM,
             ),
             "system_alert": NotificationTemplate(
-                subject="⚠️ System Alert - Urbanclear",
+                subject=" System Alert - Urbanclear",
                 body="""
 System Alert
 
@@ -137,7 +137,7 @@ Urbanclear Traffic Management System
                 priority=NotificationPriority.CRITICAL,
             ),
             "incident_resolved": NotificationTemplate(
-                subject="✅ Incident Resolved - {location}",
+                subject=" Incident Resolved - {location}",
                 body="""
 Incident Resolved
 
@@ -200,7 +200,7 @@ Urbanclear Traffic Management System
                 msg.attach(html_part)
 
             # Send email (mock implementation)
-            logger.info(f"📧 Email sent to {request.recipients}: {subject}")
+            logger.info(f" Email sent to {request.recipients}: {subject}")
             return True
 
         except Exception as e:
@@ -238,7 +238,7 @@ Urbanclear Traffic Management System
             }
 
             # Mock Slack webhook call
-            logger.info(f"📱 Slack message sent: {message['text']}")
+            logger.info(f" Slack message sent: {message['text']}")
             return True
 
         except Exception as e:
@@ -257,7 +257,7 @@ Urbanclear Traffic Management System
             }
 
             # Mock webhook call
-            logger.info(f"🔗 Webhook sent: {json.dumps(payload, indent=2)}")
+            logger.info(f" Webhook sent: {json.dumps(payload, indent=2)}")
             return True
 
         except Exception as e:
@@ -273,7 +273,7 @@ Urbanclear Traffic Management System
             )
 
             # Mock SMS service
-            logger.info(f"📱 SMS sent to {request.recipients}: {message}")
+            logger.info(f" SMS sent to {request.recipients}: {message}")
             return True
 
         except Exception as e:
@@ -284,7 +284,7 @@ Urbanclear Traffic Management System
         """Send push notification"""
         try:
             # Mock push notification
-            logger.info(f"📲 Push notification sent to {request.recipients}")
+            logger.info(f" Push notification sent to {request.recipients}")
             return True
 
         except Exception as e:

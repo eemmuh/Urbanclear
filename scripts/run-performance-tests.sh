@@ -3,7 +3,7 @@
 
 set -e
 
-echo "🚀 UrbanClear Performance Testing Script"
+echo " UrbanClear Performance Testing Script"
 echo "=========================================="
 
 # Colors for output
@@ -17,10 +17,10 @@ NC='\033[0m' # No Color
 check_server() {
     echo -e "${BLUE}Checking if API server is running...${NC}"
     if curl -s http://localhost:8000/health > /dev/null 2>&1; then
-        echo -e "${GREEN}✅ API server is running${NC}"
+        echo -e "${GREEN} API server is running${NC}"
         return 0
     else
-        echo -e "${RED}❌ API server is not running${NC}"
+        echo -e "${RED} API server is not running${NC}"
         return 1
     fi
 }
@@ -79,7 +79,7 @@ case $choice in
             if check_server; then
                 run_performance_tests
             else
-                echo -e "${RED}❌ Server still not running. Please start the API server first.${NC}"
+                echo -e "${RED} Server still not running. Please start the API server first.${NC}"
                 exit 1
             fi
         fi
@@ -92,18 +92,18 @@ case $choice in
             if check_server; then
                 run_web_interface
             else
-                echo -e "${RED}❌ Server still not running. Please start the API server first.${NC}"
+                echo -e "${RED} Server still not running. Please start the API server first.${NC}"
                 exit 1
             fi
         fi
         ;;
     3)
         if check_server; then
-            echo -e "${GREEN}✅ Setup is working correctly!${NC}"
+            echo -e "${GREEN} Setup is working correctly!${NC}"
             echo "Running quick test..."
             locust -f tests/performance/locustfile.py --headless -u 1 -r 1 -t 10s --host=http://localhost:8000
         else
-            echo -e "${RED}❌ API server is not running. Please start it first.${NC}"
+            echo -e "${RED} API server is not running. Please start it first.${NC}"
             echo "Command: uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000"
         fi
         ;;
@@ -112,10 +112,10 @@ case $choice in
         exit 0
         ;;
     *)
-        echo -e "${RED}❌ Invalid choice. Please run the script again.${NC}"
+        echo -e "${RED} Invalid choice. Please run the script again.${NC}"
         exit 1
         ;;
 esac
 
 echo ""
-echo -e "${GREEN}🎉 Performance testing completed!${NC}" 
+echo -e "${GREEN} Performance testing completed!${NC}" 
