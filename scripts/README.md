@@ -1,27 +1,27 @@
-# 🛠️ Scripts Directory
+#  Scripts Directory
 
 This directory contains utility scripts for development, testing, and deployment of the Urbanclear Traffic System.
 
-## 📋 Available Scripts
+##  Available Scripts
 
-### 🚀 **Deployment & Startup**
+###  **Deployment & Startup**
 - **`fast-docker-build.sh`** - Fast Docker build script for development
 - **Note**: Use `python start_api.py` from project root to start the API server
 
-### 🧪 **Testing & Quality**
+###  **Testing & Quality**
 - **`test-ci-cd-locally.sh`** - Comprehensive local CI/CD pipeline test (recommended)
 - **`test_api.py`** - API endpoint testing script
 - **`run-performance-tests.sh`** - Performance testing with Locust
 
-### 🔧 **Database & Setup**
+###  **Database & Setup**
 - **`init_database.py`** - Database initialization and setup
 - **`database_optimization.py`** - Database optimization and maintenance
 - **`setup_dashboards.py`** - Grafana dashboard setup
 
-### 🔍 **Monitoring & Health**
+###  **Monitoring & Health**
 - **`health_check.py`** - System health check and monitoring
 
-## 🎯 Most Commonly Used Scripts
+##  Most Commonly Used Scripts
 
 ### 1. **Local CI/CD Testing**
 ```bash
@@ -53,14 +53,14 @@ python scripts/init_database.py
 python scripts/health_check.py
 ```
 
-## 🔧 Script Permissions
+##  Script Permissions
 
 Make sure shell scripts are executable:
 ```bash
 chmod +x scripts/*.sh
 ```
 
-## 📚 Usage Examples
+##  Usage Examples
 
 ### Complete Pre-Push Testing
 ```bash
@@ -86,31 +86,31 @@ python scripts/health_check.py
 ### Database Management
 ```bash
 # Initialize database
-python scripts/init_database.py
+uv run python scripts/init_database.py
 
 # Optimize database performance
-python scripts/database_optimization.py
+uv run python scripts/database_optimization.py
 ```
 
-## 📊 Script Dependencies
+##  Script Dependencies
 
-Most scripts require the development environment to be set up:
+Most scripts require a uv-managed environment:
 ```bash
-# Install development dependencies
-pip install -r requirements-ci.txt
+# Install dependencies (dev tools + project)
+uv sync --extra dev
 
-# Ensure virtual environment is activated
-source urbanclear-env/bin/activate
+# Run any script
+uv run python scripts/<script>.py
 ```
 
-## 🛡️ Security Note
+##  Security Note
 
 Scripts may contain sensitive operations. Always review scripts before execution, especially:
 - Database initialization scripts
 - Deployment scripts  
 - Scripts that modify system configurations
 
-## 📝 Adding New Scripts
+##  Adding New Scripts
 
 When adding new scripts:
 1. Follow the naming convention: `verb_noun.py` or `verb-noun.sh`
@@ -118,7 +118,7 @@ When adding new scripts:
 3. Include proper documentation headers
 4. Update this README with the new script description
 
-## 🔗 Related Documentation
+##  Related Documentation
 
 - **Main README**: [../README.md](../README.md)
 - **CI/CD Testing Guide**: [../docs/LOCAL_CI_CD_TESTING.md](../docs/LOCAL_CI_CD_TESTING.md)

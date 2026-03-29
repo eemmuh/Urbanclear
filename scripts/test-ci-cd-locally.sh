@@ -22,22 +22,22 @@ print_section() {
 
 # Function to print success message
 print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN} $1${NC}"
 }
 
 # Function to print error message
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED} $1${NC}"
 }
 
 # Function to print warning message
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}  $1${NC}"
 }
 
 # Function to print info message
 print_info() {
-    echo -e "${CYAN}ℹ️  $1${NC}"
+    echo -e "${CYAN}  $1${NC}"
 }
 
 # Function to check if command exists
@@ -86,11 +86,11 @@ cleanup() {
 trap cleanup EXIT
 
 # Start of script
-print_section "🚀 Local CI/CD Pipeline Test"
+print_section " Local CI/CD Pipeline Test"
 echo -e "${CYAN}Testing UrbanClear Traffic System CI/CD Pipeline locally...${NC}\n"
 
 # Check prerequisites
-print_section "🔍 Prerequisites Check"
+print_section " Prerequisites Check"
 
 if ! command_exists python3; then
     print_error "Python 3 is required but not installed"
@@ -98,11 +98,11 @@ if ! command_exists python3; then
 fi
 print_success "Python 3 found: $(python3 --version)"
 
-if ! command_exists pip; then
-    print_error "pip is required but not installed"
+if ! command_exists uv; then
+    print_error "uv is required: https://docs.astral.sh/uv/getting-started/installation/"
     exit 1
 fi
-print_success "pip found: $(pip --version)"
+print_success "uv found: $(uv --version)"
 
 if ! command_exists docker; then
     print_warning "Docker not found - skipping Docker tests"
@@ -118,26 +118,19 @@ if [[ "$PYTHON_VERSION" != "3.9" ]]; then
 fi
 
 # Install dependencies
-print_section "📦 Installing Dependencies"
-print_info "Installing development dependencies..."
-pip install -q black flake8 mypy bandit safety pytest pytest-cov pytest-asyncio locust || {
-    print_error "Failed to install dependencies"
+print_section " Installing Dependencies"
+print_info "Syncing environment with uv (includes dev extras)..."
+uv sync --extra dev || {
+    print_error "Failed to uv sync --extra dev"
     exit 1
 }
-print_success "Development dependencies installed"
-
-print_info "Installing project dependencies..."
-pip install -q -r requirements.txt || {
-    print_error "Failed to install project dependencies"
-    exit 1
-}
-print_success "Project dependencies installed"
+print_success "Dependencies installed via uv"
 
 # 1. Code Quality Tests
-print_section "📋 Code Quality Tests"
+print_section " Code Quality Tests"
 
 print_info "Running Black code formatting check..."
-if black --check --diff src/ tests/ >/dev/null 2>&1; then
+if uv run black --check --diff src/ tests/ >/dev/null 2>&1; then
     print_success "Code formatting check passed"
 else
     print_error "Code formatting check failed"
@@ -146,7 +139,7 @@ else
 fi
 
 print_info "Running flake8 linting..."
-if flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503 >/dev/null 2>&1; then
+if uv run flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503 >/dev/null 2>&1; then
     print_success "Linting check passed"
 else
     print_error "Linting check failed"
@@ -155,34 +148,34 @@ else
 fi
 
 print_info "Running mypy type checking..."
-if mypy src/ --ignore-missing-imports >/dev/null 2>&1; then
+if uv run mypy src/ --ignore-missing-imports >/dev/null 2>&1; then
     print_success "Type checking passed"
 else
     print_warning "Type checking failed (non-blocking)"
 fi
 
 # 2. Security Scanning
-print_section "🔒 Security Scanning"
+print_section " Security Scanning"
 
 print_info "Running bandit security scan..."
-if bandit -r src/ -f json -o bandit-report.json >/dev/null 2>&1; then
+if uv run bandit -r src/ -f json -o bandit-report.json >/dev/null 2>&1; then
     print_success "Bandit security scan completed"
 else
     print_warning "Bandit scan failed (non-blocking)"
 fi
 
 print_info "Running safety dependency check..."
-if safety check --json --output safety-report.json >/dev/null 2>&1; then
+if uv run safety check --json --output safety-report.json >/dev/null 2>&1; then
     print_success "Safety dependency check passed"
 else
     print_warning "Safety check failed (non-blocking)"
 fi
 
 # 3. Unit Tests
-print_section "🧪 Unit Tests"
+print_section " Unit Tests"
 
 print_info "Running unit tests with coverage..."
-if pytest tests/unit/ -v --cov=src --cov-report=xml --cov-report=html >/dev/null 2>&1; then
+if uv run pytest tests/unit/ -v --cov=src --cov-report=xml --cov-report=html >/dev/null 2>&1; then
     print_success "Unit tests passed"
     
     # Show coverage summary
@@ -196,14 +189,14 @@ fi
 
 # 4. Docker Build Tests
 if [ "$SKIP_DOCKER" != true ]; then
-    print_section "🐳 Docker Build Tests"
+    print_section " Docker Build Tests"
     
     print_info "Building Docker image..."
     if docker build -t urbanclear:test . >/dev/null 2>&1; then
         print_success "Docker build successful"
         
         print_info "Testing Docker image..."
-        if docker run --rm urbanclear:test python -c "import src.api.main; print('Import successful')" >/dev/null 2>&1; then
+        if docker run --rm urbanclear:test python -c "import src.api.main" >/dev/null 2>&1; then
             print_success "Docker image test passed"
         else
             print_error "Docker image test failed"
@@ -216,7 +209,7 @@ if [ "$SKIP_DOCKER" != true ]; then
 fi
 
 # 5. API Tests
-print_section "🌐 API Tests"
+print_section " API Tests"
 
 print_info "Checking if port 8000 is available..."
 if ! check_port 8000; then
@@ -225,7 +218,7 @@ if ! check_port 8000; then
 fi
 
 print_info "Starting API server..."
-uvicorn src.api.main:app --host 0.0.0.0 --port 8000 >/dev/null 2>&1 &
+uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8000 >/dev/null 2>&1 &
 API_PID=$!
 
 print_info "Waiting for API server to start..."
@@ -237,7 +230,7 @@ else
 fi
 
 print_info "Running API tests..."
-if pytest tests/api/ -v >/dev/null 2>&1; then
+if uv run pytest tests/api/ -v >/dev/null 2>&1; then
     print_success "API tests passed"
 else
     print_error "API tests failed"
@@ -253,10 +246,10 @@ else
 fi
 
 # 6. Performance Tests
-print_section "⚡ Performance Tests"
+print_section " Performance Tests"
 
 print_info "Running performance tests..."
-if locust -f tests/performance/locustfile.py --headless \
+if uv run locust -f tests/performance/locustfile.py --headless \
     --users 10 --spawn-rate 2 --run-time 30s \
     --host http://localhost:8000 \
     --html performance-report.html >/dev/null 2>&1; then
@@ -272,7 +265,7 @@ API_PID=""
 
 # 7. Integration Tests (optional)
 if command_exists docker-compose; then
-    print_section "🔗 Integration Tests"
+    print_section " Integration Tests"
     
     print_info "Starting database services..."
     if docker-compose up -d postgres redis mongodb >/dev/null 2>&1; then
@@ -287,7 +280,7 @@ if command_exists docker-compose; then
         export REDIS_URL="redis://localhost:6379/0"
         export MONGODB_URL="mongodb://test_user:test_password@localhost:27017/test_traffic_logs"
         
-        if pytest tests/integration/ -v --maxfail=3 >/dev/null 2>&1; then
+        if uv run pytest tests/integration/ -v --maxfail=3 >/dev/null 2>&1; then
             print_success "Integration tests passed"
         else
             print_warning "Integration tests failed (non-blocking)"
@@ -305,7 +298,7 @@ fi
 
 # 8. Security Vulnerability Scanning
 if command_exists trivy; then
-    print_section "🛡️  Vulnerability Scanning"
+    print_section "  Vulnerability Scanning"
     
     print_info "Running filesystem vulnerability scan..."
     if trivy fs . --format sarif --output trivy-results.sarif >/dev/null 2>&1; then
@@ -330,11 +323,11 @@ else
 fi
 
 # Final Summary
-print_section "🎉 Test Summary"
+print_section " Test Summary"
 
 print_success "CI/CD Pipeline Test Completed Successfully!"
 echo ""
-echo -e "${CYAN}📊 Generated Reports:${NC}"
+echo -e "${CYAN} Generated Reports:${NC}"
 echo -e "   • Coverage Report: ${YELLOW}htmlcov/index.html${NC}"
 echo -e "   • Performance Report: ${YELLOW}performance-report.html${NC}"
 echo -e "   • Security Reports: ${YELLOW}bandit-report.json, safety-report.json${NC}"
@@ -342,10 +335,10 @@ if [ -f trivy-results.sarif ]; then
     echo -e "   • Vulnerability Scan: ${YELLOW}trivy-results.sarif${NC}"
 fi
 echo ""
-echo -e "${CYAN}🚀 Next Steps:${NC}"
+echo -e "${CYAN} Next Steps:${NC}"
 echo -e "   • Review reports for any issues"
 echo -e "   • Fix any warnings or failed tests"
 echo -e "   • Commit and push your changes"
 echo -e "   • Monitor the CI/CD pipeline on GitHub"
 echo ""
-echo -e "${GREEN}✨ Your code is ready for production! ✨${NC}" 
+echo -e "${GREEN} Your code is ready for production! ${NC}" 
