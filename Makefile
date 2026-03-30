@@ -1,4 +1,4 @@
-.PHONY: help uv-sync uv-install uv-install-dev uv-install-ci uv-status uv-clean uv-lock-regenerate uv-recreate install install-full install-core install-conda dev-install quick-start quick-start-minimal start stop restart down logs clean test test-quick ci test-api test-endpoints demo check-services logs-api logs-docker clean-logs reset-all dev-all dev-api-only api init-db setup-dashboards
+.PHONY: help uv-sync uv-install uv-install-full uv-install-dev uv-install-ci uv-status uv-clean uv-lock-regenerate uv-recreate install install-full install-core install-conda dev-install quick-start quick-start-minimal minimal-up minimal-down start stop restart down logs clean test test-quick ci test-api test-endpoints demo check-services logs-api logs-docker clean-logs reset-all dev-all dev-api-only api init-db setup-dashboards
 
 help: ## Show this help message
 	@echo " Urbanclear - Smart City Traffic Optimization System"
@@ -7,7 +7,8 @@ help: ## Show this help message
 	@echo ""
 	@echo " UV Package Management:"
 	@echo "  uv-sync          Sync dependencies with uv.lock"
-	@echo "  uv-install       Install all dependencies"
+	@echo "  uv-install       Install default (demo) dependencies"
+	@echo "  uv-install-full  Install demo + full ML/big-data stack"
 	@echo "  uv-install-dev   Install with development dependencies"
 	@echo "  uv-install-ci    Install with CI dependencies"
 	@echo "  uv-status        Check uv environment status"
@@ -25,7 +26,9 @@ help: ## Show this help message
 	@echo "  quick-start-minimal  Basic setup only"
 	@echo ""
 	@echo " Docker Services:"
-	@echo "  start           Start Docker services"
+	@echo "  minimal-up      Postgres only (API + dashboard + DB — see docs/guides/MINIMAL_STACK.md)"
+	@echo "  minimal-down    Stop minimal Postgres stack"
+	@echo "  start           Start full Docker Compose (all services)"
 	@echo "  stop            Stop Docker services"
 	@echo "  restart         Restart Docker services"
 	@echo "  down            Stop and remove containers"
@@ -69,8 +72,12 @@ uv-sync:
 	uv sync
 
 uv-install:
-	@echo " Installing all Urbanclear dependencies with uv..."
+	@echo " Installing default (demo/minimal) dependencies with uv..."
 	uv sync
+
+uv-install-full:
+	@echo " Installing full stack (TensorFlow, Spark, Kafka clients, notebooks, …)..."
+	uv sync --extra full
 
 uv-install-dev:
 	@echo " Installing with development dependencies..."
@@ -103,8 +110,8 @@ uv-lock-regenerate:
 install: uv-install
 	@echo " Dependencies installed with uv"
 
-install-full: uv-install
-	@echo " All dependencies installed with uv"
+install-full: uv-install-full
+	@echo " Full dependency stack installed (see: uv sync --extra full)"
 
 install-core:
 	@echo " Installing core dependencies only..."
@@ -112,6 +119,12 @@ install-core:
 
 dev-install: uv-install-dev
 	@echo " Development dependencies installed with uv"
+
+minimal-up: ## Postgres only — pair with: make api + dashboard npm run dev
+	docker compose -f docker-compose.minimal.yml up -d
+
+minimal-down: ## Stop minimal Postgres stack
+	docker compose -f docker-compose.minimal.yml down
 
 start: ## Start all services with Docker Compose
 	docker-compose up -d
