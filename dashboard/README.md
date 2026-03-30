@@ -24,6 +24,13 @@ A modern React dashboard for the Urbanclear Traffic Management System featuring 
 - **Framer Motion** - Smooth animations
 - **React Router** - Client-side routing
 
+##  API connection (fix “network error” / empty data)
+
+1. **Start the backend** on port **8000** (`uv run python start_api.py` or `make api` from the repo root).
+2. **Dev mode (`npm run dev`)** — Requests use the **Vite proxy** to `http://localhost:8000`. Do **not** set `VITE_API_URL` unless you know you need a direct URL.
+3. **CORS** — If you set `VITE_API_URL=http://localhost:8000`, add your dashboard origin to the API’s **`ALLOWED_ORIGINS`** (e.g. `http://localhost:3001`).
+4. **Socket.IO** — Uses path `/socket.io`, proxied in dev. Ensure the backend is running; check the browser console for connection errors.
+
 ##  Prerequisites
 
 Before running the dashboard, ensure you have:
@@ -71,7 +78,7 @@ Visit [nodejs.org](https://nodejs.org/) and download the installer.
    ```
 
 3. **Access Dashboard:**
-   Open [http://localhost:3000](http://localhost:3000) in your browser
+   Open [http://localhost:3001](http://localhost:3001) in your browser (port set in `vite.config.ts`; Grafana full stack uses 3000)
 
 ##  Project Structure
 
@@ -272,6 +279,15 @@ npm run type-check
 # Linting
 npm run lint
 ```
+
+##  npm audit / Browserslist notices
+
+The project pins **`overrides`** in `package.json` for patched **`esbuild`** and **`minimatch`** (transitive deps of Vite / ESLint) so `npm audit` stays clean without jumping to Vite 8. After changing dependencies, run **`npm install`**, then **`npm audit`** and **`npm run build`**.
+
+Other tips:
+
+- **`npx update-browserslist-db@latest`** — silences the caniuse-lite staleness hint (optional).
+- Re-run **`npm audit`** after any major upgrade.
 
 ##  Contributing
 

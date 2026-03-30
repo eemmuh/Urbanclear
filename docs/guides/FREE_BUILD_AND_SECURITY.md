@@ -17,10 +17,7 @@ This document explains how to run and ship the project **without paid licenses**
 
 ## Reducing build time and size (optional)
 
-The default `pyproject.toml` dependency set is broad (ML, Spark, Kafka clients, etc.). For a **lighter** install you can:
-
-- Use **`uv sync --extra ci`** (or the `ci` optional dependency group) where a minimal set is defined for automation.
-- Over time, split rarely used stacks into **optional extras** (e.g. `ml`, `streaming`) so default installs stay smaller — see roadmap in the main README.
+The **default** `uv sync` install is **demo-sized** (FastAPI + DB clients + realtime; no TensorFlow/Spark/Kafka in the base environment). For the **full** historical stack (TensorFlow, notebooks, GeoPandas, etc.) use **`uv sync --extra full`**. CI still uses **`uv sync --frozen --extra ci`** on GitHub Actions.
 
 Docker builds use **`uv sync --frozen`** (see `Dockerfile`) and the committed **`uv.lock`**, so installs are reproducible. The full dependency tree is still large; you may later introduce a **slim** extra or multi-stage build that only installs what the API imports.
 

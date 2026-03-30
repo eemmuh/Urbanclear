@@ -107,11 +107,10 @@ cd traffic-system
 
 2. **Install dependencies with uv** (uses committed `uv.lock` for reproducible installs):
 ```bash
-uv sync  # Install all dependencies
-# Or install with development dependencies:
-uv sync --extra dev
-# CI-style minimal set (matches GitHub Actions):
-uv sync --frozen --extra ci
+uv sync                    # Default: demo-sized deps (recommended for learning)
+uv sync --extra full       # Optional: TensorFlow, Spark/Kafka clients, notebooks, GeoPandas, …
+uv sync --extra dev        # Dev tools (pytest, ruff, …)
+uv sync --frozen --extra ci   # Match CI (after editing pyproject, run: uv lock)
 ```
 
 4. **Install Node.js dependencies:**
@@ -144,7 +143,7 @@ npm run dev
 ```
 
 8. **Access the system:**
-- **React Dashboard**: http://localhost:3000
+- **React Dashboard**: http://localhost:3001 (Vite; see `dashboard/vite.config.ts`)
 - **API Documentation**: http://localhost:8000/api/docs
 - **Health Check**: http://localhost:8000/health
 - **WebSocket Status**: http://localhost:8000/api/v1/websocket/status
@@ -384,11 +383,11 @@ pre-commit run --all-files
 
 ##  Documentation
 
-- **React Dashboard**: http://localhost:3000 (Real-time traffic visualization)
+- **React Dashboard**: http://localhost:3001 (Vite dev server)
 - **API Docs**: http://localhost:8000/api/docs (Interactive Swagger UI)
 - **Health Check**: http://localhost:8000/health
 - **WebSocket Status**: http://localhost:8000/api/v1/websocket/status
-- **Grafana**: http://localhost:3000 (admin/admin)
+- **Grafana** (full Docker stack): http://localhost:3000 (admin/admin)
 - **Prometheus**: http://localhost:9090
 
 ##  Demo Results
@@ -417,9 +416,29 @@ pre-commit run --all-files
 - **Security**: Use `.env` from [`.env.example`](.env.example); never commit secrets. In production set `ENVIRONMENT=production`, a strong `JWT_SECRET_KEY`, `ALLOW_DEV_AUTH_BYPASS=false`, and tight `ALLOWED_ORIGINS`.
 - **Docs**: [docs/guides/FREE_BUILD_AND_SECURITY.md](docs/guides/FREE_BUILD_AND_SECURITY.md) | [SECURITY.md](SECURITY.md) (how to report issues) | [docs/security/SECURITY_AUDIT.md](docs/security/SECURITY_AUDIT.md)
 
+##  Learning / demo (minimal install)
+
+**Default `uv sync` is intentionally slim** (FastAPI, DB clients, realtime, small sklearn/numpy for optional pickles). You do **not** need TensorFlow, PyTorch, Spark, or Kafka libraries to run the main API.
+
+- **Full ML / big-data Python stack** (optional): `uv sync --extra full` or `make install-full`
+- **Details**: [docs/guides/LEARNING_AND_DEMO.md](docs/guides/LEARNING_AND_DEMO.md)
+
+### API + dashboard + Postgres only
+
+Use **Postgres in Docker** and run the **API** and **dashboard** on your machine (no Redis/Mongo/Kafka required):
+
+```bash
+make minimal-up          # or: docker compose -f docker-compose.minimal.yml up -d
+# In .env add: DATABASE__MONGODB__ENABLED=false   (no Mongo in minimal stack)
+uv sync && make api      # terminal 1 — API on :8000
+cd dashboard && npm run dev   # terminal 2 — UI on :3001 (Vite)
+```
+
+Full steps: [docs/guides/MINIMAL_STACK.md](docs/guides/MINIMAL_STACK.md)
+
 ##  Next Steps
 
-1. **Test Dashboard**: Open http://localhost:3000 to see real-time traffic data
+1. **Test Dashboard**: Open http://localhost:3001 to see real-time traffic data
 2. **Add API Keys**: Configure Geoapify/OpenRouteService for enhanced data
 3. **Redis Setup**: Enable Redis for better caching performance
 4. **Production Deployment**: Deploy with Docker Compose
