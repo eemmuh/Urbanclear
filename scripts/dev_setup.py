@@ -65,8 +65,10 @@ def setup_python_environment():
         return False
     
     # Verify installation
-    if not run_command("uv run python -c 'import fastapi, pandas, numpy; print(\" Core dependencies working\")'", 
-                      "Verifying core dependencies"):
+    if not run_command(
+        "uv run python -c 'import fastapi, numpy, sklearn; print(\"Core dependencies working\")'",
+        "Verifying core dependencies",
+    ):
         return False
     
     return True
