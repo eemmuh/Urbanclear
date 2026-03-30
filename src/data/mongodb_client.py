@@ -81,10 +81,20 @@ class MongoDBClient:
         self.collections = {}
         self._connected = False
 
+    def _mongo_usable(self) -> bool:
+        """True when Mongo is enabled in config and connected."""
+        return self.settings.database.mongodb.enabled and self._connected
+
     async def connect(self) -> bool:
         """Connect to MongoDB"""
+        mongo_config = self.settings.database.mongodb
+        if not mongo_config.enabled:
+            logger.info(
+                "MongoDB is disabled (DATABASE__MONGODB__ENABLED=false); skipping connection."
+            )
+            self._connected = False
+            return False
         try:
-            mongo_config = self.settings.database.mongodb
             
             # Build connection string
             if mongo_config.username and mongo_config.password:
@@ -98,11 +108,11 @@ class MongoDBClient:
                     f"mongodb://{mongo_config.host}:{mongo_config.port}/{mongo_config.database}"
                 )
 
-            # Create client with connection pooling
+            # Create client with connection pooling (short timeout when Mongo optional)
             self.client = MongoClient(
                 connection_string,
-                serverSelectionTimeoutMS=5000,
-                connectTimeoutMS=5000,
+                serverSelectionTimeoutMS=2000,
+                connectTimeoutMS=2000,
                 socketTimeoutMS=5000,
                 maxPoolSize=10,
                 minPoolSize=1
@@ -122,11 +132,15 @@ class MongoDBClient:
             return True
 
         except (ConnectionFailure, ServerSelectionTimeoutError) as e:
-            logger.error(f"MongoDB connection failed: {e}")
+            logger.warning(
+                "MongoDB unavailable ({}). Structured logging to Mongo is off; start Mongo or set "
+                "DATABASE__MONGODB__ENABLED=false for Postgres-only mode.",
+                e,
+            )
             self._connected = False
             return False
         except Exception as e:
-            logger.error(f"Unexpected MongoDB error: {e}")
+            logger.warning("MongoDB error: {} — continuing without Mongo.", e)
             self._connected = False
             return False
 
@@ -203,8 +217,7 @@ class MongoDBClient:
 
     async def log_entry(self, log_entry: LogEntry) -> bool:
         """Store a log entry"""
-        if not self._connected:
-            logger.warning("MongoDB not connected, skipping log entry")
+        if not self._mongo_usable():
             return False
 
         try:
@@ -229,8 +242,7 @@ class MongoDBClient:
 
     async def log_analytics_event(self, event: AnalyticsEvent) -> bool:
         """Store an analytics event"""
-        if not self._connected:
-            logger.warning("MongoDB not connected, skipping analytics event")
+        if not self._mongo_usable():
             return False
 
         try:
@@ -254,7 +266,7 @@ class MongoDBClient:
 
     async def store_sensor_log(self, sensor_id: str, data: Dict[str, Any]) -> bool:
         """Store sensor-specific log data"""
-        if not self._connected:
+        if not self._mongo_usable():
             return False
 
         try:
@@ -273,7 +285,7 @@ class MongoDBClient:
 
     async def store_incident_log(self, incident_id: str, data: Dict[str, Any]) -> bool:
         """Store incident-specific log data"""
-        if not self._connected:
+        if not self._mongo_usable():
             return False
 
         try:
@@ -292,7 +304,7 @@ class MongoDBClient:
 
     async def store_api_log(self, endpoint: str, method: str, data: Dict[str, Any]) -> bool:
         """Store API-specific log data"""
-        if not self._connected:
+        if not self._mongo_usable():
             return False
 
         try:
@@ -312,7 +324,7 @@ class MongoDBClient:
 
     async def store_system_log(self, component: str, data: Dict[str, Any]) -> bool:
         """Store system-specific log data"""
-        if not self._connected:
+        if not self._mongo_usable():
             return False
 
         try:
@@ -338,7 +350,7 @@ class MongoDBClient:
         limit: int = 100
     ) -> List[Dict[str, Any]]:
         """Retrieve logs with filters"""
-        if not self._connected:
+        if not self._mongo_usable():
             return []
 
         try:
@@ -374,7 +386,7 @@ class MongoDBClient:
         limit: int = 100
     ) -> List[Dict[str, Any]]:
         """Retrieve analytics events with filters"""
-        if not self._connected:
+        if not self._mongo_usable():
             return []
 
         try:
@@ -406,7 +418,7 @@ class MongoDBClient:
         end_time: Optional[datetime] = None
     ) -> Dict[str, Any]:
         """Get analytics summary with aggregations"""
-        if not self._connected:
+        if not self._mongo_usable():
             return {}
 
         try:
@@ -449,7 +461,7 @@ class MongoDBClient:
 
     async def cleanup_old_data(self, days_to_keep: int = 90):
         """Clean up old data to prevent database bloat"""
-        if not self._connected:
+        if not self._mongo_usable():
             return
 
         try:

@@ -21,7 +21,8 @@ class SocketIOHandler:
         # Security: Restrict CORS origins
         allowed_origins = os.getenv(
             "ALLOWED_ORIGINS",
-            "http://localhost:3000,http://127.0.0.1:3000"
+            "http://localhost:3000,http://127.0.0.1:3000,"
+            "http://localhost:3001,http://127.0.0.1:3001",
         ).split(",")
         self.sio = socketio.AsyncServer(
             cors_allowed_origins=allowed_origins,  # Restricted origins

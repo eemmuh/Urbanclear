@@ -42,6 +42,10 @@ class DatabaseConfig(BaseSettings):
 class MongoConfig(BaseSettings):
     """MongoDB configuration"""
 
+    enabled: bool = Field(
+        default=True,
+        description="Set false when using API + Postgres only (no MongoDB). Env: DATABASE__MONGODB__ENABLED",
+    )
     host: str = "localhost"
     port: int = 27017
     database: str = "traffic_logs"
