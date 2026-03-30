@@ -20,6 +20,13 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path,
       },
+      // python-socketio / Engine.IO (must match client path: /socket.io)
+      '/socket.io': {
+        target: 'http://localhost:8000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
       '/ws': {
         target: 'ws://localhost:8000',
         ws: true,

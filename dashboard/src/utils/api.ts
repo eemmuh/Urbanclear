@@ -1,7 +1,14 @@
 import axios from 'axios'
 import { TrafficData, Incident, Route, DashboardStats, ApiResponse } from '../types'
 
-const API_BASE_URL = 'http://localhost:8000' // Use direct API URL
+/**
+ * Dev: empty baseURL so requests go to the Vite dev server and are proxied to the API
+ * (avoids CORS). Set VITE_API_URL to talk to the API directly (must match ALLOWED_ORIGINS).
+ * Prod preview / static hosting: defaults to localhost:8000 unless VITE_API_URL is set.
+ */
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL?.replace(/\/$/, '') ??
+  (import.meta.env.DEV ? '' : 'http://localhost:8000')
 
 // Create axios instance with default config
 const apiClient = axios.create({

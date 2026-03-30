@@ -27,7 +27,11 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
   maxRetries: 5,
 
   connect: () => {
-    const socket = io('/ws/traffic', {
+    // Socket.IO default path is /socket.io — must hit the API (or Vite proxy in dev).
+    // Do not use a relative path like '/ws/traffic' (that targeted the Vite server, not FastAPI).
+    const explicitUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '')
+    const socket = io(explicitUrl || undefined, {
+      path: '/socket.io',
       transports: ['websocket'],
       autoConnect: true,
       reconnection: true,
