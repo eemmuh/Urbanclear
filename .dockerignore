@@ -114,6 +114,5 @@ docker-compose*.yml
 .dockerignore
 
 # Infrastructure as Code
-infrastructure/
 terraform/
 ansible/ 

@@ -19,7 +19,7 @@ For notebooks, GeoPandas, TensorFlow/Torch, Spark/Kafka **Python** libraries, St
 uv sync --extra full
 ```
 
-Use this when you work under `infrastructure/spark/`, heavy ML experiments, or scripts that import those libraries.
+Use this for notebooks, heavy ML experiments, or scripts that import Spark/Kafka client libraries. Optional Kafka/Spark **services** still come from `docker-compose.yml` when you run the full stack.
 
 ## Development tools
 

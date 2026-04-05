@@ -68,11 +68,6 @@ traffic-system/
 │   │   └── utils/               # Utility functions
 │   ├── package.json             # Node.js dependencies
 │   └── vite.config.ts           # Vite configuration with API proxy
-├──  infrastructure/           # Infrastructure components (optional)
-│   ├── kafka/                   # Kafka producer (mock/simulation)
-│   │   └── enhanced_kafka_producer.py
-│   └── spark/                   # Spark processor (standalone script)
-│       └── enhanced_traffic_processor.py
 ├──  docker/                   # Docker configurations
 │   ├── grafana/                 # Monitoring dashboards
 │   ├── prometheus/              # Metrics collection
